@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <script
+      type="text/javascript"
+      src="https://js.cdn.aliyun.dcloud.net.cn/dev/uni-app/uni.webview.1.5.1.js"
+    ></script>
+    <script src="bundle.js"></script>
+  </head>
+  <body>
+    <h1 id="info">Loading...</h1>
+    <script>
+      document.addEventListener("UniAppJSBridgeReady", function () {
+        uni.getEnv(function (res) {
+          console.log("当前环境：" + JSON.stringify(res));
+        });
+
+        // TODO: change to CTT wss node address
+        subInit("wss://kusama-rpc.polkadot.io/")
+          .then((info) => {
+            console.log("Sub init done!");
+            document.getElementById("info").innerHTML = info;
+            uni.postMessage({
+              data: {
+                action: "chainReady",
+                data: info,
+              },
+            });
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      });
+
+      // app -> html interfaces
+
+      // create new account, return mnemonic & key pair json info
+      const createAccount = (name, password) => {
+        let result = subNewAccount(name, password);
+        console.log("create new account result:", result);
+        if (result) {
+          uni.postMessage({
+            data: {
+              action: "createAccountResult",
+              data: result,
+            },
+          });
+        }
+      };
+
+      const setupAccountByJson = (jsonStr) => {
+        let json = JSON.parse(jsonStr);
+      };
+    </script>
+  </body>
+</html>

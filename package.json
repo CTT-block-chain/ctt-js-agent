@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@polkadot/api": "^1.10.1",
+    "json-rpc2": "^2.0.0"
+  }
+}
