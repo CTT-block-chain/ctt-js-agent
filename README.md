@@ -43,7 +43,7 @@ node jsonrrpc/jsonrpc.js
       handleMessage(evt) {
         let msg = evt.detail.data[0];
         switch (msg.action) {
-          case "chainReady":
+          case "keyringReady":
             // here we try to create new account
             let currentWebview = this.$scope.$getAppWebview();
             let wv = currentWebview.children()[0];
