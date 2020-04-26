@@ -19,7 +19,7 @@
         });
 
         // TODO: change to CTT wss node address
-        subInit("wss://kusama-rpc.polkadot.io/")
+        /*subInit("wss://kusama-rpc.polkadot.io/")
           .then((info) => {
             console.log("Sub init done!");
             document.getElementById("info").innerHTML = info;
@@ -32,7 +32,17 @@
           })
           .catch((e) => {
             console.log(e);
+          });*/
+
+        subInitKeyring().then(() => {
+          console.log("init keyring done");
+          uni.postMessage({
+            data: {
+              action: "keyringReady",
+              data: info,
+            },
           });
+        });
       });
 
       // app -> html interfaces
