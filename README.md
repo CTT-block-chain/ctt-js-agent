@@ -19,7 +19,7 @@ browserify uniapp/index.js -o uniapp/bundle.js
 ## run json-rpc server:(or use others process manage, like pm2)
 
 ```bash
-node jsonrrpc/jsonrpc.js
+node jsonrpc/jsonrpc.js
 ```
 
 ## uni-app webview demo use
