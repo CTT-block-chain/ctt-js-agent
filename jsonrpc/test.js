@@ -5,7 +5,8 @@ const testJson = `{"address":"5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk",
 const testSign =
   "0x1233d10921070f212cefe0a1e7680cbf8ec0e90b3ca4767ccdd232eb4a8c4104d59c3a7ee29fcdd7742664791ff9f9ba79f1eda6819d71715ccd513e906cb984";
 
-sub.init("ws://127.0.0.1:9944").then(() => {
+//sub.init("ws://127.0.0.1:9944").then(() => {
+sub.initKeyring().then(() => {
   console.log("API init done!");
   // test create account
   /*const pair = sub.newAccount("bob", "123456");
@@ -26,7 +27,7 @@ sub.init("ws://127.0.0.1:9944").then(() => {
   const test = sub.sign(json.address, msg);
   console.log("sign:", test);
 
-  console.log("verify result:", sub.verify(json.address, msg, testSign));
+  console.log("verify result:", sub.verify(json.address, msg + "0", testSign));
 
   //hash test
   let hash = sub.hash("hello word");

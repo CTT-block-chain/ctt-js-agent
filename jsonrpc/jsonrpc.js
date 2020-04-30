@@ -1,5 +1,8 @@
 const rpc = require("json-rpc2");
 const sub = require("../lib/sub");
+const config = require("../config/config");
+
+const server_white_list = require("./keys/wl.json");
 
 const server = rpc.Server.$create({
   websocket: false, // is true by default
@@ -82,7 +85,7 @@ server.expose("subVerify", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     const result = sub.verify(param.address, param.msg, param.sign);
-    sendResult(callback, { result: result ? 1 : 0 });
+    sendResult(callback, { result: result.isValid ? 1 : 0 });
   } catch (e) {
     console.error(`subVerify error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -111,16 +114,44 @@ server.expose("subHash", (args, opt, callback) => {
   }
 });
 
+// below apis need sub node connection ready
+
+/**
+ * product parameters publish
+ */
+server.expose("subProductPublish", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    const address = param.user_pub_key;
+
+    if (!verifyPubKey(address)) {
+      sendResult(callback, { error: "not valid pub key" });
+      return;
+    }
+
+    // TODO: other parameters
+  } catch (e) {
+    console.error(`subProductPublish error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+// support functions
+
+// init pub key white list
+
+// verify sender pubkey
+const verifyPubKey = (address) => (server_white_list[address] ? true : false);
+
 const sendResult = (callback, data) => {
   callback(null, JSON.stringify(data));
 };
 
-// listen creates an HTTP server on localhost only
-const port = 5080;
-
+// TODO: init api connection
 console.log("init keyring...");
 sub.initKeyring().then(() => {
   console.log("init keyring done!");
+  const port = config.get("port");
   server.listen(port, "localhost");
   console.log(`server start on ${port}`);
 });

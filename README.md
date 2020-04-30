@@ -20,6 +20,8 @@ browserify uniapp/index.js -o uniapp/bundle.js
 
 ```bash
 node jsonrpc/jsonrpc.js
+#default is using dev env, port will be 5080, please modify config/*.json
+#or you can use arguments --port xxxx
 ```
 
 ## uni-app webview demo use

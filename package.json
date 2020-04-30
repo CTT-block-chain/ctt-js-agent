@@ -1,6 +1,17 @@
 {
+  "repository": "https://github.com/CTT-block-chain/ctt-js-agent.git",
+  "author": "CTT",
+  "license": "GPL-3.0-only",
+  "homepage": ".",
   "dependencies": {
     "@polkadot/api": "^1.10.1",
+    "commander": "^5.1.0",
+    "convict": "^5.2.0",
     "json-rpc2": "^2.0.0"
+  },
+  "scripts": {
+    "jsonrpc_dev": "NODE_ENV=dev node jsonrpc/jsonrpc.js",
+    "jsonrpc_prod": "NODE_ENV=prod node jsonrpc/jsonrpc.js",
+    "uniapp_build": "browserify uniapp/index.js -o uniapp/bundle.js"
   }
 }
