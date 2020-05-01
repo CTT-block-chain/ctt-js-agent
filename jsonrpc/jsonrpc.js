@@ -61,6 +61,22 @@ server.expose("subUnlock", (args, opt, callback) => {
 });
 
 /**
+ * lock account
+ * param : {"address" : "xxx"}
+ * return: {"result": "ok"} or error
+ */
+server.expose("subLock", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    sub.lock(param.address);
+    sendResult(callback, { result: "ok" });
+  } catch (e) {
+    console.error(`subLock error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * sign string
  * param : {"address" : "xxx", "msg": "xxx"}
  * return: {"result": "xxx"} or error
