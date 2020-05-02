@@ -13,15 +13,21 @@ yarn install
 yarn install browserify -g
 
 #bundle js:(output is bundle.js)
-browserify uniapp/index.js -o uniapp/bundle.js
+yarn run uniapp_build
 ```
 
 ## run json-rpc server:(or use others process manage, like pm2)
 
 ```bash
-node jsonrpc/jsonrpc.js
+yarn run jsonrpc_dev
 #default is using dev env, port will be 5080, please modify config/*.json
 #or you can use arguments --port xxxx
+```
+
+## unit test
+
+```bash
+yarn test
 ```
 
 ## uni-app webview demo use
