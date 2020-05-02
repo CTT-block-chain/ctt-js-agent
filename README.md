@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/CTT-block-chain/ctt-js-agent.svg?branch=master)](https://travis-ci.com/CTT-block-chain/ctt-js-agent)
+
 # ctt-js-agent
 
 ## install dependences:
