@@ -1,5 +1,7 @@
 const rpc = require("json-rpc2");
+const fs = require("fs");
 const sub = require("../lib/sub");
+const util = require("../lib/util");
 const config = require("../config/config");
 
 const server_white_list = require("./keys/wl.json");
@@ -138,26 +140,32 @@ server.expose("subHash", (args, opt, callback) => {
 server.expose("subProductPublish", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
-    const {
-      sender_pub_key,
-      sender_sign,
-      user_data,
-      user_pub_key,
-      user_sign,
-    } = param;
-    const {
-      knowledge_id,
-      model_id,
-      product_id,
-      content_hash,
-      extra_compute_ratio,
-      memo,
-    } = user_data;
+    console.log(`subProductPublish:${args[0]}`);
+    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
+    const { knowledge_id, model_id, product_id, content_hash, extra_compute_ratio, memo } = user_data;
 
+    // validate sender
     if (!verifyPubKey(sender_pub_key)) {
       sendResult(callback, { error: "not valid address" });
       return;
     }
+
+    // verify sender sign
+    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    if (!senderVerify.isValid) {
+      sendResult(callback, { error: "sender sign verify fail" });
+      return;
+    }
+
+    // verify user sign
+    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
+    if (!userVerify.isValid) {
+      sendResult(callback, { error: "user sign verify fail" });
+      return;
+    }
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
   } catch (e) {
     console.error(`subProductPublish error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -173,10 +181,24 @@ const sendResult = (callback, data) => {
   callback(null, JSON.stringify(data));
 };
 
+const loadKeys = () => {
+  Object.keys(server_white_list).forEach((address) => {
+    try {
+      const keyData = fs.readFileSync(`jsonrpc/keys/${address}.json`);
+      const json = JSON.parse(keyData);
+
+      sub.setupAccountByJson(json.json);
+    } catch (e) {
+      console.error(e);
+    }
+  });
+};
+
 // TODO: init api connection
 console.log("init keyring...");
 sub.initKeyring().then(() => {
   console.log("init keyring done!");
+  loadKeys();
   const port = config.get("port");
   server.listen(port, "localhost");
   console.log(`server start on ${port}`);
