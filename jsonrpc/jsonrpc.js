@@ -172,6 +172,135 @@ server.expose("subProductPublish", (args, opt, callback) => {
   }
 });
 
+/**
+ * product indentify
+ */
+server.expose("subProductIdentify", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subProductIdentify:${args[0]}`);
+    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
+    const { knowledge_id, model_id, product_id, content_hash, extra_compute_ratio, memo, transaction_id } = user_data;
+
+    // validate sender
+    if (!verifyPubKey(sender_pub_key)) {
+      sendResult(callback, { error: "not valid address" });
+      return;
+    }
+
+    // verify sender sign
+    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    if (!senderVerify.isValid) {
+      sendResult(callback, { error: "sender sign verify fail" });
+      return;
+    }
+
+    // verify user sign
+    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
+    if (!userVerify.isValid) {
+      sendResult(callback, { error: "user sign verify fail" });
+      return;
+    }
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
+  } catch (e) {
+    console.error(`subProductIdentify error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * product try
+ */
+server.expose("subProductTry", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subProductTry:${args[0]}`);
+    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
+    const {
+      knowledge_id,
+      model_id,
+      product_id,
+      content_hash,
+      memo,
+      transaction_id,
+      tasting_score,
+      avg_score,
+    } = user_data;
+
+    // validate sender
+    if (!verifyPubKey(sender_pub_key)) {
+      sendResult(callback, { error: "not valid address" });
+      return;
+    }
+
+    // verify sender sign
+    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    if (!senderVerify.isValid) {
+      sendResult(callback, { error: "sender sign verify fail" });
+      return;
+    }
+
+    // verify user sign
+    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
+    if (!userVerify.isValid) {
+      sendResult(callback, { error: "user sign verify fail" });
+      return;
+    }
+
+    // TODO: extra_compute_ratio
+    // extra_compute_ratio = (tasting_score / (tasting_score + avg_score)) * 100
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
+  } catch (e) {
+    console.error(`subProductTry error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ *  try
+ */
+server.expose("subModleOperate", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subModleOperate:${args[0]}`);
+    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
+    const { interface_status, model_id, commodity_name, commodit_type, content_hash, memo } = user_data;
+
+    // validate sender
+    if (!verifyPubKey(sender_pub_key)) {
+      sendResult(callback, { error: "not valid address" });
+      return;
+    }
+
+    // verify sender sign
+    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    if (!senderVerify.isValid) {
+      sendResult(callback, { error: "sender sign verify fail" });
+      return;
+    }
+
+    // verify user sign
+    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
+    if (!userVerify.isValid) {
+      sendResult(callback, { error: "user sign verify fail" });
+      return;
+    }
+
+    // TODO: extra_compute_ratio
+    // extra_compute_ratio = (tasting_score / (tasting_score + avg_score)) * 100
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
+  } catch (e) {
+    console.error(`subModleOperate error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 
 // verify sender pubkey
