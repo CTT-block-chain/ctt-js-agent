@@ -261,7 +261,7 @@ server.expose("subProductTry", (args, opt, callback) => {
 });
 
 /**
- *  try
+ *  product model operation
  */
 server.expose("subModleOperate", (args, opt, callback) => {
   try {
@@ -289,9 +289,6 @@ server.expose("subModleOperate", (args, opt, callback) => {
       sendResult(callback, { error: "user sign verify fail" });
       return;
     }
-
-    // TODO: extra_compute_ratio
-    // extra_compute_ratio = (tasting_score / (tasting_score + avg_score)) * 100
 
     // TODO: invoke chain interface
     sendResult(callback, { result: "pending" });
