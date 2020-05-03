@@ -138,14 +138,26 @@ server.expose("subHash", (args, opt, callback) => {
 server.expose("subProductPublish", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
-    const address = param.user_pub_key;
+    const {
+      sender_pub_key,
+      sender_sign,
+      user_data,
+      user_pub_key,
+      user_sign,
+    } = param;
+    const {
+      knowledge_id,
+      model_id,
+      product_id,
+      content_hash,
+      extra_compute_ratio,
+      memo,
+    } = user_data;
 
-    if (!verifyPubKey(address)) {
-      sendResult(callback, { error: "not valid pub key" });
+    if (!verifyPubKey(sender_pub_key)) {
+      sendResult(callback, { error: "not valid address" });
       return;
     }
-
-    // TODO: other parameters
   } catch (e) {
     console.error(`subProductPublish error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -153,8 +165,6 @@ server.expose("subProductPublish", (args, opt, callback) => {
 });
 
 // support functions
-
-// init pub key white list
 
 // verify sender pubkey
 const verifyPubKey = (address) => (server_white_list[address] ? true : false);
