@@ -4,7 +4,7 @@
   "license": "GPL-3.0-only",
   "homepage": ".",
   "dependencies": {
-    "@polkadot/api": "^1.13.0",
+    "@polkadot/api": "^1.14.0-beta.9",
     "commander": "^5.1.0",
     "convict": "^5.2.0",
     "json-rpc2": "^2.0.0"
