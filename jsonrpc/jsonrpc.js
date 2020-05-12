@@ -164,6 +164,8 @@ server.expose("subProductPublish", (args, opt, callback) => {
       return;
     }
 
+    // TODO: data fields validation check
+
     // TODO: invoke chain interface
     sendResult(callback, { result: "pending" });
   } catch (e) {
@@ -328,4 +330,8 @@ sub.initKeyring().then(() => {
   const port = config.get("port");
   server.listen(port, "localhost");
   console.log(`server start on ${port}`);
+});
+
+sub.initApi("ws://localhost:9944").then(() => {
+  console.log("init api done!");
 });
