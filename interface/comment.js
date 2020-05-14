@@ -1,4 +1,5 @@
 const { stringToU8a, u8aConcat } = require("@polkadot/util");
+const { uint32ToU8a } = require("../lib/util");
 
 module.exports = {
   create: (app_id, knowledge_id, comment_id, last_comment_id, comment_hash, comment_fee, knowledge_profit) => {
@@ -18,8 +19,8 @@ module.exports = {
      * Rust code:
      *
      */
-    // TODO:
     let buf = stringToU8a(`${inst.app_id}${inst.knowledge_id}${inst.comment_id}`);
-    return u8aConcat(buf, new Uint8Array([]));
+    let numBuf = uint32ToU8a(inst.knowledge_profit);
+    return u8aConcat(buf, numBuf);
   },
 };
