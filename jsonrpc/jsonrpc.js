@@ -136,13 +136,29 @@ server.expose("subHash", (args, opt, callback) => {
 
 /**
  * product parameters publish
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      para_issue_rate: 参数发布率 String
+ *      self_issue_rate: 自证参数发布率 String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
  */
 server.expose("subProductPublish", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
-    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
-    const { knowledge_id, model_id, product_id, content_hash, extra_compute_ratio, memo } = user_data;
+    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
+    const { document_id, model_id, product_id, content_hash } = app_data;
 
     // validate sender
     if (!verifyPubKey(sender_pub_key)) {
@@ -151,16 +167,20 @@ server.expose("subProductPublish", (args, opt, callback) => {
     }
 
     // verify sender sign
-    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    const senderVerify = sub.verify(
+      sender_pub_key,
+      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
+      sender_sign
+    );
     if (!senderVerify.isValid) {
       sendResult(callback, { error: "sender sign verify fail" });
       return;
     }
 
-    // verify user sign
-    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
-    if (!userVerify.isValid) {
-      sendResult(callback, { error: "user sign verify fail" });
+    // verify app sign
+    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
+    if (!appVerify.isValid) {
+      sendResult(callback, { error: "app sign verify fail" });
       return;
     }
 
@@ -332,6 +352,7 @@ sub.initKeyring().then(() => {
   console.log(`server start on ${port}`);
 });
 
-sub.initApi("ws://localhost:9944").then(() => {
+/* temp disable
+sub.initApi("ws://39.106.116.92:9944").then(() => {
   console.log("init api done!");
-});
+});*/
