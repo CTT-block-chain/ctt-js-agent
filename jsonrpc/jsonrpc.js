@@ -316,13 +316,30 @@ server.expose("subProductTry", (args, opt, callback) => {
 
 /**
  *  product model operation
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      expert_id: 专家ID String
+ *      interface_status: 接口状态 String("0": 废止, "1": 创建)
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      commodity_name: 商品名称 String
+ *      commodity_type: 商品类型 String
+ *      memo: 备注 String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
  */
 server.expose("subModleOperate", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subModleOperate:${args[0]}`);
-    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
-    const { interface_status, model_id, commodity_name, commodit_type, content_hash, memo } = user_data;
+    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
+    const { document_id, model_id, commodity_name, commodity_type, content_hash, memo } = app_data;
 
     // validate sender
     if (!verifyPubKey(sender_pub_key)) {
@@ -331,16 +348,20 @@ server.expose("subModleOperate", (args, opt, callback) => {
     }
 
     // verify sender sign
-    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    const senderVerify = sub.verify(
+      sender_pub_key,
+      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
+      sender_sign
+    );
     if (!senderVerify.isValid) {
       sendResult(callback, { error: "sender sign verify fail" });
       return;
     }
 
-    // verify user sign
-    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
-    if (!userVerify.isValid) {
-      sendResult(callback, { error: "user sign verify fail" });
+    // verify app sign
+    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
+    if (!appVerify.isValid) {
+      sendResult(callback, { error: "app sign verify fail" });
       return;
     }
 
