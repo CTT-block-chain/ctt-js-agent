@@ -196,13 +196,31 @@ server.expose("subProductPublish", (args, opt, callback) => {
 
 /**
  * product indentify
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      goodsprice: 商品价格 String
+ *      ident_rate: 参数鉴别率 String
+ *      ident_consistence: 鉴别核实一致性  String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *      cart_id: 购物车id String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
  */
 server.expose("subProductIdentify", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
-    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
-    const { knowledge_id, model_id, product_id, content_hash, extra_compute_ratio, memo, transaction_id } = user_data;
+    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
+    const { document_id, model_id, product_id, content_hash, cart_id } = app_data;
 
     // validate sender
     if (!verifyPubKey(sender_pub_key)) {
@@ -211,16 +229,20 @@ server.expose("subProductIdentify", (args, opt, callback) => {
     }
 
     // verify sender sign
-    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    const senderVerify = sub.verify(
+      sender_pub_key,
+      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
+      sender_sign
+    );
     if (!senderVerify.isValid) {
       sendResult(callback, { error: "sender sign verify fail" });
       return;
     }
 
-    // verify user sign
-    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
-    if (!userVerify.isValid) {
-      sendResult(callback, { error: "user sign verify fail" });
+    // verify app sign
+    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
+    if (!appVerify.isValid) {
+      sendResult(callback, { error: "app sign verify fail" });
       return;
     }
 
@@ -234,22 +256,31 @@ server.expose("subProductIdentify", (args, opt, callback) => {
 
 /**
  * product try
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      goodsprice: 商品价格 String
+ *      offset_rate: 品鉴偏差率 String
+ *      true_rate: 品鉴真实度 String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *      cart_id: 购物车id String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
  */
 server.expose("subProductTry", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
-    console.log(`subProductTry:${args[0]}`);
-    const { sender_pub_key, sender_sign, user_data, user_pub_key, user_sign } = param;
-    const {
-      knowledge_id,
-      model_id,
-      product_id,
-      content_hash,
-      memo,
-      transaction_id,
-      tasting_score,
-      avg_score,
-    } = user_data;
+    console.log(`subProductIdentify:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
+    const { document_id, model_id, product_id, content_hash, cart_id } = app_data;
 
     // validate sender
     if (!verifyPubKey(sender_pub_key)) {
@@ -258,21 +289,22 @@ server.expose("subProductTry", (args, opt, callback) => {
     }
 
     // verify sender sign
-    const senderVerify = sub.verify(sender_pub_key, user_pub_key + user_sign, sender_sign);
+    const senderVerify = sub.verify(
+      sender_pub_key,
+      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
+      sender_sign
+    );
     if (!senderVerify.isValid) {
       sendResult(callback, { error: "sender sign verify fail" });
       return;
     }
 
-    // verify user sign
-    const userVerify = sub.verify(user_pub_key, util.getObjectFieldValueStr(user_data), user_sign);
-    if (!userVerify.isValid) {
-      sendResult(callback, { error: "user sign verify fail" });
+    // verify app sign
+    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
+    if (!appVerify.isValid) {
+      sendResult(callback, { error: "app sign verify fail" });
       return;
     }
-
-    // TODO: extra_compute_ratio
-    // extra_compute_ratio = (tasting_score / (tasting_score + avg_score)) * 100
 
     // TODO: invoke chain interface
     sendResult(callback, { result: "pending" });
