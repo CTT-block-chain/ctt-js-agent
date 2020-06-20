@@ -139,6 +139,7 @@ server.expose("subHash", (args, opt, callback) => {
  * {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
  *      para_issue_rate: 参数发布率 String
  *      self_issue_rate: 自证参数发布率 String
  *    }
@@ -157,30 +158,12 @@ server.expose("subProductPublish", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
-    const { document_id, model_id, product_id, content_hash } = app_data;
+    const { document_id, model_id, product_id, content_hash } = param.app_data;
 
-    // validate sender
-    if (!verifyPubKey(sender_pub_key)) {
-      sendResult(callback, { error: "not valid address" });
-      return;
-    }
+    const verifyResult = verifyServerSign(param);
 
-    // verify sender sign
-    const senderVerify = sub.verify(
-      sender_pub_key,
-      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
-      sender_sign
-    );
-    if (!senderVerify.isValid) {
-      sendResult(callback, { error: "sender sign verify fail" });
-      return;
-    }
-
-    // verify app sign
-    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
-    if (!appVerify.isValid) {
-      sendResult(callback, { error: "app sign verify fail" });
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
       return;
     }
 
@@ -199,6 +182,7 @@ server.expose("subProductPublish", (args, opt, callback) => {
  * {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
  *      goodsprice: 商品价格 String
  *      ident_rate: 参数鉴别率 String
  *      ident_consistence: 鉴别核实一致性  String
@@ -219,30 +203,12 @@ server.expose("subProductIdentify", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
-    const { document_id, model_id, product_id, content_hash, cart_id } = app_data;
+    const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
 
-    // validate sender
-    if (!verifyPubKey(sender_pub_key)) {
-      sendResult(callback, { error: "not valid address" });
-      return;
-    }
+    const verifyResult = verifyServerSign(param);
 
-    // verify sender sign
-    const senderVerify = sub.verify(
-      sender_pub_key,
-      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
-      sender_sign
-    );
-    if (!senderVerify.isValid) {
-      sendResult(callback, { error: "sender sign verify fail" });
-      return;
-    }
-
-    // verify app sign
-    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
-    if (!appVerify.isValid) {
-      sendResult(callback, { error: "app sign verify fail" });
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
       return;
     }
 
@@ -259,6 +225,7 @@ server.expose("subProductIdentify", (args, opt, callback) => {
  * {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
  *      goodsprice: 商品价格 String
  *      offset_rate: 品鉴偏差率 String
  *      true_rate: 品鉴真实度 String
@@ -279,30 +246,12 @@ server.expose("subProductTry", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
-    const { document_id, model_id, product_id, content_hash, cart_id } = app_data;
+    const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
 
-    // validate sender
-    if (!verifyPubKey(sender_pub_key)) {
-      sendResult(callback, { error: "not valid address" });
-      return;
-    }
+    const verifyResult = verifyServerSign(param);
 
-    // verify sender sign
-    const senderVerify = sub.verify(
-      sender_pub_key,
-      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
-      sender_sign
-    );
-    if (!senderVerify.isValid) {
-      sendResult(callback, { error: "sender sign verify fail" });
-      return;
-    }
-
-    // verify app sign
-    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
-    if (!appVerify.isValid) {
-      sendResult(callback, { error: "app sign verify fail" });
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
       return;
     }
 
@@ -319,12 +268,12 @@ server.expose("subProductTry", (args, opt, callback) => {
  * {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
  *      expert_id: 专家ID String
  *      interface_status: 接口状态 String("0": 废止, "1": 创建)
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_data: {  应用数据
- *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
  *      commodity_name: 商品名称 String
  *      commodity_type: 商品类型 String
@@ -338,30 +287,12 @@ server.expose("subModleOperate", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subModleOperate:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
-    const { document_id, model_id, commodity_name, commodity_type, content_hash, memo } = app_data;
+    const { model_id, commodity_name, commodity_type, content_hash, memo } = param.app_data;
 
-    // validate sender
-    if (!verifyPubKey(sender_pub_key)) {
-      sendResult(callback, { error: "not valid address" });
-      return;
-    }
+    const verifyResult = verifyServerSign(param);
 
-    // verify sender sign
-    const senderVerify = sub.verify(
-      sender_pub_key,
-      util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
-      sender_sign
-    );
-    if (!senderVerify.isValid) {
-      sendResult(callback, { error: "sender sign verify fail" });
-      return;
-    }
-
-    // verify app sign
-    const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
-    if (!appVerify.isValid) {
-      sendResult(callback, { error: "app sign verify fail" });
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
       return;
     }
 
@@ -373,7 +304,125 @@ server.expose("subModleOperate", (args, opt, callback) => {
   }
 });
 
+/**
+ *  product model operation
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      last_block_num: 上次区块高度 String
+ *      statistics_period: 统计周期 String
+ *      statistics_type: 统计类型 String
+ *      model_id: 商品模型ID String
+ *      commodity_name: 商品名称 String
+ *      sale_total: 销售总收入 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("subSaleStat", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subSaleStat:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
+  } catch (e) {
+    console.error(`subSaleStat error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+// server vote related interfaces
+
+/**
+ * knowledge power parameters change vote
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      vote_start_time: 投票开始时间 String (格式: 1970-01-01T00:00:00)
+ *      vote_end_time: 投票结束时间 String (格式: 1970-01-01T00:00:00)
+ *      decayperiod: 衰减周期 String (天数，例如 5)
+ *      decaypercentag: 衰减百分比 String (例如："0.02")
+ *      finaldecay: 最终衰减值 String
+ *      parameter_publish 参数发布权重 String
+ *      identification 鉴别文章权重 String
+ *      appraisal 品鉴文章权重 String
+ *      consumers_comment 消费者点评权重 String
+ *      profit 权益 String
+ *      kpt_bond 抵押 String
+ *      goods_price
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("subKpParamsChangeVote", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subKpParamsChangeVote:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    // TODO: invoke chain interface
+    sendResult(callback, { result: "pending" });
+  } catch (e) {
+    console.error(`subKpParamsChangeVote error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
+// verify server api sign
+const verifyServerSign = (param) => {
+  const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
+  const result = {
+    isOk: false,
+    msg: "unknown",
+  };
+
+  // validate sender
+  if (!verifyPubKey(sender_pub_key)) {
+    //sendResult(callback, { error: "not valid address" });
+    result.msg = "not valid address";
+    return result;
+  }
+
+  // verify sender sign
+  const senderVerify = sub.verify(
+    sender_pub_key,
+    util.getObjectFieldValueStr(sender_data) + app_pub_key + app_sign,
+    sender_sign
+  );
+  if (!senderVerify.isValid) {
+    // sendResult(callback, { error: "sender sign verify fail" });
+    result.msg = "sender sign verify fail";
+    return result;
+  }
+
+  // verify app sign
+  const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
+  if (!appVerify.isValid) {
+    // sendResult(callback, { error: "app sign verify fail" });
+    result.msg = "app sign verify fail";
+    return result;
+  }
+
+  result.isOk = true;
+  return result;
+};
 
 // verify sender pubkey
 const verifyPubKey = (address) => (server_white_list[address] ? true : false);
@@ -405,7 +454,9 @@ sub.initKeyring().then(() => {
   console.log(`server start on ${port}`);
 });
 
-/* temp disable
-sub.initApi("ws://39.106.116.92:9944").then(() => {
+const apiAddr = config.get("sub_endpoint");
+console.log("trying to connect to:", apiAddr);
+
+sub.initApi(apiAddr).then(() => {
   console.log("init api done!");
-});*/
+});

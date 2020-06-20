@@ -15,6 +15,13 @@ var config = convict({
     env: "PORT",
     arg: "port",
   },
+  sub_endpoint: {
+    doc: "Sub node web socket api endpoint",
+    format: String,
+    default: "ws://39.106.116.92:9944",
+    env: "SUB_ENDPOINT",
+    arg: "sub_endpoint",
+  },
 });
 
 // Load environment dependent configuration
