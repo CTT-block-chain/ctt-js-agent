@@ -183,7 +183,7 @@ server.expose("subProductPublish", (args, opt, callback) => {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
  *      app_id: 应用ID String
- *      goodsprice: 商品价格 String
+ *      goods_price: 商品价格 String
  *      ident_rate: 参数鉴别率 String
  *      ident_consistence: 鉴别核实一致性  String
  *    }
@@ -226,7 +226,7 @@ server.expose("subProductIdentify", (args, opt, callback) => {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
  *      app_id: 应用ID String
- *      goodsprice: 商品价格 String
+ *      goods_price: 商品价格 String
  *      offset_rate: 品鉴偏差率 String
  *      true_rate: 品鉴真实度 String
  *    }
