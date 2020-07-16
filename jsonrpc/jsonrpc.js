@@ -380,7 +380,7 @@ server.expose("subModleOperate", (args, opt, callback) => {
     let api;
     let mod = model.create(app_id, model_id, expert_id, commodity_name, commodity_type, content_hash);
 
-    if (interface_status === "0") {
+    if (interface_status === "1") {
       api = sub.createModel;
     } else {
       api = sub.disableModel;
