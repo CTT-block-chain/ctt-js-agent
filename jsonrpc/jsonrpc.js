@@ -4,6 +4,10 @@ const sub = require("../lib/sub");
 const util = require("../lib/util");
 const config = require("../config/config");
 
+const document = require("../interface/document");
+const comment = require("../interface/comment");
+const model = require("../interface/model");
+
 const server_white_list = require("./keys/wl.json");
 
 const server = rpc.Server.$create({
@@ -158,7 +162,9 @@ server.expose("subProductPublish", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash } = param.app_data;
+    const { app_id, para_issue_rate, self_issue_rate } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -169,8 +175,31 @@ server.expose("subProductPublish", (args, opt, callback) => {
 
     // TODO: data fields validation check
 
-    // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    let doc = document.create(
+      app_id,
+      document_id,
+      0,
+      model_id,
+      product_id,
+      content_hash,
+      para_issue_rate,
+      self_issue_rate,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    );
+    sub
+      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log("createDocument result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
   } catch (e) {
     console.error(`subProductPublish error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -203,7 +232,9 @@ server.expose("subProductIdentify", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
+    const { app_id, goods_price, ident_rate, ident_consistence } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -212,8 +243,29 @@ server.expose("subProductIdentify", (args, opt, callback) => {
       return;
     }
 
-    // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    let doc = document.create(
+      app_id,
+      document_id,
+      1,
+      model_id,
+      product_id,
+      content_hash,
+      0,
+      0,
+      goods_price,
+      ident_rate,
+      ident_consistence,
+      cart_id
+    );
+    sub
+      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log("createDocument result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
   } catch (e) {
     console.error(`subProductIdentify error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -246,7 +298,10 @@ server.expose("subProductTry", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
+    const { app_id, goods_price, offset_rate, true_rate } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -255,8 +310,31 @@ server.expose("subProductTry", (args, opt, callback) => {
       return;
     }
 
-    // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    let doc = document.create(
+      app_id,
+      document_id,
+      1,
+      model_id,
+      product_id,
+      content_hash,
+      0,
+      0,
+      goods_price,
+      0,
+      0,
+      cart_id,
+      offset_rate,
+      true_rate
+    );
+    sub
+      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log("createDocument result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
   } catch (e) {
     console.error(`subProductTry error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -277,7 +355,7 @@ server.expose("subProductTry", (args, opt, callback) => {
  *      model_id: 商品模型ID String
  *      commodity_name: 商品名称 String
  *      commodity_type: 商品类型 String
- *      memo: 备注 String
+ *      content_hash: String
  *    }
  *    app_sign: 用户数据签名 String
  *    sender_sign: 发送者签名 String
@@ -287,7 +365,10 @@ server.expose("subModleOperate", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subModleOperate:${args[0]}`);
-    const { model_id, commodity_name, commodity_type, content_hash, memo } = param.app_data;
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
+    const { model_id, commodity_name, commodity_type } = param.app_data;
+    const { app_id, expert_id, interface_status } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -296,8 +377,23 @@ server.expose("subModleOperate", (args, opt, callback) => {
       return;
     }
 
-    // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    let api;
+    let mod = model.create(app_id, model_id, expert_id, commodity_name, commodity_type, content_hash);
+
+    if (interface_status === "0") {
+      api = sub.createModel;
+    } else {
+      api = sub.disableModel;
+    }
+
+    api(mod, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log("modelOperate result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
   } catch (e) {
     console.error(`subModleOperate error: ${e}`);
     sendResult(callback, { error: e.message });
