@@ -367,7 +367,7 @@ server.expose("subModleOperate", (args, opt, callback) => {
     console.log(`subModleOperate:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { model_id, commodity_name, commodity_type } = param.app_data;
+    const { model_id, commodity_name, commodity_type, content_hash } = param.app_data;
     const { app_id, expert_id, interface_status } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
