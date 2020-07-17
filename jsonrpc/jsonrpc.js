@@ -164,7 +164,7 @@ server.expose("subProductPublish", (args, opt, callback) => {
     console.log(`subProductPublish:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash } = param.app_data;
-    const { app_id, para_issue_rate, self_issue_rate } = param.sender_data;
+    let { app_id, para_issue_rate, self_issue_rate } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -174,6 +174,8 @@ server.expose("subProductPublish", (args, opt, callback) => {
     }
 
     // TODO: data fields validation check
+    para_issue_rate = Math.round(Number(para_issue_rate) * 100);
+    self_issue_rate = Math.round(Number(self_issue_rate) * 100);
 
     let doc = document.create(
       app_id,
@@ -234,7 +236,7 @@ server.expose("subProductIdentify", (args, opt, callback) => {
     console.log(`subProductIdentify:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
-    const { app_id, goods_price, ident_rate, ident_consistence } = param.sender_data;
+    let { app_id, goods_price, ident_rate, ident_consistence } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -242,6 +244,11 @@ server.expose("subProductIdentify", (args, opt, callback) => {
       sendResult(callback, { error: verifyResult.msg });
       return;
     }
+
+    // conver $ to cent
+    goods_price = Math.round(Number(goods_price) * 100);
+    ident_rate = Math.round(Number(ident_rate) * 100);
+    ident_consistence = Math.round(Number(ident_consistence) * 100);
 
     let doc = document.create(
       app_id,
@@ -301,7 +308,7 @@ server.expose("subProductTry", (args, opt, callback) => {
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
-    const { app_id, goods_price, offset_rate, true_rate } = param.sender_data;
+    let { app_id, goods_price, offset_rate, true_rate } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -309,6 +316,10 @@ server.expose("subProductTry", (args, opt, callback) => {
       sendResult(callback, { error: verifyResult.msg });
       return;
     }
+
+    goods_price = Math.round(Number(goods_price) * 100);
+    offset_rate = Math.round(Number(offset_rate) * 100);
+    true_rate = Math.round(Number(true_rate) * 100);
 
     let doc = document.create(
       app_id,
