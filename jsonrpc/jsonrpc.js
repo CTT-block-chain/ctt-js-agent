@@ -491,6 +491,137 @@ server.expose("subKpParamsChangeVote", (args, opt, callback) => {
   }
 });
 
+/**
+ * SUDO 设置APP ROOT账户
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      app_root_pub_key: APP ROOT公钥 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("membersSetAppAdmin", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersSetAppAdmin:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { app_id, app_root_pub_key } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    sub
+      .membersSetAppAdmin(app_id, app_root_pub_key, sender_pub_key)
+      .then((result) => {
+        console.log("membersSetAppAdmin result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersSetAppAdmin error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 增加APP平台点评组成员
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      op_type: "0": 增加, "1": 删除 String
+ *      new_member_pub_key: 新增成员公钥 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("membersOperatePlatformExpert", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersOperatePlatformExpert:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { app_id, op_type, new_member_pub_key } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    sub
+      .membersOperatePlatformExpert(app_id, op_type, new_member_pub_key, sender_pub_key)
+      .then((result) => {
+        console.log("membersOperatePlatformExpert result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersOperatePlatformExpert error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 删除模型专家组成员
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      app_id: 应用ID String
+ *      model_id: 商品模型ID String
+ *      old_member_pub_key: 待删除成员公钥 String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersRemoveExpertByCreator:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign, app_pub_key, app_sign } = param;
+    const { app_id, model_id, old_member_pub_key } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    sub
+      .membersRemoveExpertByCreator(
+        app_id,
+        model_id,
+        old_member_pub_key,
+        app_pub_key,
+        app_sign,
+        sender_pub_key,
+        sender_sign
+      )
+      .then((result) => {
+        console.log("membersRemoveExpertByCreator result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersRemoveExpertByCreator error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 // verify server api sign
 const verifyServerSign = (param) => {
