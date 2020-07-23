@@ -53,4 +53,4 @@ window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
 
 // query
 window.queryTotalPower = () => Sub.rpcGetTotalPower();
-window.queruAccountPower = (address) => Sub.rpcGetAccountPower(address);
+window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
