@@ -50,3 +50,7 @@ window.walletTransfer = (srcAddress, destAddress, amount, password) =>
 
 window.walletFetchCouncilVotes = () => Sub.fetchCouncilVotes();
 window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
+
+// query
+window.queryTotalPower = () => Sub.rpcGetTotalPower();
+window.queruAccountPower = (address) => Sub.rpcGetAccountPower(address);

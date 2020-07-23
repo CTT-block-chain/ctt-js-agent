@@ -622,6 +622,57 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
   }
 });
 
+// power related query
+/**
+ * 查询全网算力
+ * 无参数
+ */
+server.expose("queryTotalPower", (args, opt, callback) => {
+  try {
+    sub
+      .rpcGetTotalPower()
+      .then((result) => {
+        console.log("queryTotalPower result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryTotalPower error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 查询账户算力
+ * {
+ *    sender_data: { 发送端数据
+ *      address: 账户地址 String
+ *    }
+ * }
+ */
+server.expose("queryAccountPower", (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryAccountPower:${args[0]}`);
+  const { address } = param.sender_data;
+
+  try {
+    sub
+      .rpcGetAccountPower(address)
+      .then((result) => {
+        console.log("queryTotalPower result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryTotalPower error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 // verify server api sign
 const verifyServerSign = (param) => {
@@ -697,4 +748,7 @@ console.log("trying to connect to:", apiAddr);
 
 sub.initApi(apiAddr).then(() => {
   console.log("init api done!");
+
+  // test
+  // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
 });
