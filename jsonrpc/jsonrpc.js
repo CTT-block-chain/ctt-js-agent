@@ -673,6 +673,36 @@ server.expose("queryAccountPower", (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询体验商品算力
+ * {
+ *    sender_data: { 发送端数据
+ *      app_id:  String
+ *      cart_id: String
+ *    }
+ * }
+ */
+server.expose("queryCommodityPower", (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryCommodityPower:${args[0]}`);
+  const { app_id, cart_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcGetCommodityPower(app_id, cart_id)
+      .then((result) => {
+        console.log("queryCommodityPower result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryCommodityPower error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 // verify server api sign
 const verifyServerSign = (param) => {
@@ -751,4 +781,5 @@ sub.initApi(apiAddr).then(() => {
 
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
+  // sub.rpcGetCommodityPower("0x01", "0x01").then((res) => console.log("p:", res));
 });
