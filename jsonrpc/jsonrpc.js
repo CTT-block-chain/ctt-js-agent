@@ -358,12 +358,12 @@ server.expose("subProductTry", (args, opt, callback) => {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
  *      app_id: 应用ID String
+ *      model_id: 商品模型ID String
  *      expert_id: 专家ID String
  *      interface_status: 接口状态 String("0": 废止, "1": 创建)
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_data: {  应用数据
- *      model_id: 商品模型ID String
  *      commodity_name: 商品名称 String
  *      commodity_type: 商品类型 String
  *      content_hash: String
@@ -378,8 +378,8 @@ server.expose("subModleOperate", (args, opt, callback) => {
     console.log(`subModleOperate:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { model_id, commodity_name, commodity_type, content_hash } = param.app_data;
-    const { app_id, expert_id, interface_status } = param.sender_data;
+    const { commodity_name, commodity_type, content_hash } = param.app_data;
+    const { app_id, model_id, expert_id, interface_status } = param.sender_data;
 
     const verifyResult = verifyServerSign(param);
 
