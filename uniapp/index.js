@@ -4,6 +4,8 @@ const Comment = require("../interface/comment");
 window.subInitKeyring = () => Sub.initKeyring();
 window.subInitApi = (node) => Sub.initApi(node);
 window.subNewAccount = (name, pwd) => Sub.newAccount(name, pwd);
+window.subResetAccountWithMnemonic = (name, mnemonic, password) =>
+  Sub.resetAccountWithMnemonic(name, mnemonic, password);
 window.subSetupAccountByJson = (json) => Sub.setupAccountByJson(json);
 window.subUnlock = (address, pwd) => Sub.unlock(address, pwd);
 window.subLock = (address) => Sub.lock(address);
