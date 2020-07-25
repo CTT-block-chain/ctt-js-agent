@@ -750,8 +750,9 @@ const sendResult = (callback, data) => {
   callback(null, JSON.stringify(data));
 };
 
+// disable loadKeys
 const loadKeys = () => {
-  Object.keys(server_white_list).forEach((address) => {
+  /*Object.keys(server_white_list).forEach((address) => {
     try {
       const keyData = fs.readFileSync(`jsonrpc/keys/${address}.json`);
       const json = JSON.parse(keyData);
@@ -760,7 +761,7 @@ const loadKeys = () => {
     } catch (e) {
       console.error(e);
     }
-  });
+  });*/
 };
 
 // TODO: init api connection
