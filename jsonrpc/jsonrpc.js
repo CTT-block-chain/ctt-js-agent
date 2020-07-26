@@ -372,10 +372,10 @@ server.expose("subProductTry", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subModleOperate", (args, opt, callback) => {
+server.expose("subModelOperate", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
-    console.log(`subModleOperate:${args[0]}`);
+    console.log(`subModelOperate:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { commodity_name, commodity_type, content_hash } = param.app_data;
@@ -406,7 +406,7 @@ server.expose("subModleOperate", (args, opt, callback) => {
         sendResult(callback, { error: err });
       });
   } catch (e) {
-    console.error(`subModleOperate error: ${e}`);
+    console.error(`subModelOperate error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
