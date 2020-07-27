@@ -23187,6 +23187,11 @@ const chainDataTypes = {
     trueRate: "u32",
     cartId: "Vec<u8>",
   },
+
+  QueryCommodityPowerParams: {
+    appId: "Bytes",
+    cartId: "Bytes",
+  },
 };
 
 const rpc = {
@@ -23194,6 +23199,38 @@ const rpc = {
     totalPower: {
       description: "Get current total knowledge power.",
       params: [],
+      type: "u32",
+    },
+
+    accountPower: {
+      description: "Get account knowledge power.",
+      params: [
+        {
+          name: "account",
+          type: "AccountId",
+        },
+        {
+          name: "at",
+          type: "Hash",
+          isOptional: true,
+        },
+      ],
+      type: "u32",
+    },
+
+    commodityPower: {
+      description: "Get commodify knowledge power.",
+      params: [
+        {
+          name: "query",
+          type: "QueryCommodityPowerParams",
+        },
+        {
+          name: "at",
+          type: "Hash",
+          isOptional: true,
+        },
+      ],
       type: "u32",
     },
   },
@@ -23224,6 +23261,20 @@ const initApi = async (wss) => {
 const newAccount = (name, password) => {
   isKeyringReady();
   const mnemonic = mnemonicGenerate(12);
+  let path = `${mnemonic}//hard/derivatio`;
+  if (!!password) {
+    path += `///${password}`;
+  }
+
+  const pair = this.keyring.addFromUri(path, {
+    name,
+  });
+
+  return { mnemonic, json: pair.toJson(password) };
+};
+
+const resetAccountWithMnemonic = (name, mnemonic, password) => {
+  isKeyringReady();
   let path = `${mnemonic}//hard/derivatio`;
   if (!!password) {
     path += `///${password}`;
@@ -23606,6 +23657,266 @@ const disableModel = async (model, owner_pub_key, owner_sign, sender_pub_key, se
   });
 };
 
+// member interfaces
+/**
+ * 设置APP root账户，仅在SUDO启用有效
+ * @param {*} app_id
+ * @param {*} app_root_pub_key APP ROOT账户公钥
+ * @param {*} sudo_pub_key SUDO 账户公钥，调用者需确保SUDO key已经unlock
+ */
+const membersSetAppAdmin = async (app_id, app_root_pub_key, sudo_pub_key) => {
+  return new Promise(async (resolve, reject) => {
+    const keyPair = this.keyring.getPair(sudo_pub_key);
+
+    this.api.tx.system.remark(new Array());
+
+    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
+    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+
+    this.api.members
+      .setAppAdmin(app_id, app_root_pub_key)
+      .signAndSend(keyPair, ({ status, events }) => {
+        if (status.isFinalized) {
+          console.log(status.asFinalized.toHex());
+          events.forEach(async ({ phase, event: { data, method, section } }) => {
+            console.log("setAppAdmin:", section.toString(), method.toString(), data.toString());
+            section = section.toString();
+            method = method.toString();
+
+            switch (section) {
+              case "system":
+                if (method === "ExtrinsicFailed") {
+                  reject({
+                    error: "ExtrinsicFailed",
+                  });
+                }
+                break;
+              case "members":
+                if (method === "AppAdminSet") {
+                  const datajson = JSON.parse(data.toString());
+                  // resolve with event data
+                  resolve({
+                    tx: status.asFinalized.toHex(),
+                    data: datajson,
+                  });
+                }
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject({ error: err.message });
+      });
+  });
+};
+
+/**
+ * 增加APP平台点评组成员
+ * @param {*} app_id
+ * @param {*} op_type "0": 增加, "1": 删除
+ * @param {*} new_member_pub_key 新增成员公钥
+ * @param {*} app_root_pub_key 调用者需要确保该KEY已经unlock, 并且该KEY是APP root 账户
+ */
+const membersOperatePlatformExpert = async (app_id, op_type, member_account, app_root_pub_key) => {
+  return new Promise(async (resolve, reject) => {
+    const keyPair = this.keyring.getPair(app_root_pub_key);
+
+    this.api.tx.system.remark(new Array());
+
+    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
+    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+
+    let api =
+      op_type === "0" ? this.api.members.addAppPlatformExpertMember : this.api.members.removeAppPlatformExpertMember;
+
+    api(app_id, member_account)
+      .signAndSend(keyPair, ({ status, events }) => {
+        if (status.isFinalized) {
+          console.log(status.asFinalized.toHex());
+          events.forEach(async ({ phase, event: { data, method, section } }) => {
+            console.log("addAppPlatformExpertMember:", section.toString(), method.toString(), data.toString());
+            section = section.toString();
+            method = method.toString();
+
+            switch (section) {
+              case "system":
+                if (method === "ExtrinsicFailed") {
+                  reject({
+                    error: "ExtrinsicFailed",
+                  });
+                }
+                break;
+              case "members":
+                if (method === "MemberAdded") {
+                  const datajson = JSON.parse(data.toString());
+                  // resolve with event data
+                  resolve({
+                    tx: status.asFinalized.toHex(),
+                    data: datajson,
+                  });
+                }
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject({ error: err.message });
+      });
+  });
+};
+
+/**
+ * 增加模型专家组成员
+ * @param {*} app_id
+ * @param {*} modle_id
+ * @param {*} model_creator 模型创建者公钥
+ * @param {*} model_creator_sign 模型创建者签名（签名内容为new_member_pub_key + kpt_profit_rate）
+ * @param {*} new_member_pub_key 新增成员公钥
+ * @param {*} kpt_profit_rate 每年模型增发kpt分成比例 浮点字符串小数点后至多4位 ("0.0000" - "1")
+ */
+const membersAddExpertByCreator = async (
+  app_id,
+  modle_id,
+  model_creator,
+  model_creator_sign,
+  new_member_pub_key,
+  kpt_profit_rate
+) => {
+  return new Promise(async (resolve, reject) => {
+    const keyPair = this.keyring.getPair(new_member_pub_key);
+
+    this.api.tx.system.remark(new Array());
+
+    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
+    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+
+    kpt_profit_rate = Math.round(Number(kpt_profit_rate) * 10000);
+
+    this.api.members
+      .addExpertMember(app_id, modle_id, kpt_profit_rate, model_creator, model_creator_sign)
+      .signAndSend(keyPair, ({ status, events }) => {
+        if (status.isFinalized) {
+          console.log(status.asFinalized.toHex());
+          events.forEach(async ({ phase, event: { data, method, section } }) => {
+            console.log("addExpertMember:", section.toString(), method.toString(), data.toString());
+            section = section.toString();
+            method = method.toString();
+
+            switch (section) {
+              case "system":
+                if (method === "ExtrinsicFailed") {
+                  reject({
+                    error: "ExtrinsicFailed",
+                  });
+                }
+                break;
+              case "members":
+                if (method === "MemberAdded") {
+                  const datajson = JSON.parse(data.toString());
+                  // resolve with event data
+                  resolve({
+                    tx: status.asFinalized.toHex(),
+                    data: datajson,
+                  });
+                }
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject({ error: err.message });
+      });
+  });
+};
+
+/**
+ * 删除模型专家组成员
+ * @param {*} app_id
+ * @param {*} modle_id
+ * @param {*} old_member_pub_key 待删除成员公钥
+ * @param {*} model_creator 模型创建者公钥
+ * @param {*} model_creator_sign 模型创建者签名（签名内容为old_member_pub_key）
+ * @param {*} sender_pub_key 发送服务端公钥
+ * @param {*} sender_sign 发送服务端签名（签名内容为model_creator_sign)
+ */
+const membersRemoveExpertByCreator = async (
+  app_id,
+  modle_id,
+  old_member_pub_key,
+  model_creator,
+  model_creator_sign,
+  sender_pub_key,
+  sender_sign
+) => {
+  return new Promise(async (resolve, reject) => {
+    const keyPair = this.keyring.getPair(sender_pub_key);
+
+    this.api.tx.system.remark(new Array());
+
+    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
+    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+
+    this.api.members
+      .removeExpertMember(
+        old_member_pub_key,
+        app_id,
+        modle_id,
+        model_creator,
+        model_creator_sign,
+        sender_pub_key,
+        sender_sign
+      )
+      .signAndSend(keyPair, ({ status, events }) => {
+        if (status.isFinalized) {
+          console.log(status.asFinalized.toHex());
+          events.forEach(async ({ phase, event: { data, method, section } }) => {
+            console.log("removeExpertMember:", section.toString(), method.toString(), data.toString());
+            section = section.toString();
+            method = method.toString();
+
+            switch (section) {
+              case "system":
+                if (method === "ExtrinsicFailed") {
+                  reject({
+                    error: "ExtrinsicFailed",
+                  });
+                }
+                break;
+              case "members":
+                if (method === "MemberRemoved") {
+                  const datajson = JSON.parse(data.toString());
+                  // resolve with event data
+                  resolve({
+                    tx: status.asFinalized.toHex(),
+                    data: datajson,
+                  });
+                }
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject({ error: err.message });
+      });
+  });
+};
+
 // Wallet interfaces
 // {"accountId":"5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk","accountNonce":0,"availableBalance":1000000000000,"freeBalance":1000000000000,"frozenFee":0,"frozenMisc":0,"isVesting":false,"lockedBalance":0,"lockedBreakdown":[],"reservedBalance":0,"vestedBalance":0,"vestingTotal":0,"votingBalance":1000000000000}
 const balancesAll = async (address) => {
@@ -23685,11 +23996,24 @@ const rpcGetTotalPower = async () => {
   return Number(pw);
 };
 
+const rpcGetAccountPower = async (accountId) => {
+  console.log(this.api.rpc);
+  let pw = await this.api.rpc.kP.accountPower(accountId);
+  return Number(pw);
+};
+
+const rpcGetCommodityPower = async (appId, cartId) => {
+  console.log(this.api.rpc);
+  let pw = await this.api.rpc.kP.commodityPower({ appId, cartId });
+  return Number(pw);
+};
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
   newAccount: newAccount,
   setupAccountByJson: setupAccountByJson,
+  resetAccountWithMnemonic: resetAccountWithMnemonic,
   unlock: unlock,
   lock: lock,
   sign: sign,
@@ -23705,6 +24029,12 @@ module.exports = {
   createModel: createModel,
   disableModel: disableModel,
 
+  // members inteface:
+  membersSetAppAdmin: membersSetAppAdmin,
+  membersOperatePlatformExpert: membersOperatePlatformExpert,
+  membersAddExpertByCreator: membersAddExpertByCreator,
+  membersRemoveExpertByCreator: membersRemoveExpertByCreator,
+
   // wallet interfaces:
   // accounts:
   balancesAll: balancesAll, // get account total balance info
@@ -23719,6 +24049,8 @@ module.exports = {
 
   // RPC
   rpcGetTotalPower: rpcGetTotalPower,
+  rpcGetAccountPower: rpcGetAccountPower,
+  rpcGetCommodityPower: rpcGetCommodityPower,
 };
 
 },{"@polkadot/api":268,"@polkadot/keyring":287,"@polkadot/util":632,"@polkadot/util-crypto":533}],161:[function(require,module,exports){
@@ -40106,7 +40438,7 @@ function createTypeUnsafe(registry, type, params = [], isPedantic) {
   try {
     // Circle back to isPedantic when it handles all cases 100% - as of now,
     // it provides false warning which is more hinderance than help
-    return initType(registry, (0, _createClass.createClass)(registry, type), params); // , isPedantic);
+  return initType(registry, (0, _createClass.createClass)(registry, type), params); // , isPedantic);
   } catch (error) {
     throw new Error(`createType(${type}):: ${error.message}`);
   }
@@ -107986,6 +108318,8 @@ const Comment = require("../interface/comment");
 window.subInitKeyring = () => Sub.initKeyring();
 window.subInitApi = (node) => Sub.initApi(node);
 window.subNewAccount = (name, pwd) => Sub.newAccount(name, pwd);
+window.subResetAccountWithMnemonic = (name, mnemonic, password) =>
+  Sub.resetAccountWithMnemonic(name, mnemonic, password);
 window.subSetupAccountByJson = (json) => Sub.setupAccountByJson(json);
 window.subUnlock = (address, pwd) => Sub.unlock(address, pwd);
 window.subLock = (address) => Sub.lock(address);
@@ -108026,11 +108360,35 @@ window.subComment = (
   return Sub.createComment(comment, server_addr, server_sign, sender_addr, "0x0");
 };
 
+/**
+ * 增加模型专家组成员
+ * @param {*} app_id
+ * @param {*} modle_id
+ * @param {*} model_creator 模型创建者公钥
+ * @param {*} model_creator_sign 模型创建者签名（签名内容为new_member_pub_key + kpt_profit_rate）
+ * @param {*} new_member_pub_key 新增成员公钥
+ * @param {*} kpt_profit_rate 每年模型增发kpt分成比例 浮点字符串小数点后至多4位 ("0.0000" - "1")
+ */
+window.membersAddExpert = (app_id, modle_id, model_creator, model_creator_sign, new_member_pub_key, kpt_profit_rate) =>
+  Sub.membersAddExpertByCreator(
+    app_id,
+    modle_id,
+    model_creator,
+    model_creator_sign,
+    new_member_pub_key,
+    kpt_profit_rate
+  );
+
 window.walletBalanceAll = (address) => Sub.balancesAll(address);
 window.walletTransfer = (srcAddress, destAddress, amount, password) =>
   Sub.transfer(srcAddress, destAddress, amount, password);
 
 window.walletFetchCouncilVotes = () => Sub.fetchCouncilVotes();
 window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
+
+// query
+window.queryTotalPower = () => Sub.rpcGetTotalPower();
+window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
+window.queryCommodityPower = (app_id, cart_id) => Sub.rpcGetCommodityPower(app_id, cart_id);
 
 },{"../interface/comment":159,"../lib/sub":160}]},{},[1090]);

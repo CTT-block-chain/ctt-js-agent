@@ -46,6 +46,25 @@ window.subComment = (
   return Sub.createComment(comment, server_addr, server_sign, sender_addr, "0x0");
 };
 
+/**
+ * 增加模型专家组成员
+ * @param {*} app_id
+ * @param {*} modle_id
+ * @param {*} model_creator 模型创建者公钥
+ * @param {*} model_creator_sign 模型创建者签名（签名内容为new_member_pub_key + kpt_profit_rate）
+ * @param {*} new_member_pub_key 新增成员公钥
+ * @param {*} kpt_profit_rate 每年模型增发kpt分成比例 浮点字符串小数点后至多4位 ("0.0000" - "1")
+ */
+window.membersAddExpert = (app_id, modle_id, model_creator, model_creator_sign, new_member_pub_key, kpt_profit_rate) =>
+  Sub.membersAddExpertByCreator(
+    app_id,
+    modle_id,
+    model_creator,
+    model_creator_sign,
+    new_member_pub_key,
+    kpt_profit_rate
+  );
+
 window.walletBalanceAll = (address) => Sub.balancesAll(address);
 window.walletTransfer = (srcAddress, destAddress, amount, password) =>
   Sub.transfer(srcAddress, destAddress, amount, password);
