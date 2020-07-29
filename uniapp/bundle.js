@@ -23810,7 +23810,7 @@ const membersAddExpertByCreator = async (
         if (status.isFinalized) {
           console.log(status.asFinalized.toHex());
           events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log("addExpertMember:", section.toString(), method.toString(), data.toString());
+            console.log(`addExpertMember:, ${section.toString()}, ${method.toString()}, ${data.toString()}`);
             section = section.toString();
             method = method.toString();
 
