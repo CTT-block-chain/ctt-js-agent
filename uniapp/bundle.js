@@ -23253,6 +23253,8 @@ const initApi = async (wss) => {
 
   console.log(chainInfo);
 
+  console.log("api:", this.api);
+
   this.isApiReady = true;
   // return chain info
   return chainInfo;
@@ -23673,7 +23675,7 @@ const membersSetAppAdmin = async (app_id, app_root_pub_key, sudo_pub_key) => {
     const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
     console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
 
-    this.api.members
+    this.api.tx.members
       .setAppAdmin(app_id, app_root_pub_key)
       .signAndSend(keyPair, ({ status, events }) => {
         if (status.isFinalized) {
@@ -23731,7 +23733,9 @@ const membersOperatePlatformExpert = async (app_id, op_type, member_account, app
     console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
 
     let api =
-      op_type === "0" ? this.api.members.addAppPlatformExpertMember : this.api.members.removeAppPlatformExpertMember;
+      op_type === "0"
+        ? this.api.tx.members.addAppPlatformExpertMember
+        : this.api.tx.members.removeAppPlatformExpertMember;
 
     api(app_id, member_account)
       .signAndSend(keyPair, ({ status, events }) => {
@@ -23800,7 +23804,7 @@ const membersAddExpertByCreator = async (
 
     kpt_profit_rate = Math.round(Number(kpt_profit_rate) * 10000);
 
-    this.api.members
+    this.api.tx.members
       .addExpertMember(app_id, modle_id, kpt_profit_rate, model_creator, model_creator_sign)
       .signAndSend(keyPair, ({ status, events }) => {
         if (status.isFinalized) {
@@ -23868,7 +23872,7 @@ const membersRemoveExpertByCreator = async (
     const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
     console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
 
-    this.api.members
+    this.api.tx.members
       .removeExpertMember(
         old_member_pub_key,
         app_id,
