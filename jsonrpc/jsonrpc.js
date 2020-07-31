@@ -502,7 +502,7 @@ server.expose("subKpParamsChangeVote", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("membersSetAppAdmin", (args, opt, callback) => {
+/*server.expose("membersSetAppAdmin", (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersSetAppAdmin:${args[0]}`);
@@ -528,7 +528,7 @@ server.expose("membersSetAppAdmin", (args, opt, callback) => {
     console.error(`membersSetAppAdmin error: ${e}`);
     sendResult(callback, { error: e.message });
   }
-});
+});*/
 
 /**
  * 增加APP平台点评组成员
@@ -786,20 +786,21 @@ sub.initApi(apiAddr).then(() => {
   // sub.rpcGetCommodityPower("0x01", "0x01").then((res) => console.log("p:", res));
 
   // check dev balances
-  /*sub.balancesAll(sub.getDevAdmin().address).then((info) => {
+  sub.balancesAll(sub.getDevAdmin().address).then((info) => {
     console.log("dev(alice) balance:", info.transferable.toString());
-  });*/
+  });
 
-  /*sub.balancesAll("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K").then((info) => {
-    console.log("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K balance:", info.transferable.toString());
-  });*/
+  sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
+    console.log("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:", info.transferable.toString());
+  });
 
-  //sub.devTransfer("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg", 1000000000000000);
+  //sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", 1000000000000000);
+
   //sub.devTransfer("5FyCrqVh4NYzNdRXehbS7jFBT95TkQ1DQud9rbeDhL7SUSXd", 1000000000000000);
   //sub.devTransfer("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K", 1000000000000000);
   //sub.devTransfer("5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", 1000000000000000);
   //sub.devTransfer("5EbavMXi76q8bfnaY2n7fXYr8Aqvoqo2h9r8SdyB6MjVWa3S", 1000000000000000);
-  //sub.devTransfer("5H8i6WyFAE38fofPw2fYmhYdPxE8abwsZY582TNv5MbDbZcb", 1000000000000000);
+  //sub.devTransfer("5C8EArEjFskWMxkKTnUKccBoU5fTpkwyQB2wqw9ZXUURARh6", 1000000000000000);
 
   /*sub
     .membersSetAppAdmin("12345678", "5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", sub.getDevAdmin().address)

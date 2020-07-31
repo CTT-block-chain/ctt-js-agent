@@ -23161,9 +23161,9 @@ const getDevAdmin = () => this.alice;
 
 const chainDataTypes = {
   // mapping the actual specified address format
-  Address: "AccountId",
+  //Address: "AccountId",
   // mapping the lookup
-  LookupSource: "AccountId",
+  //LookupSource: "AccountId",
 
   AccountID32: "AccountId",
 
@@ -23253,7 +23253,7 @@ const initApi = async (wss) => {
 
   console.log(chainInfo);
 
-  console.log("api:", this.api);
+  //console.log("api:", this.api);
 
   this.isApiReady = true;
   // return chain info
@@ -23664,20 +23664,19 @@ const disableModel = async (model, owner_pub_key, owner_sign, sender_pub_key, se
  * 设置APP root账户，仅在SUDO启用有效
  * @param {*} app_id
  * @param {*} app_root_pub_key APP ROOT账户公钥
- * @param {*} sudo_pub_key SUDO 账户公钥，调用者需确保SUDO key已经unlock
  */
-const membersSetAppAdmin = async (app_id, app_root_pub_key, sudo_pub_key) => {
+const membersSetAppAdmin = async (app_id, app_root_pub_key) => {
   return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sudo_pub_key);
+    const sudoKey = await this.api.query.sudo.key();
+    console.log("sudo key:", sudoKey);
 
-    this.api.tx.system.remark(new Array());
+    // Lookup from keyring (assuming we have added all, on --dev this would be `//Alice`)
+    //const sudoPair = this.keyring.getPair(sudoKey);
+    const sudoPair = this.keyring.getPair(getDevAdmin().address);
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
-
-    this.api.tx.members
-      .setAppAdmin(app_id, app_root_pub_key)
-      .signAndSend(keyPair, ({ status, events }) => {
+    this.api.tx.sudo
+      .sudo(this.api.tx.members.setAppAdmin(app_id, app_root_pub_key))
+      .signAndSend(sudoPair, ({ status, events }) => {
         if (status.isFinalized) {
           console.log(status.asFinalized.toHex());
           events.forEach(async ({ phase, event: { data, method, section } }) => {
@@ -23755,7 +23754,7 @@ const membersOperatePlatformExpert = async (app_id, op_type, member_account, app
                 }
                 break;
               case "members":
-                if (method === "MemberAdded") {
+                if (method === "MemberAdded" || method === "MemberRemoved") {
                   const datajson = JSON.parse(data.toString());
                   // resolve with event data
                   resolve({
