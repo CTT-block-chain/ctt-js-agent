@@ -591,7 +591,7 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`membersRemoveExpertByCreator:${args[0]}`);
     const { sender_pub_key, sender_data, sender_sign, app_pub_key, app_sign } = param;
-    const { app_id, model_id, old_member_pub_key } = param.sender_data;
+    const { app_id, model_id, old_member_pub_key } = param.app_data;
 
     const verifyResult = verifyServerSign(param);
 
@@ -790,17 +790,21 @@ sub.initApi(apiAddr).then(() => {
     console.log("dev(alice) balance:", info.transferable.toString());
   });
 
-  sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
-    console.log("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:", info.transferable.toString());
+  sub.balancesAll("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg").then((info) => {
+    console.log("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg balance:", info.transferable.toString());
   });
 
   //sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", 1000000000000000);
 
+  //sub.devTransfer("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg", 1000000000000000);
   //sub.devTransfer("5FyCrqVh4NYzNdRXehbS7jFBT95TkQ1DQud9rbeDhL7SUSXd", 1000000000000000);
   //sub.devTransfer("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K", 1000000000000000);
   //sub.devTransfer("5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", 1000000000000000);
   //sub.devTransfer("5EbavMXi76q8bfnaY2n7fXYr8Aqvoqo2h9r8SdyB6MjVWa3S", 1000000000000000);
-  //sub.devTransfer("5C8EArEjFskWMxkKTnUKccBoU5fTpkwyQB2wqw9ZXUURARh6", 1000000000000000);
+  //sub.devTransfer("5H8i6WyFAE38fofPw2fYmhYdPxE8abwsZY582TNv5MbDbZcb", 1000000000000000);
+  //sub.devTransfer("5EbavMXi76q8bfnaY2n7fXYr8Aqvoqo2h9r8SdyB6MjVWa3S", 1000000000000000);
+  //sub.devTransfer("5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", 1000000000000000);
+  //sub.devTransfer("5GW69fQSx1EnnrsgMN1Khnbmg9JzhrBmPcrTQknJcHthrr8V", 1000000000000000);
 
   /*sub
     .membersSetAppAdmin("12345678", "5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", sub.getDevAdmin().address)
