@@ -593,9 +593,10 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
     const { sender_pub_key, sender_data, sender_sign, app_pub_key, app_sign } = param;
     const { app_id, model_id, old_member_pub_key } = param.sender_data;
 
-    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
-    if (!verify.isValid) {
-      sendResult(callback, { error: "sign veify fail" });
+    const verifyResult = verifyServerSign(param);
+
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
       return;
     }
 
@@ -783,4 +784,28 @@ sub.initApi(apiAddr).then(() => {
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
   // sub.rpcGetCommodityPower("0x01", "0x01").then((res) => console.log("p:", res));
+
+  // check dev balances
+  /*sub.balancesAll(sub.getDevAdmin().address).then((info) => {
+    console.log("dev(alice) balance:", info.transferable.toString());
+  });*/
+
+  /*sub.balancesAll("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K").then((info) => {
+    console.log("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K balance:", info.transferable.toString());
+  });*/
+
+  //sub.devTransfer("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg", 1000000000000000);
+  //sub.devTransfer("5FyCrqVh4NYzNdRXehbS7jFBT95TkQ1DQud9rbeDhL7SUSXd", 1000000000000000);
+  //sub.devTransfer("5FNg8a6QrgtSg5QjNA4x9B2JMzquC8F1Uq7rC7GV77mcxF3K", 1000000000000000);
+  //sub.devTransfer("5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", 1000000000000000);
+  //sub.devTransfer("5EbavMXi76q8bfnaY2n7fXYr8Aqvoqo2h9r8SdyB6MjVWa3S", 1000000000000000);
+
+  /*sub
+    .membersSetAppAdmin("12345678", "5Gdw5xA3rWG61Gp7uP4bq4GoHygTZnTnyKLtdm5cPPwTYv5c", sub.getDevAdmin().address)
+    .then((info) => {
+      console.log("set app admin result:", info);
+    })
+    .catch((e) => {
+      console.error("set app admin error:", e);
+    });*/
 });
