@@ -771,7 +771,7 @@ sub.initKeyring().then(() => {
   console.log("init keyring done!");
   loadKeys();
   const port = config.get("port");
-  server.listen(port, "localhost");
+  server.listen(port);
   console.log(`server start on ${port}`);
 });
 
