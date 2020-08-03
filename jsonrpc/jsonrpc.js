@@ -840,5 +840,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
       );
       console.log("transfer diff:", before.sub(info.transferable).toString());
     });
-  });*/
+  });
+
+  let v = sub.constBalanceExistentialDeposit();
+  console.log(v);*/
 });
