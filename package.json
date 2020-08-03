@@ -7,7 +7,8 @@
     "@polkadot/api": "^1.14.0-beta.9",
     "commander": "^5.1.0",
     "convict": "^5.2.0",
-    "json-rpc2": "^2.0.0"
+    "json-rpc2": "^2.0.0",
+    "bn.js": "^5.1.1"
   },
   "scripts": {
     "jsonrpc_dev": "NODE_ENV=dev node jsonrpc/jsonrpc.js",

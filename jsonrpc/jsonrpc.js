@@ -778,7 +778,11 @@ sub.initKeyring().then(() => {
 const apiAddr = config.get("sub_endpoint");
 console.log("trying to connect to:", apiAddr);
 
-sub.initApi(apiAddr).then(() => {
+function sub_notify_cb(method, data) {
+  console.log("SUB notify:", method, data);
+}
+
+sub.initApi(apiAddr, sub_notify_cb).then(() => {
   console.log("init api done!");
 
   // test
@@ -787,7 +791,7 @@ sub.initApi(apiAddr).then(() => {
 
   // check dev balances
   sub.balancesAll(sub.getDevAdmin().address).then((info) => {
-    console.log("dev(alice) balance:", info.transferable.toString());
+    console.log("dev(alice) balance:", info);
   });
 
   sub.balancesAll("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg").then((info) => {
@@ -814,4 +818,27 @@ sub.initApi(apiAddr).then(() => {
     .catch((e) => {
       console.error("set app admin error:", e);
     });*/
+
+  /*let before;
+  sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
+    console.log(
+      "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance before transfer:",
+      info.transferable.toString()
+    );
+    before = info.transferable;
+  });
+
+  console.log("start:", new Date());
+  sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", "32.7897456").then((result) => {
+    console.log(result);
+    console.log("end:", new Date());
+
+    sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
+      console.log(
+        "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance after transfer:",
+        info.transferable.toString()
+      );
+      console.log("transfer diff:", before.sub(info.transferable).toString());
+    });
+  });*/
 });
