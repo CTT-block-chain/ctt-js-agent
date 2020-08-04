@@ -35,6 +35,22 @@ server.expose("subNewAccount", (args, opt, callback) => {
 });
 
 /**
+ * judge account active
+ * param :  {"address": "xxxx"}
+ * return: {"result": 1 or 0} or error
+ */
+server.expose("subIsAccountActive", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    const result = sub.isAccountActive(param.address);
+    sendResult(callback, { result });
+  } catch (e) {
+    console.error(`subIsAccountActive error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * load account by json
  * param : account JSON
  * return: {"reuslt": "ok"} or error
