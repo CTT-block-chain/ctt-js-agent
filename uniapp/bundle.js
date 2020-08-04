@@ -23134,6 +23134,8 @@ const { mnemonicGenerate, blake2AsHex, cryptoWaitReady, signatureVerify } = requ
 
 const { BN } = require("bn.js");
 
+const DEC_NUM = 14; // TODO: should be 12
+
 const isApiReady = () => {
   if (!this.isApiReady) {
     throw new Error("api not ready");
@@ -23256,7 +23258,7 @@ const initApi = async (wss, notify_cb) => {
 
   console.log(chainInfo);
 
-  console.log("api:", this.api.rpc);
+  //console.log("api:", this.api.rpc);
 
   this.isApiReady = true;
   // return chain info
@@ -23441,8 +23443,10 @@ const transfer = async (srcAddress, targetAddress, amount, password) => {
   let int = sep[0];
   let dec = sep[1];
 
-  let decLen = Math.min(12, dec.length);
-  let convert = new BN(int, 10).mul(new BN(1e12, 10)).add(new BN(dec, 10).mul(new BN(Math.pow(10, 12 - decLen))));
+  let decLen = Math.min(DEC_NUM, dec.length);
+  let convert = new BN(int, 10)
+    .mul(new BN(Math.pow(10, DEC_NUM), 10))
+    .add(new BN(dec, 10).mul(new BN(Math.pow(10, DEC_NUM - decLen))));
 
   console.log("amount convert:", convert.toString());
 
@@ -23468,8 +23472,10 @@ const devTransfer = async (target, num) => {
   let int = sep[0];
   let dec = sep[1];
 
-  let decLen = Math.min(12, dec.length);
-  let convert = new BN(int, 10).mul(new BN(1e12, 10)).add(new BN(dec, 10).mul(new BN(Math.pow(10, 12 - decLen))));
+  let decLen = Math.min(DEC_NUM, dec.length);
+  let convert = new BN(int, 10)
+    .mul(new BN(Math.pow(10, DEC_NUM), 10))
+    .add(new BN(dec, 10).mul(new BN(Math.pow(10, DEC_NUM - decLen))));
 
   console.log("num convert:", convert.toString());
 
@@ -24061,11 +24067,11 @@ function convertBN(bnNum) {
 
   let int, dec;
   let str = bnNum.toString();
-  // check str length, if over 12, right left is dec part
+  // check str length, if over DEC_NUM, right left is dec part
   let strLen = str.length;
-  if (strLen > 12) {
-    int = str.substring(0, strLen - 12);
-    dec = str.substring(strLen - 12);
+  if (strLen > DEC_NUM) {
+    int = str.substring(0, strLen - DEC_NUM);
+    dec = str.substring(strLen - DEC_NUM);
     // remove 0
     dec = remove0(dec);
 
@@ -24076,7 +24082,7 @@ function convertBN(bnNum) {
   }
 
   // make up missed 0
-  let zeroLen = 12 - strLen;
+  let zeroLen = DEC_NUM - strLen;
   dec = remove0(`${"0".repeat(zeroLen)}${str}`);
   if (dec.length > 0) {
     dec = `.${dec}`;
@@ -24164,6 +24170,12 @@ const fetchCouncilVotes = async () => {
   }, {});
 };
 
+const txFeeEstimate = async (txInfo, paramList) => {
+  const dispatchInfo = await this.api.tx[txInfo.module][txInfo.call](...paramList).paymentInfo(txInfo.address);
+  console.log("txFeeEstimate:", dispatchInfo);
+  return dispatchInfo;
+};
+
 // below are rpc interfaces:
 const rpcGetTotalPower = async () => {
   console.log(this.api.rpc);
@@ -24181,6 +24193,14 @@ const rpcGetCommodityPower = async (appId, cartId) => {
   console.log(this.api.rpc);
   let pw = await this.api.rpc.kP.commodityPower({ appId, cartId });
   return Number(pw);
+};
+
+// chain constant api
+const constBalanceExistentialDeposit = () => {
+  let v = this.api.consts.balances.existentialDeposit;
+  console.log("ExistentialDeposit:", v.toString());
+
+  return convertBN(v);
 };
 
 module.exports = {
@@ -24226,6 +24246,9 @@ module.exports = {
   rpcGetTotalPower: rpcGetTotalPower,
   rpcGetAccountPower: rpcGetAccountPower,
   rpcGetCommodityPower: rpcGetCommodityPower,
+
+  // const query
+  constBalanceExistentialDeposit: constBalanceExistentialDeposit,
 };
 
 },{"@polkadot/api":268,"@polkadot/keyring":287,"@polkadot/util":632,"@polkadot/util-crypto":533,"bn.js":712}],161:[function(require,module,exports){
@@ -108565,5 +108588,8 @@ window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
 window.queryTotalPower = () => Sub.rpcGetTotalPower();
 window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
 window.queryCommodityPower = (app_id, cart_id) => Sub.rpcGetCommodityPower(app_id, cart_id);
+
+// const api
+window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
 
 },{"../interface/comment":159,"../lib/sub":160}]},{},[1090]);
