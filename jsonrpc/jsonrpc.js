@@ -639,6 +639,47 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
   }
 });
 
+/**
+ * 空投新用户KPT
+ * {
+ *    sender_pub_key: 发送者公钥 String (同时也是资金持有账户)
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      user_id: 用户ID String
+ *      receiver_address: 用户账户地址 String
+ *      amount: 空投数量 String 例如 "1"
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose("membersAirDropNewUserBenefit", (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAirDropNewUserBenefit:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { app_id, user_id, amount, receiver_address } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: "sign veify fail" });
+      return;
+    }
+
+    sub
+      .membersAirDropNewUserBenefit(sender_pub_key, receiver_address, app_id, user_id, amount)
+      .then((result) => {
+        console.log("membersAirDropNewUserBenefit result:", result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAirDropNewUserBenefit error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // power related query
 /**
  * 查询全网算力
@@ -810,8 +851,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("dev(alice) balance:", info);
   });
 
-  sub.balancesAll("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg").then((info) => {
-    console.log("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg balance:", info.transferable.toString());
+  sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
+    console.log("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:", info.transferable.toString());
   });
 
   //sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", 1000000000000000);
