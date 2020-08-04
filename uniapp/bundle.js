@@ -23442,6 +23442,9 @@ const transfer = async (srcAddress, targetAddress, amount, password) => {
   let sep = amount.split(".");
   let int = sep[0];
   let dec = sep[1];
+  if (!dec) {
+    dec = "0";
+  }
 
   let decLen = Math.min(DEC_NUM, dec.length);
   let convert = new BN(int, 10)
@@ -23471,6 +23474,10 @@ const devTransfer = async (target, num) => {
   let sep = num.split(".");
   let int = sep[0];
   let dec = sep[1];
+
+  if (!dec) {
+    dec = "0";
+  }
 
   let decLen = Math.min(DEC_NUM, dec.length);
   let convert = new BN(int, 10)

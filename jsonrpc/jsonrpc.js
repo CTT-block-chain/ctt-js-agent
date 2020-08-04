@@ -829,7 +829,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   });
 
   console.log("start:", new Date());
-  sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", "32.7897456").then((result) => {
+  sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", "2.010").then((result) => {
     console.log(result);
     console.log("end:", new Date());
 
