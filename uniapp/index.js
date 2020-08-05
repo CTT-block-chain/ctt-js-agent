@@ -75,7 +75,7 @@ window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
 // query
 window.queryTotalPower = () => Sub.rpcGetTotalPower();
 window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
-window.queryCommodityPower = (app_id, cart_id) => Sub.rpcGetCommodityPower(app_id, cart_id);
+window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_id, cart_ids);
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();

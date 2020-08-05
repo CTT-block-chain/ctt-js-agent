@@ -736,18 +736,18 @@ server.expose("queryAccountPower", (args, opt, callback) => {
  * {
  *    sender_data: { 发送端数据
  *      app_id:  String
- *      cart_id: String
+ *      cart_ids: String array: ['001', '002']
  *    }
  * }
  */
 server.expose("queryCommodityPower", (args, opt, callback) => {
   const param = JSON.parse(args[0]);
   console.log(`queryCommodityPower:${args[0]}`);
-  const { app_id, cart_id } = param.sender_data;
+  const { app_id, cart_ids } = param.sender_data;
 
   try {
     sub
-      .rpcGetCommodityPower(app_id, cart_id)
+      .rpcGetCommodityPower(app_id, cart_ids)
       .then((result) => {
         console.log("queryCommodityPower result:", result);
         sendResult(callback, { result });
@@ -901,4 +901,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   let v = sub.constBalanceExistentialDeposit();
   console.log(v);*/
+
+  sub.rpcGetCommodityPower("a01", ["001", "002", "003"]).then((result) => {
+    console.log("result:", result);
+  });
 });

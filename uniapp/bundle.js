@@ -23258,7 +23258,7 @@ const initApi = async (wss, notify_cb) => {
 
   console.log(chainInfo);
 
-  //console.log("api:", this.api.rpc);
+  console.log("api:", this.api.rpc);
 
   this.isApiReady = true;
   // return chain info
@@ -23302,6 +23302,16 @@ const setupAccountByJson = (json) => {
     // address not setup, use json
     console.log(`${json.address} not ready, reload it`);
     this.keyring.addFromJson(json);
+  }
+};
+
+const isAccountActive = (address) => {
+  isKeyringReady();
+  try {
+    this.keyring.getPair(address);
+    return 1;
+  } catch (e) {
+    return 0;
   }
 };
 
@@ -24059,6 +24069,46 @@ const membersRemoveExpertByCreator = async (
   });
 };
 
+/**
+ *
+ * @param {*} sender_address
+ * @param {*} receiver_address
+ * @param {*} app_id
+ * @param {*} user_id
+ * @param {*} amount
+ */
+const membersAirDropNewUserBenefit = async (sender_address, receiver_address, app_id, user_id, amount) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: "members",
+    call: "airDropNewUserBenefit",
+    pubKey: sender_address,
+  };
+
+  // expect num is a float string rep, like "3.564"
+  let sep = amount.split(".");
+  let int = sep[0];
+  let dec = sep[1];
+
+  if (!dec) {
+    dec = "0";
+  }
+
+  let decLen = Math.min(DEC_NUM, dec.length);
+  let convert = new BN(int, 10)
+    .mul(new BN(Math.pow(10, DEC_NUM), 10))
+    .add(new BN(dec, 10).mul(new BN(Math.pow(10, DEC_NUM - decLen))));
+
+  console.log("num convert:", convert.toString());
+
+  const result = await sendTx(txInfo, [app_id, user_id, receiver_address, convert]);
+  console.log("air drop result:", result);
+
+  return result;
+};
+
 function remove0(dec) {
   for (let i = dec.length - 1; i >= 0; i--) {
     if (dec[i] === "0") {
@@ -24196,10 +24246,20 @@ const rpcGetAccountPower = async (accountId) => {
   return Number(pw);
 };
 
-const rpcGetCommodityPower = async (appId, cartId) => {
-  console.log(this.api.rpc);
-  let pw = await this.api.rpc.kP.commodityPower({ appId, cartId });
-  return Number(pw);
+const rpcGetCommodityPower = async (appId, cartIds) => {
+  let queue = [];
+  for (let i = 0; i < cartIds.length; i++) {
+    queue.push(this.api.rpc.kP.commodityPower({ appId, cartId: cartIds[i] }));
+  }
+  let pws = await Promise.all(queue);
+
+  pws = pws.map((item) => {
+    return item.toString();
+  });
+
+  console.log("pws:", pws);
+
+  return pws;
 };
 
 // chain constant api
@@ -24214,6 +24274,7 @@ module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
   newAccount: newAccount,
+  isAccountActive: isAccountActive,
   setupAccountByJson: setupAccountByJson,
   resetAccountWithMnemonic: resetAccountWithMnemonic,
   unlock: unlock,
@@ -24236,6 +24297,7 @@ module.exports = {
   membersOperatePlatformExpert: membersOperatePlatformExpert,
   membersAddExpertByCreator: membersAddExpertByCreator,
   membersRemoveExpertByCreator: membersRemoveExpertByCreator,
+  membersAirDropNewUserBenefit: membersAirDropNewUserBenefit,
 
   // wallet interfaces:
   // accounts:
@@ -108594,7 +108656,7 @@ window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
 // query
 window.queryTotalPower = () => Sub.rpcGetTotalPower();
 window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
-window.queryCommodityPower = (app_id, cart_id) => Sub.rpcGetCommodityPower(app_id, cart_id);
+window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_id, cart_ids);
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
