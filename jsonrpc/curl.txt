@@ -1,0 +1,21 @@
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"subNewAccount","params":["{\"name\": \"bob\", \"pwd\": \"123456\"}"]}' \
+     http://39.106.116.92:5080
+
+
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"subUnlock","params":["{\"address\": \"5C5YBafD2cG3zp9CpSqrNEB8LgCfDat1592SeSqkiZGC2DgC\", \"pwd\": \"123456\"}"]}' \
+     http://39.106.116.92:5080
+
+
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"subIsAccountActive","params":["{\"address\": \"5C5YBafD2cG3zp9CpSqrNEB8LgCfDat1592SeSqkiZGC2DgC\"}"]}' \
+     http://39.106.116.92:5080
+
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"subLock","params":["{\"address\": \"5C5YBafD2cG3zp9CpSqrNEB8LgCfDat1592SeSqkiZGC2DgC\"}"]}' \
+     http://39.106.116.92:5080

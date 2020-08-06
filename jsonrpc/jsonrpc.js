@@ -25,6 +25,7 @@ const server = rpc.Server.$create({
  */
 server.expose("subNewAccount", (args, opt, callback) => {
   try {
+    console.log("args:", args[0]);
     const param = JSON.parse(args[0]);
     const result = sub.newAccount(param.name, param.pwd);
     sendResult(callback, { result });
@@ -851,11 +852,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("dev(alice) balance:", info);
   });
 
-  sub.balancesAll("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then((info) => {
-    console.log("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:", info.transferable.toString());
-  });
+  /*sub.balancesAll("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG").then((info) => {
+    console.log("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG balance:", info);
+  });*/
 
-  //sub.devTransfer("5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk", 1000000000000000);
+  //sub.devTransfer("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG", "10000");
 
   //sub.devTransfer("5EUQBQByNtomUNJCCCN9zTuXNLC9JL5PpceT9K1AtDWceYxg", 1000000000000000);
   //sub.devTransfer("5FyCrqVh4NYzNdRXehbS7jFBT95TkQ1DQud9rbeDhL7SUSXd", 1000000000000000);
@@ -902,7 +903,12 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let v = sub.constBalanceExistentialDeposit();
   console.log(v);*/
 
-  sub.rpcGetCommodityPower("a01", ["001", "002", "003"]).then((result) => {
+  /*sub.rpcGetCommodityPower("a01", ["001", "002", "003"]).then((result) => {
     console.log("result:", result);
   });
+
+  let r = sub.isAccountActive("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG");
+  console.log("r:", r);*/
+
+  // sub.unlock("5CS6KGBqoNBkUMCzFSLa78Uo7TFN98xdWokaQkh8h9j1uJTf", "123456");
 });
