@@ -23169,8 +23169,8 @@ const chainDataTypes = {
   // mapping the lookup
   // LookupSource: "AccountId",
 
+  PowerSize: "u128",
   AccountID32: "AccountId",
-
   AuthAccountId: "AccountId",
 
   KPProductPublishData: {
