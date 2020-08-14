@@ -1,20 +1,20 @@
-const rpc = require("json-rpc2");
-const fs = require("fs");
-const sub = require("../lib/sub");
-const util = require("../lib/util");
-const config = require("../config/config");
+const rpc = require('json-rpc2');
+const fs = require('fs');
+const sub = require('../lib/sub');
+const util = require('../lib/util');
+const config = require('../config/config');
 
-const document = require("../interface/document");
-const comment = require("../interface/comment");
-const model = require("../interface/model");
+const document = require('../interface/document');
+const comment = require('../interface/comment');
+const model = require('../interface/model');
 
-const server_white_list = require("./keys/wl.json");
+const server_white_list = require('./keys/wl.json');
 
 const server = rpc.Server.$create({
   websocket: false, // is true by default
   headers: {
     // allow custom headers is empty by default
-    "Access-Control-Allow-Origin": "*",
+    'Access-Control-Allow-Origin': '*',
   },
 });
 
@@ -23,9 +23,9 @@ const server = rpc.Server.$create({
  * param :  {"name": "bob", "pwd": "123456"}
  * return: {"result": {"json": json struct, "mnemonic": mnemonic}} or error
  */
-server.expose("subNewAccount", (args, opt, callback) => {
+server.expose('subNewAccount', (args, opt, callback) => {
   try {
-    console.log("args:", args[0]);
+    console.log('args:', args[0]);
     const param = JSON.parse(args[0]);
     const result = sub.newAccount(param.name, param.pwd);
     sendResult(callback, { result });
@@ -40,7 +40,7 @@ server.expose("subNewAccount", (args, opt, callback) => {
  * param :  {"address": "xxxx"}
  * return: {"result": 1 or 0} or error
  */
-server.expose("subIsAccountActive", (args, opt, callback) => {
+server.expose('subIsAccountActive', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     const result = sub.isAccountActive(param.address);
@@ -56,11 +56,11 @@ server.expose("subIsAccountActive", (args, opt, callback) => {
  * param : account JSON
  * return: {"reuslt": "ok"} or error
  */
-server.expose("subSetupAccountByJson", (args, opt, callback) => {
+server.expose('subSetupAccountByJson', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     sub.setupAccountByJson(param);
-    sendResult(callback, { result: "ok" });
+    sendResult(callback, { result: 'ok' });
   } catch (e) {
     console.error(`subSetupAccountByJson error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -72,11 +72,11 @@ server.expose("subSetupAccountByJson", (args, opt, callback) => {
  * param : {"address" : "xxx", "pwd": "xxx"}
  * return: {"result": "ok"} or error
  */
-server.expose("subUnlock", (args, opt, callback) => {
+server.expose('subUnlock', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     sub.unlock(param.address, param.pwd);
-    sendResult(callback, { result: "ok" });
+    sendResult(callback, { result: 'ok' });
   } catch (e) {
     console.error(`subUnlock error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -88,11 +88,11 @@ server.expose("subUnlock", (args, opt, callback) => {
  * param : {"address" : "xxx"}
  * return: {"result": "ok"} or error
  */
-server.expose("subLock", (args, opt, callback) => {
+server.expose('subLock', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     sub.lock(param.address);
-    sendResult(callback, { result: "ok" });
+    sendResult(callback, { result: 'ok' });
   } catch (e) {
     console.error(`subLock error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -104,7 +104,7 @@ server.expose("subLock", (args, opt, callback) => {
  * param : {"address" : "xxx", "msg": "xxx"}
  * return: {"result": "xxx"} or error
  */
-server.expose("subSign", (args, opt, callback) => {
+server.expose('subSign', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     const result = sub.sign(param.address, param.msg);
@@ -120,7 +120,7 @@ server.expose("subSign", (args, opt, callback) => {
  * param : {"address" : "xxx", "msg": "xxx", "sign": "xxx"}
  * return: {"result": "1" or "0"} or error
  */
-server.expose("subVerify", (args, opt, callback) => {
+server.expose('subVerify', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     const result = sub.verify(param.address, param.msg, param.sign);
@@ -136,9 +136,9 @@ server.expose("subVerify", (args, opt, callback) => {
  * param : {"data": "xxxxx"}
  * return: hash hex string
  */
-server.expose("subHash", (args, opt, callback) => {
+server.expose('subHash', (args, opt, callback) => {
   try {
-    let result = "";
+    let result = '';
     const param = JSON.parse(args[0]);
     if (!param.data) {
       console.log(`hash invalid params: ${param}`);
@@ -175,7 +175,7 @@ server.expose("subHash", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subProductPublish", (args, opt, callback) => {
+server.expose('subProductPublish', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
@@ -213,7 +213,7 @@ server.expose("subProductPublish", (args, opt, callback) => {
     sub
       .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log("createDocument result:", result);
+        console.log('createDocument result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -247,7 +247,7 @@ server.expose("subProductPublish", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subProductIdentify", (args, opt, callback) => {
+server.expose('subProductIdentify', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
@@ -284,7 +284,7 @@ server.expose("subProductIdentify", (args, opt, callback) => {
     sub
       .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log("createDocument result:", result);
+        console.log('createDocument result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -318,7 +318,7 @@ server.expose("subProductIdentify", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subProductTry", (args, opt, callback) => {
+server.expose('subProductTry', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
@@ -357,7 +357,7 @@ server.expose("subProductTry", (args, opt, callback) => {
     sub
       .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log("createDocument result:", result);
+        console.log('createDocument result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -389,7 +389,7 @@ server.expose("subProductTry", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subModelOperate", (args, opt, callback) => {
+server.expose('subModelOperate', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subModelOperate:${args[0]}`);
@@ -408,7 +408,7 @@ server.expose("subModelOperate", (args, opt, callback) => {
     let api;
     let mod = model.create(app_id, model_id, expert_id, commodity_name, commodity_type, content_hash);
 
-    if (interface_status === "1") {
+    if (interface_status === '1') {
       api = sub.createModel;
     } else {
       api = sub.disableModel;
@@ -416,7 +416,7 @@ server.expose("subModelOperate", (args, opt, callback) => {
 
     api(mod, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log("modelOperate result:", result);
+        console.log('modelOperate result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -444,7 +444,7 @@ server.expose("subModelOperate", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subSaleStat", (args, opt, callback) => {
+server.expose('subSaleStat', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subSaleStat:${args[0]}`);
@@ -452,12 +452,12 @@ server.expose("subSaleStat", (args, opt, callback) => {
 
     const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
     if (!verify.isValid) {
-      sendResult(callback, { error: "sign veify fail" });
+      sendResult(callback, { error: 'sign veify fail' });
       return;
     }
 
     // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    sendResult(callback, { result: 'pending' });
   } catch (e) {
     console.error(`subSaleStat error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -488,7 +488,7 @@ server.expose("subSaleStat", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("subKpParamsChangeVote", (args, opt, callback) => {
+server.expose('subKpParamsChangeVote', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subKpParamsChangeVote:${args[0]}`);
@@ -496,12 +496,12 @@ server.expose("subKpParamsChangeVote", (args, opt, callback) => {
 
     const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
     if (!verify.isValid) {
-      sendResult(callback, { error: "sign veify fail" });
+      sendResult(callback, { error: 'sign veify fail' });
       return;
     }
 
     // TODO: invoke chain interface
-    sendResult(callback, { result: "pending" });
+    sendResult(callback, { result: 'pending' });
   } catch (e) {
     console.error(`subKpParamsChangeVote error: ${e}`);
     sendResult(callback, { error: e.message });
@@ -559,7 +559,7 @@ server.expose("subKpParamsChangeVote", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("membersOperatePlatformExpert", (args, opt, callback) => {
+server.expose('membersOperatePlatformExpert', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersOperatePlatformExpert:${args[0]}`);
@@ -568,14 +568,14 @@ server.expose("membersOperatePlatformExpert", (args, opt, callback) => {
 
     const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
     if (!verify.isValid) {
-      sendResult(callback, { error: "sign veify fail" });
+      sendResult(callback, { error: 'sign veify fail' });
       return;
     }
 
     sub
       .membersOperatePlatformExpert(app_id, op_type, new_member_pub_key, sender_pub_key)
       .then((result) => {
-        console.log("membersOperatePlatformExpert result:", result);
+        console.log('membersOperatePlatformExpert result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -603,7 +603,7 @@ server.expose("membersOperatePlatformExpert", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
+server.expose('membersRemoveExpertByCreator', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersRemoveExpertByCreator:${args[0]}`);
@@ -628,7 +628,7 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
         sender_sign
       )
       .then((result) => {
-        console.log("membersRemoveExpertByCreator result:", result);
+        console.log('membersRemoveExpertByCreator result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -653,7 +653,7 @@ server.expose("membersRemoveExpertByCreator", (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose("membersAirDropNewUserBenefit", (args, opt, callback) => {
+server.expose('membersAirDropNewUserBenefit', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersAirDropNewUserBenefit:${args[0]}`);
@@ -662,14 +662,14 @@ server.expose("membersAirDropNewUserBenefit", (args, opt, callback) => {
 
     const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
     if (!verify.isValid) {
-      sendResult(callback, { error: "sign veify fail" });
+      sendResult(callback, { error: 'sign veify fail' });
       return;
     }
 
     sub
       .membersAirDropNewUserBenefit(sender_pub_key, receiver_address, app_id, user_id, amount)
       .then((result) => {
-        console.log("membersAirDropNewUserBenefit result:", result);
+        console.log('membersAirDropNewUserBenefit result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -686,12 +686,12 @@ server.expose("membersAirDropNewUserBenefit", (args, opt, callback) => {
  * 查询全网算力
  * 无参数
  */
-server.expose("queryTotalPower", (args, opt, callback) => {
+server.expose('queryTotalPower', (args, opt, callback) => {
   try {
     sub
       .rpcGetTotalPower()
       .then((result) => {
-        console.log("queryTotalPower result:", result);
+        console.log('queryTotalPower result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -711,7 +711,7 @@ server.expose("queryTotalPower", (args, opt, callback) => {
  *    }
  * }
  */
-server.expose("queryAccountPower", (args, opt, callback) => {
+server.expose('queryAccountPower', (args, opt, callback) => {
   const param = JSON.parse(args[0]);
   console.log(`queryAccountPower:${args[0]}`);
   const { address } = param.sender_data;
@@ -720,7 +720,7 @@ server.expose("queryAccountPower", (args, opt, callback) => {
     sub
       .rpcGetAccountPower(address)
       .then((result) => {
-        console.log("queryTotalPower result:", result);
+        console.log('queryTotalPower result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -741,7 +741,7 @@ server.expose("queryAccountPower", (args, opt, callback) => {
  *    }
  * }
  */
-server.expose("queryCommodityPower", (args, opt, callback) => {
+server.expose('queryCommodityPower', (args, opt, callback) => {
   const param = JSON.parse(args[0]);
   console.log(`queryCommodityPower:${args[0]}`);
   const { app_id, cart_ids } = param.sender_data;
@@ -750,7 +750,7 @@ server.expose("queryCommodityPower", (args, opt, callback) => {
     sub
       .rpcGetCommodityPower(app_id, cart_ids)
       .then((result) => {
-        console.log("queryCommodityPower result:", result);
+        console.log('queryCommodityPower result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
@@ -768,13 +768,13 @@ const verifyServerSign = (param) => {
   const { sender_pub_key, sender_data, sender_sign, app_data, app_pub_key, app_sign } = param;
   const result = {
     isOk: false,
-    msg: "unknown",
+    msg: 'unknown',
   };
 
   // validate sender
   if (!verifyPubKey(sender_pub_key)) {
     //sendResult(callback, { error: "not valid address" });
-    result.msg = "not valid address";
+    result.msg = 'not valid address';
     return result;
   }
 
@@ -786,7 +786,7 @@ const verifyServerSign = (param) => {
   );
   if (!senderVerify.isValid) {
     // sendResult(callback, { error: "sender sign verify fail" });
-    result.msg = "sender sign verify fail";
+    result.msg = 'sender sign verify fail';
     return result;
   }
 
@@ -794,7 +794,7 @@ const verifyServerSign = (param) => {
   const appVerify = sub.verify(app_pub_key, util.getObjectFieldValueStr(app_data), app_sign);
   if (!appVerify.isValid) {
     // sendResult(callback, { error: "app sign verify fail" });
-    result.msg = "app sign verify fail";
+    result.msg = 'app sign verify fail';
     return result;
   }
 
@@ -824,24 +824,24 @@ const loadKeys = () => {
 };
 
 // TODO: init api connection
-console.log("init keyring...");
+console.log('init keyring...');
 sub.initKeyring().then(() => {
-  console.log("init keyring done!");
+  console.log('init keyring done!');
   loadKeys();
-  const port = config.get("port");
+  const port = config.get('port');
   server.listen(port);
   console.log(`server start on ${port}`);
 });
 
-const apiAddr = config.get("sub_endpoint");
-console.log("trying to connect to:", apiAddr);
+const apiAddr = config.get('sub_endpoint');
+console.log('trying to connect to:', apiAddr);
 
 function sub_notify_cb(method, data) {
-  console.log("SUB notify:", method, data);
+  console.log('SUB notify:', method, data);
 }
 
 sub.initApi(apiAddr, sub_notify_cb).then(() => {
-  console.log("init api done!");
+  console.log('init api done!');
 
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
@@ -849,7 +849,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   // check dev balances
   sub.balancesAll(sub.getDevAdmin().address).then((info) => {
-    console.log("dev(alice) balance:", info);
+    console.log('dev(alice) balance:', info);
   });
 
   /*sub.balancesAll("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG").then((info) => {
@@ -903,12 +903,16 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let v = sub.constBalanceExistentialDeposit();
   console.log(v);*/
 
-  /*sub.rpcGetCommodityPower("a01", ["001", "002", "003"]).then((result) => {
-    console.log("result:", result);
+  sub.rpcGetCommodityPower('a01', ['001', '002', '003']).then((result) => {
+    console.log('result:', result);
   });
 
-  let r = sub.isAccountActive("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG");
-  console.log("r:", r);*/
+  let r = sub.isAccountActive('5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG');
+  console.log('r:', r);
+
+  sub.rpcCheckAccountIsModelCreator('5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG', 'a01', 'm01').then((result) => {
+    console.log('rpcCheckAccountIsModelCreator:', result);
+  });
 
   // sub.unlock("5CS6KGBqoNBkUMCzFSLa78Uo7TFN98xdWokaQkh8h9j1uJTf", "123456");
 });
