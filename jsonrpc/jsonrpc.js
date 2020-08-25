@@ -406,7 +406,7 @@ server.expose('subModelOperate', (args, opt, callback) => {
     }
 
     let api;
-    let mod = model.create(app_id, model_id, expert_id, commodity_name, commodity_type, content_hash);
+    let mod = model.create(app_id, model_id, expert_id, commodity_name, Number(commodity_type), content_hash);
 
     if (interface_status === '1') {
       api = sub.createModel;
@@ -424,6 +424,44 @@ server.expose('subModelOperate', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`subModelOperate error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/** Add new commodity type
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      type_id: Number String, "10001"
+ *      type_desc: String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('subAddCommodityType', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersSetAppAdmin:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { type_id, type_desc } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: 'sign veify fail' });
+      return;
+    }
+
+    sub
+      .addCommodityType(Number(type_id), type_desc)
+      .then((result) => {
+        console.log('addCommodityType result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`addCommodityType error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -915,4 +953,20 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   });
 
   // sub.unlock("5CS6KGBqoNBkUMCzFSLa78Uo7TFN98xdWokaQkh8h9j1uJTf", "123456");
+
+  /*sub
+    .membersAirDropNewUserBenefit(
+      sub.getDevAdmin().address,
+      '5CqabEJF7UxEb5iDGSQmao4a26vJ2urPKdXghu64QgcbPDLM',
+      'a01',
+      'u01',
+      '1'
+    )
+    .then((result) => {
+      console.log('air drop result:', result);
+    });*/
+
+  sub.balancesAll('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg').then((info) => {
+    console.log('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg balance:', info.transferable.toString());
+  });
 });
