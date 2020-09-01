@@ -719,6 +719,82 @@ server.expose('membersAirDropNewUserBenefit', (args, opt, callback) => {
   }
 });
 
+/**
+ * SUDO 增加投资角色账户
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      investor: 投资账户地址 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('membersAddInvestor', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAddInvestor:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { investor } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: 'sign veify fail' });
+      return;
+    }
+
+    sub
+      .membersAddInvestor(investor)
+      .then((result) => {
+        console.log('membersAddInvestor result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAddInvestor error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * SUDO 增加开发角色账户
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      developer: 开发账户地址 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('membersAddDeveloper', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAddDeveloper:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { developer } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: 'sign veify fail' });
+      return;
+    }
+
+    sub
+      .membersAddDeveloper(developer)
+      .then((result) => {
+        console.log('membersAddDeveloper result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAddDeveloper error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // power related query
 /**
  * 查询全网算力
