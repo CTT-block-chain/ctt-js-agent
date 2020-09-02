@@ -720,10 +720,11 @@ server.expose('membersAirDropNewUserBenefit', (args, opt, callback) => {
 });
 
 /**
- * SUDO 增加投资角色账户
+ * 增加投资角色账户
  * {
- *    sender_pub_key: 发送者公钥 String
+ *    sender_pub_key: 发送者公钥 String, app admin 公钥
  *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
  *      investor: 投资账户地址 String
  *    }
  *    sender_sign: 发送者签名 String
@@ -734,7 +735,7 @@ server.expose('membersAddInvestor', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`membersAddInvestor:${args[0]}`);
     const { sender_pub_key, sender_data, sender_sign } = param;
-    const { investor } = param.sender_data;
+    const { app_id, investor } = param.sender_data;
 
     const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
     if (!verify.isValid) {
@@ -743,7 +744,7 @@ server.expose('membersAddInvestor', (args, opt, callback) => {
     }
 
     sub
-      .membersAddInvestor(investor)
+      .membersAddInvestor(sender_pub_key, app_id, investor)
       .then((result) => {
         console.log('membersAddInvestor result:', result);
         sendResult(callback, { result });
