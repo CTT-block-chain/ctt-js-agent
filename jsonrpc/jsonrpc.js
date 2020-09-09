@@ -36,6 +36,23 @@ server.expose('subNewAccount', (args, opt, callback) => {
 });
 
 /**
+ * reset account by mnemonic
+ * param :  {"name": "bob", "pwd": "123456", "mnemonic": mnemonic}
+ * return: {"result": {"json": json struct, "mnemonic": mnemonic}} or error
+ */
+server.expose('subResetAccountWithMnemonic', (args, opt, callback) => {
+  try {
+    console.log('args:', args[0]);
+    const param = JSON.parse(args[0]);
+    const result = sub.resetAccountWithMnemonic(param.name, param.mnemonic, param.pwd);
+    sendResult(callback, { result });
+  } catch (e) {
+    console.error(`subResetAccountWithMnemonic error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * judge account active
  * param :  {"address": "xxxx"}
  * return: {"result": 1 or 0} or error
