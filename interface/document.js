@@ -1,4 +1,4 @@
-const { stringToU8a, u8aConcat } = require("@polkadot/util");
+const { stringToU8a, u8aConcat } = require('@polkadot/util');
 
 module.exports = {
   create: (
@@ -17,7 +17,12 @@ module.exports = {
     ident_consistence,
     cart_id,
     offset_rate,
-    true_rate
+    true_rate,
+
+    sell_count,
+    try_count,
+    producer_count,
+    product_count
   ) => {
     this.app_id = app_id; // String
     this.document_id = document_id; // String
@@ -34,6 +39,11 @@ module.exports = {
     this.cart_id = cart_id;
     this.offset_rate = offset_rate;
     this.true_rate = true_rate;
+
+    this.sell_count = sell_count;
+    this.try_count = try_count;
+    this.producer_count = producer_count;
+    this.product_count = product_count;
 
     return this;
   },

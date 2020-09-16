@@ -387,6 +387,154 @@ server.expose('subProductTry', (args, opt, callback) => {
 });
 
 /**
+ * product choose
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      sell_count: 销售数量 Number String
+ *      try_count: 体验数量 Number String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('subProductChooseDoc', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subProductIdentify:${args[0]}`);
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
+    const { document_id, model_id, product_id, content_hash } = param.app_data;
+    let { app_id, sell_count, try_count } = param.sender_data;
+
+    const verifyResult = verifyServerSign(param);
+
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
+      return;
+    }
+
+    sell_count = Number(sell_count);
+    try_count = Number(try_count);
+
+    let doc = document.create(
+      app_id,
+      document_id,
+      3,
+      model_id,
+      product_id,
+      content_hash,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      sell_count,
+      try_count,
+      0,
+      0
+    );
+    sub
+      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log('createDocument result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`subProductChoose error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * model create document
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *      producer_count: 生产数量 Number String
+ *      product_count: 产品数量 Number String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      document_id: 文章ID  String
+ *      model_id: 商品模型ID String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('subModelCreateDoc', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subModelCreateDoc:${args[0]}`);
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
+    const { document_id, model_id, product_id, content_hash } = param.app_data;
+    let { app_id, producer_count, product_count } = param.sender_data;
+
+    const verifyResult = verifyServerSign(param);
+
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
+      return;
+    }
+
+    sell_count = Number(sell_count);
+    try_count = Number(try_count);
+
+    let doc = document.create(
+      app_id,
+      document_id,
+      3,
+      model_id,
+      product_id,
+      content_hash,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      producer_count,
+      product_count
+    );
+    sub
+      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log('createDocument result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`subModelCreateDoc error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  *  product model operation
  * {
  *    sender_pub_key: 发送者公钥 String
