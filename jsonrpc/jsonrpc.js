@@ -1183,7 +1183,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let v = sub.constBalanceExistentialDeposit();
   console.log(v);*/
 
-  sub.rpcGetCommodityPower('a01', ['001', '002', '003']).then((result) => {
+  /*sub.rpcGetCommodityPower('a01', ['001', '002', '003']).then((result) => {
     console.log('result:', result);
   });
 
@@ -1192,7 +1192,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.rpcCheckAccountIsModelCreator('5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG', 'a01', 'm01').then((result) => {
     console.log('rpcCheckAccountIsModelCreator:', result);
-  });
+  });*/
 
   // sub.unlock("5CS6KGBqoNBkUMCzFSLa78Uo7TFN98xdWokaQkh8h9j1uJTf", "123456");
 
@@ -1208,7 +1208,14 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
       console.log('air drop result:', result);
     });*/
 
-  sub.balancesAll('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg').then((info) => {
+  /*sub.balancesAll('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg').then((info) => {
     console.log('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg balance:', info.transferable.toString());
-  });
+  });*/
+  /*sub.democracyPowerComplain(
+    {},
+    '5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG',
+    '',
+    '5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG',
+    ''
+  );*/
 });
