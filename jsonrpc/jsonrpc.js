@@ -496,8 +496,8 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
       return;
     }
 
-    sell_count = Number(sell_count);
-    try_count = Number(try_count);
+    producer_count = Number(producer_count);
+    product_count = Number(product_count);
 
     let doc = document.create(
       app_id,
