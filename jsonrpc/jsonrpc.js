@@ -1186,9 +1186,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('dev(alice) balance:', info);
   });
 
-  /*sub.balancesAll("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG").then((info) => {
-    console.log("5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG balance:", info);
-  });*/
+  sub.balancesAll('5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk').then((info) => {
+    console.log('5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:', info);
+  });
 
   //sub.devTransfer("5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg", "10000");
 
