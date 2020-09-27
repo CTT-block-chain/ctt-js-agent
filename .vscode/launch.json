@@ -11,14 +11,6 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/jsonrpc/jsonrpc.js",
       "args": ["--sub_endpoint=ws://localhost:9944"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "tools",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/tools/commodity_type_manager/index.js",
-      "args": ["--sub_endpoint=ws://localhost:9944"]
     }
   ]
 }

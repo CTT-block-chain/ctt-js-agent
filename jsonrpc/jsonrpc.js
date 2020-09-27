@@ -1162,6 +1162,13 @@ console.log('init keyring...');
 sub.initKeyring().then(() => {
   console.log('init keyring done!');
   loadKeys();
+
+  const testJson = JSON.parse(
+    `{"address":"5Gy5A6fsD4JXLVEqYp3EWqzTauLD9u5NVaSLDDDnS8rPoRDr","encoded":"0x9aa1a546e866be05bb6b47817a2f98a6ae8f83a56d4858526be5169fd014d57e78ab3a4cdc959958d1685d8b9ec5ef58edfe330b52ccbef34d3dc6070a3a0b0ce8e2170bf7394aa6fd1cf159c318fdb0e5e882a2910b17b72e79bbfd9ff6a823f608a796b02ef7a05da4d833af69645315b779232a31127767eb66d4742ace24cd073625a5cd9a4a945292bb8d90691ee44803e1e5976b37bbb9a5ed27","encoding":{"content":["pkcs8","sr25519"],"type":"xsalsa20-poly1305","version":"2"},"meta":{"name":"abc"}}`
+  );
+  sub.setupAccountByJson(testJson);
+  sub.unlock(testJson.address, '123456');
+
   const port = config.get('port');
   server.listen(port);
   console.log(`server start on ${port}`);
@@ -1186,8 +1193,12 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('dev(alice) balance:', info);
   });
 
-  sub.balancesAll('5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk').then((info) => {
-    console.log('5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk balance:', info);
+  sub.balancesAll('5EYCAe5ijiYfyeZ2JJCGq56LmPyNRAKzpG4QkoQkkQNB5e6Z').then((info) => {
+    console.log('5EYCAe5ijiYfyeZ2JJCGq56LmPyNRAKzpG4QkoQkkQNB5e6Z balance:', info);
+  });
+
+  sub.balancesAll('5FenQHhRgGfqYgJtTYLWz8u31tmznv2XV8qiXNpNBKScZT1t').then((info) => {
+    console.log('5FenQHhRgGfqYgJtTYLWz8u31tmznv2XV8qiXNpNBKScZT1t balance:', info);
   });
 
   //sub.devTransfer("5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg", "10000");
@@ -1272,4 +1283,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     '5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG',
     ''
   );*/
+
+  // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu
+  /*sub.rpcCheckAccountIsPlatformExpert('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', '12345678').then((result) => {
+    console.log('check result:', result);
+  });
+
+  sub.queryKpDocuments().then((result) => {
+    console.log(result);
+  });*/
 });
