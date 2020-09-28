@@ -23159,6 +23159,9 @@ const initKeyring = async () => {
   // just for dev
   this.alice = this.keyring.addFromUri('//Alice', { name: 'Alice default' });
 
+  const json = this.alice.toJson();
+  console.log('alice:', JSON.stringify(json));
+
   //console.log("alice address:", hexToU8a(this.alice.address));
 
   this.isKeyringReady = true;
@@ -23203,6 +23206,103 @@ const chainDataTypes = {
   KPModelCreateData: {
     producerCount: 'PowerSize',
     productCount: 'PowerSize',
+  },
+
+  ModelStatus: {
+    _enum: ['ENABLED', 'DISABLED'],
+  },
+
+  DocumentType: {
+    _enum: ['ProductPublish', 'ProductIdentify', 'ProductTry', 'ProductChoose', 'ModelCreate', 'Unknown'],
+  },
+
+  CommentTrend: {
+    _enum: ['Positive', 'Negative', 'Empty'],
+  },
+
+  KPProductPublishData: {
+    paraIssueRate: 'PowerSize',
+    selfIssueRate: 'PowerSize',
+  },
+
+  KPProductIdentifyData: {
+    goodsPrice: 'PowerSize',
+    identRate: 'PowerSize',
+    identConsistence: 'PowerSize',
+    cartId: 'Vec<u8>',
+  },
+
+  KPProductTryData: {
+    goodsPrice: 'PowerSize',
+    offsetRate: 'PowerSize',
+    trueRate: 'PowerSize',
+    cartId: 'Vec<u8>',
+  },
+
+  KPProductChooseData: {
+    sellCount: 'PowerSize',
+    tryCount: 'PowerSize',
+  },
+
+  KPModelCreateData: {
+    producerCount: 'PowerSize',
+    productCount: 'PowerSize',
+  },
+
+  DocumentSpecificData: {
+    _enum: {
+      ProductPublish: 'KPProductPublishData',
+      ProductIdentify: 'KPProductIdentifyData',
+      ProductTry: 'KPProductTryData',
+      ProductChoose: 'KPProductChooseData',
+      ModelCreate: 'KPModelCreateData',
+    },
+  },
+
+  KPDocumentDataOf: {
+    appId: 'Vec<u8>',
+    documentId: 'Vec<u8>',
+    modelId: 'Vec<u8>',
+    productId: 'Vec<u8>',
+    contentHash: 'Hash',
+    sender: 'AccountId',
+    owner: 'AuthAccountId',
+    documentType: 'DocumentType',
+    documentData: 'DocumentSpecificData',
+    commentCount: 'PowerSize',
+    commentTotalFee: 'PowerSize',
+    commentPositiveCount: 'PowerSize',
+    expertTrend: 'CommentTrend',
+    platformTrend: 'CommentTrend',
+  },
+
+  KPModelDataOf: {
+    appId: 'Vec<u8>',
+    modelId: 'Vec<u8>',
+    expertId: 'Vec<u8>',
+    status: 'ModelStatus',
+    commodityName: 'Vec<u8>',
+    commodityType: 'u32',
+    contentHash: 'Hash',
+    sender: 'AccountId',
+    owner: 'AuthAccountId',
+  },
+
+  KPCommentDataOf: {
+    appId: 'Vec<u8>',
+    documentId: 'Vec<u8>',
+    commentId: 'Vec<u8>',
+    commentHash: 'Hash',
+    commentFee: 'PowerSize',
+    commentTrend: 'u8',
+    sender: 'AccountId',
+    owner: 'AuthAccountId',
+  },
+
+  DocumentPower: {
+    attend: 'PowerSize',
+    content: 'PowerSize',
+    judge: 'PowerSize',
   },
 
   QueryCommodityPowerParams: {
@@ -23410,7 +23510,8 @@ const unlock = (address, password) => {
   isKeyringReady();
   const pair = this.keyring.getPair(address);
   password = password ? password : '';
-  pair.decodePkcs8(password);
+  let decode = pair.decodePkcs8(password);
+  console.log('decode:', decode);
   console.log(pair.isLocked);
 };
 
@@ -23456,11 +23557,12 @@ const _extractEvents = (result) => {
         if (dispatchError.isModule) {
           try {
             const mod = dispatchError.asModule;
-            const error = api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
+            const error = this.api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
 
             message = `${error.section}.${error.name}`;
           } catch (error) {
             // swallow error
+            console.error('_extractEvents error:', error);
           }
         }
         if (this.notify_cb) {
@@ -23605,321 +23707,164 @@ const createDocument = async (document, owner_pub_key, owner_sign, sender_pub_ke
   isKeyringReady();
   isApiReady();
 
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sender_pub_key);
-    // here we don't need to unlock, invoker should make sure the key has been unlocked
-    // keyPair.decodePkcs8(password);
+  const { app_id, document_id, document_type, product_id, model_id, content_hash } = document;
+  let specificData = {};
+  let createApi;
 
-    this.api.tx.system.remark(new Array());
+  let txInfo = {
+    module: 'kp',
+    pubKey: sender_pub_key,
+  };
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+  switch (document_type) {
+    case 0:
+      {
+        // product publish
+        const { para_issue_rate: paraIssueRate, self_issue_rate: selfIssueRate } = document;
+        specificData = { paraIssueRate, selfIssueRate };
+        txInfo.call = 'createProductPublishDocument';
+      }
+      break;
+    case 1:
+      // product identify
+      {
+        const {
+          goods_price: goodsPrice,
+          ident_rate: identRate,
+          ident_consistence: identConsistence,
+          cart_id: cartId,
+        } = document;
+        specificData = { goodsPrice, identRate, identConsistence, cartId };
+        txInfo.call = 'createProductIdentifyDocument';
+      }
+      break;
+    case 2:
+      // product try
+      {
+        const { goods_price: goodsPrice, offset_rate: offsetRate, true_rate: trueRate, cart_id: cartId } = document;
+        specificData = { goodsPrice, offsetRate, trueRate, cartId };
+        txInfo.call = 'createProductTryDocument';
+      }
+      break;
+    case 3:
+      // product choose
+      {
+        const { sell_count: sellCount, try_count: tryCount } = document;
+        specificData = { sellCount, tryCount };
+        txInfo.call = 'createProductChooseDocument';
+      }
+      break;
+    case 4:
+      // model create
+      {
+        const { producer_count: producerCount, product_count: productCount } = document;
+        specificData = { producerCount, productCount };
+        txInfo.call = 'createModelCreateDocument';
+      }
+      break;
+    default:
+      console.error('document type error:', document.document_type);
+      return;
+  }
 
-    const { app_id, document_id, document_type, product_id, model_id, content_hash } = document;
-    let specificData = {};
-    let createApi;
+  console.log('specific data:', specificData);
+  console.log(`app id:${app_id} document id ${document_id}`);
 
-    switch (document_type) {
-      case 0:
-        {
-          // product publish
-          const { para_issue_rate: paraIssueRate, self_issue_rate: selfIssueRate } = document;
-          specificData = { paraIssueRate, selfIssueRate };
-          createApi = this.api.tx.kp.createProductPublishDocument;
-        }
-        break;
-      case 1:
-        // product identify
-        {
-          const {
-            goods_price: goodsPrice,
-            ident_rate: identRate,
-            ident_consistence: identConsistence,
-            cart_id: cartId,
-          } = document;
-          specificData = { goodsPrice, identRate, identConsistence, cartId };
-          createApi = this.api.tx.kp.createProductIdentifyDocument;
-        }
-        break;
-      case 2:
-        // product try
-        {
-          const { goods_price: goodsPrice, offset_rate: offsetRate, true_rate: trueRate, cart_id: cartId } = document;
-          specificData = { goodsPrice, offsetRate, trueRate, cartId };
-          createApi = this.api.tx.kp.createProductTryDocument;
-        }
-        break;
-      case 3:
-        // product choose
-        {
-          const { sell_count: sellCount, try_count: tryCount } = document;
-          specificData = { sellCount, tryCount };
-          createApi = this.api.tx.kp.createProductChooseDocument;
-        }
-        break;
-      case 4:
-        // model create
-        {
-          const { producer_count: producerCount, product_count: productCount } = document;
-          specificData = { producerCount, productCount };
-          createApi = this.api.tx.kp.createModelCreateDocument;
-        }
-        break;
-      default:
-        console.error('document type error:', document.document_type);
-        return;
-    }
+  // create, sign and send transaction
+  params = [
+    app_id,
+    document_id,
+    model_id,
+    product_id,
+    content_hash,
 
-    console.log('specific data:', specificData);
-    console.log(`app id:${app_id} document id ${document_id}`);
+    specificData,
 
-    // create, sign and send transaction
-    createApi(
-      app_id,
-      document_id,
-      model_id,
-      product_id,
-      content_hash,
+    owner_pub_key,
+    owner_sign,
 
-      specificData,
+    sender_pub_key,
+    sender_sign,
+  ];
 
-      owner_pub_key,
-      owner_sign,
-
-      sender_pub_key,
-      sender_sign
-    )
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('createDocument:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'kp':
-                if (method === 'KnowledgeCreated') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, params);
+  console.log('createDocument result:', result);
+  return result;
 };
 
 const createComment = async (comment, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sender_pub_key);
-    //keyPair.decodePkcs8(password);
+  const { app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend } = comment;
 
-    this.api.tx.system.remark(new Array());
+  let txInfo = {
+    module: 'kp',
+    call: 'createComment',
+    pubKey: sender_pub_key,
+  };
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+  params = [
+    app_id,
+    comment_id,
+    document_id,
 
-    // TODO: last_comment_id
-    const { app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend } = comment;
-    this.api.tx.kp
-      .createComment(
-        app_id,
-        comment_id,
-        document_id,
+    comment_hash,
+    comment_fee,
+    comment_trend,
 
-        comment_hash,
-        comment_fee,
-        comment_trend,
+    owner_pub_key,
+    owner_sign,
 
-        owner_pub_key,
-        owner_sign,
+    sender_pub_key,
+    sender_sign,
+  ];
 
-        sender_pub_key,
-        sender_sign
-      )
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('createComment:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'kp':
-                if (method === 'CommentCreated') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, params);
+  console.log('createComment result:', result);
+  return result;
 };
 
 const createModel = async (model, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sender_pub_key);
-    //keyPair.decodePkcs8(password);
+  const { app_id, model_id, expert_id, commodity_name, commodity_type, content_hash } = model;
 
-    this.api.tx.system.remark(new Array());
+  let txInfo = {
+    module: 'kp',
+    call: 'createModel',
+    pubKey: sender_pub_key,
+  };
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+  params = [
+    app_id,
+    model_id,
+    expert_id,
 
-    const { app_id, model_id, expert_id, commodity_name, commodity_type, content_hash } = model;
-    this.api.tx.kp
-      .createModel(
-        app_id,
-        model_id,
-        expert_id,
+    commodity_name,
+    commodity_type,
+    content_hash,
 
-        commodity_name,
-        commodity_type,
-        content_hash,
+    owner_pub_key,
+    owner_sign,
 
-        owner_pub_key,
-        owner_sign,
+    sender_pub_key,
+    sender_sign,
+  ];
 
-        sender_pub_key,
-        sender_sign
-      )
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('createModel:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'kp':
-                if (method === 'ModelCreated') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, params);
+  console.log('createModel result:', result);
+  return result;
 };
 
 const disableModel = async (model, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sender_pub_key);
-    //keyPair.decodePkcs8(password);
+  const { app_id, model_id } = model;
 
-    this.api.tx.system.remark(new Array());
+  let txInfo = {
+    module: 'kp',
+    call: 'disableModel',
+    pubKey: sender_pub_key,
+  };
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
-
-    const { app_id, model_id } = model;
-    this.api.tx.kp
-      .disableModel(
-        app_id,
-        model_id,
-
-        owner_pub_key,
-        owner_sign,
-
-        sender_pub_key,
-        sender_sign
-      )
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('disableModel:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'kp':
-                if (method === 'ModelDisabled') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  params = [app_id, model_id, owner_pub_key, owner_sign, sender_pub_key, sender_sign];
+  const result = await sendTx(txInfo, params);
+  console.log('disableModel result:', result);
+  return result;
 };
 
 const addCommodityType = async (type_id, type_desc) => {
@@ -23939,53 +23884,18 @@ const addCommodityType = async (type_id, type_desc) => {
  * @param {*} app_root_pub_key APP ROOT账户公钥
  */
 const membersSetAppAdmin = async (app_id, app_root_pub_key) => {
-  return new Promise(async (resolve, reject) => {
-    const sudoKey = await this.api.query.sudo.key();
-    console.log('sudo key:', sudoKey);
+  const sudoKey = await this.api.query.sudo.key();
+  console.log('sudo key:', sudoKey);
 
-    // Lookup from keyring (assuming we have added all, on --dev this would be `//Alice`)
-    //const sudoPair = this.keyring.getPair(sudoKey);
-    const sudoPair = this.keyring.getPair(getDevAdmin().address);
+  let txInfo = {
+    module: 'members',
+    call: 'setAppAdmin',
+    pubKey: getDevAdmin().address,
+  };
 
-    this.api.tx.sudo
-      .sudo(this.api.tx.members.setAppAdmin(app_id, app_root_pub_key))
-      .signAndSend(sudoPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('setAppAdmin:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'members':
-                if (method === 'AppAdminSet') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, [app_id, app_root_pub_key], true);
+  console.log('membersSetAppAdmin result:', result);
+  return result;
 };
 
 /**
@@ -23996,57 +23906,15 @@ const membersSetAppAdmin = async (app_id, app_root_pub_key) => {
  * @param {*} app_root_pub_key 调用者需要确保该KEY已经unlock, 并且该KEY是APP root 账户
  */
 const membersOperatePlatformExpert = async (app_id, op_type, member_account, app_root_pub_key) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(app_root_pub_key);
+  let txInfo = {
+    module: 'members',
+    call: op_type === '0' ? 'addAppPlatformExpertMember' : 'removeAppPlatformExpertMember',
+    pubKey: app_root_pub_key,
+  };
 
-    this.api.tx.system.remark(new Array());
-
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
-
-    let api =
-      op_type === '0'
-        ? this.api.tx.members.addAppPlatformExpertMember
-        : this.api.tx.members.removeAppPlatformExpertMember;
-
-    api(app_id, member_account)
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('addAppPlatformExpertMember:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'members':
-                if (method === 'MemberAdded' || method === 'MemberRemoved') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, [app_id, member_account]);
+  console.log('membersOperatePlatformExpert result:', result);
+  return result;
 };
 
 /**
@@ -24066,55 +23934,19 @@ const membersAddExpertByCreator = async (
   new_member_pub_key,
   kpt_profit_rate
 ) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(new_member_pub_key);
+  //const keyPair = this.keyring.getPair(new_member_pub_key);
 
-    this.api.tx.system.remark(new Array());
+  kpt_profit_rate = Math.round(Number(kpt_profit_rate) * 10000);
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
+  let txInfo = {
+    module: 'members',
+    call: 'addExpertMember',
+    pubKey: new_member_pub_key,
+  };
 
-    kpt_profit_rate = Math.round(Number(kpt_profit_rate) * 10000);
-
-    this.api.tx.members
-      .addExpertMember(app_id, modle_id, kpt_profit_rate, model_creator, model_creator_sign)
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log(`addExpertMember:, ${section.toString()}, ${method.toString()}, ${data.toString()}`);
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'members':
-                if (method === 'MemberAdded') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, [app_id, modle_id, kpt_profit_rate, model_creator, model_creator_sign]);
+  console.log('membersAddExpertByCreator result:', result);
+  return result;
 };
 
 /**
@@ -24136,61 +23968,17 @@ const membersRemoveExpertByCreator = async (
   sender_pub_key,
   sender_sign
 ) => {
-  return new Promise(async (resolve, reject) => {
-    const keyPair = this.keyring.getPair(sender_pub_key);
+  let txInfo = {
+    module: 'members',
+    call: 'removeExpertMember',
+    pubKey: sender_pub_key,
+  };
 
-    this.api.tx.system.remark(new Array());
+  params = [old_member_pub_key, app_id, modle_id, model_creator, model_creator_sign, sender_pub_key, sender_sign];
 
-    const { nonce, data: balance } = await this.api.query.system.account(keyPair.address);
-    console.log(`balance of ${balance.free} and a nonce of ${nonce}`);
-
-    this.api.tx.members
-      .removeExpertMember(
-        old_member_pub_key,
-        app_id,
-        modle_id,
-        model_creator,
-        model_creator_sign,
-        sender_pub_key,
-        sender_sign
-      )
-      .signAndSend(keyPair, ({ status, events }) => {
-        if (status.isFinalized) {
-          console.log(status.asFinalized.toHex());
-          events.forEach(async ({ phase, event: { data, method, section } }) => {
-            console.log('removeExpertMember:', section.toString(), method.toString(), data.toString());
-            section = section.toString();
-            method = method.toString();
-
-            switch (section) {
-              case 'system':
-                if (method === 'ExtrinsicFailed') {
-                  reject({
-                    error: 'ExtrinsicFailed',
-                  });
-                }
-                break;
-              case 'members':
-                if (method === 'MemberRemoved') {
-                  const datajson = JSON.parse(data.toString());
-                  // resolve with event data
-                  resolve({
-                    tx: status.asFinalized.toHex(),
-                    data: datajson,
-                  });
-                }
-                break;
-              default:
-                break;
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject({ error: err.message });
-      });
-  });
+  const result = await sendTx(txInfo, params);
+  console.log('membersRemoveExpertByCreator result:', result);
+  return result;
 };
 
 /**
@@ -24294,6 +24082,22 @@ const membersRemoveDeveloper = async (developer) => {
 
   const result = await sendTx(txInfo, [investor], true);
   console.log('membersRemoveDeveloper result:', result);
+
+  return result;
+};
+
+const setModelMax = async (app_id, max_count) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'kp',
+    call: 'setAppModelTotal',
+    pubKey: getDevAdmin().address,
+  };
+
+  const result = await sendTx(txInfo, [app_id, max_count], true);
+  console.log('setModelMax result:', result);
 
   return result;
 };
@@ -24517,6 +24321,32 @@ const democracyPowerComplain = async (powerComplain, owner_pub_key, owner_sign, 
   return result;
 };
 
+// Some chain storage query interfaces
+const queryKpDocuments = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.kPDocumentDataByIdHash;
+  //console.log('queryKpModels:', await entry.keys());
+  const store = await entry.entries();
+  console.log('queryKpModels len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -24539,6 +24369,8 @@ module.exports = {
   createModel: createModel,
   disableModel: disableModel,
   addCommodityType: addCommodityType,
+
+  setModelMax: setModelMax, // needs root
 
   // members inteface:
   membersSetAppAdmin: membersSetAppAdmin,
@@ -24576,6 +24408,9 @@ module.exports = {
 
   // democracy
   democracyPowerComplain: democracyPowerComplain,
+
+  // state query
+  queryKpDocuments: queryKpDocuments,
 };
 
 },{"@polkadot/api":274,"@polkadot/keyring":293,"@polkadot/util":672,"@polkadot/util-crypto":561,"bn.js":755,"fs":1}],162:[function(require,module,exports){
@@ -31264,7 +31099,7 @@ Object.keys(_submittable).forEach(function (key) {
 },{"./package.json":275,"./promise":278,"./rx":280,"./submittable":284,"@babel/runtime/helpers/interopRequireDefault":166,"@polkadot/keyring":293,"@polkadot/rpc-provider":343,"@polkadot/util":672}],275:[function(require,module,exports){
 module.exports={
   "name": "@polkadot/api",
-  "version": "1.34.1",
+  "version": "1.35.0-beta.5",
   "description": "Promise and RxJS wrappers around the Polkadot JS RPC",
   "main": "index.js",
   "keywords": [
@@ -31291,13 +31126,13 @@ module.exports={
   "homepage": "https://github.com/polkadot-js/api/tree/master/packages/api#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@polkadot/api-derive": "1.34.1",
+    "@polkadot/api-derive": "1.35.0-beta.5",
     "@polkadot/keyring": "^3.4.1",
-    "@polkadot/metadata": "1.34.1",
-    "@polkadot/rpc-core": "1.34.1",
-    "@polkadot/rpc-provider": "1.34.1",
-    "@polkadot/types": "1.34.1",
-    "@polkadot/types-known": "1.34.1",
+    "@polkadot/metadata": "1.35.0-beta.5",
+    "@polkadot/rpc-core": "1.35.0-beta.5",
+    "@polkadot/rpc-provider": "1.35.0-beta.5",
+    "@polkadot/types": "1.35.0-beta.5",
+    "@polkadot/types-known": "1.35.0-beta.5",
     "@polkadot/util": "^3.4.1",
     "@polkadot/util-crypto": "^3.4.1",
     "bn.js": "^5.1.3",
@@ -37139,6 +36974,8 @@ const sharedTypes = {
     docRoot: 'H256',
     id: 'H256'
   },
+  ChainId: 'u8',
+  DepositNonce: 'u64',
   Fee: {
     key: 'Hash',
     price: 'Balance'
@@ -37159,17 +36996,21 @@ const sharedTypes = {
     leafHash: 'H256',
     sortedHashes: 'H256'
   },
-  ReferendumInfo: 'ReferendumInfoTo239',
-  StakingLedger: 'StakingLedgerTo240',
-  Weight: 'u32'
+  ResourceId: '[u8; 32]',
+  'chainbridge::ChainId': 'u8'
 };
 const versioned = [{
-  minmax: [229, undefined],
+  minmax: [229, 234],
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
-    ChainId: 'u8',
-    DepositNonce: 'u64',
-    ResourceId: '[u8; 32]',
-    'chainbridge::ChainId': 'u8'
+    RefCount: 'RefCountTo259',
+    ReferendumInfo: 'ReferendumInfoTo239',
+    StakingLedger: 'StakingLedgerTo240',
+    Weight: 'u32'
+  })
+}, {
+  minmax: [235, undefined],
+  types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
+    RefCount: 'RefCountTo259'
   })
 }];
 var _default = versioned;
@@ -37244,6 +37085,7 @@ const versioned = [{
     Keys: 'SessionKeys5',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     ReferendumInfo: 'ReferendumInfoTo239',
     RewardDestination: 'RewardDestinationTo257',
     SlashingSpans: 'SlashingSpansTo204',
@@ -37261,6 +37103,7 @@ const versioned = [{
     Keys: 'SessionKeys5',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     ReferendumInfo: 'ReferendumInfoTo239',
     RewardDestination: 'RewardDestinationTo257',
     SlashingSpans: 'SlashingSpansTo204',
@@ -37279,6 +37122,7 @@ const versioned = [{
     Keys: 'SessionKeys5',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     ReferendumInfo: 'ReferendumInfoTo239',
     RewardDestination: 'RewardDestinationTo257',
     StakingLedger: 'StakingLedgerTo223',
@@ -37292,6 +37136,7 @@ const versioned = [{
     DispatchInfo: 'DispatchInfoTo244',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     ReferendumInfo: 'ReferendumInfoTo239',
     RewardDestination: 'RewardDestinationTo257',
     StakingLedger: 'StakingLedgerTo240',
@@ -37304,6 +37149,7 @@ const versioned = [{
     DispatchInfo: 'DispatchInfoTo244',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257',
     StakingLedger: 'StakingLedgerTo240',
     Weight: 'u32'
@@ -37314,6 +37160,7 @@ const versioned = [{
     CompactAssignments: 'CompactAssignmentsTo257',
     DispatchInfo: 'DispatchInfoTo244',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
@@ -37321,17 +37168,21 @@ const versioned = [{
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [2013, 2022],
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [2023, undefined],
-  types: _objectSpread({}, sharedTypes)
+  types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
+    RefCount: 'RefCountTo259'
+  })
 }];
 var _default = versioned;
 exports.default = _default;
@@ -37368,17 +37219,21 @@ const versioned = [{
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [13, 22],
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [23, undefined],
-  types: _objectSpread({}, sharedTypes)
+  types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
+    RefCount: 'RefCountTo259'
+  })
 }];
 var _default = versioned;
 exports.default = _default;
@@ -37409,7 +37264,8 @@ const sharedTypes = {
 const versioned = [{
   minmax: [0, undefined],
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
-    CompactAssignments: 'CompactAssignmentsTo257'
+    CompactAssignments: 'CompactAssignmentsTo257',
+    RefCount: 'RefCountTo259'
   })
 }];
 var _default = versioned;
@@ -37447,6 +37303,7 @@ const versioned = [{
     CompactAssignments: 'CompactAssignmentsTo257',
     Multiplier: 'Fixed64',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257',
     Weight: 'u32'
   })
@@ -37455,17 +37312,21 @@ const versioned = [{
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
     OpenTip: 'OpenTipTo225',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [23, 42],
   types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
     CompactAssignments: 'CompactAssignmentsTo257',
+    RefCount: 'RefCountTo259',
     RewardDestination: 'RewardDestinationTo257'
   })
 }, {
   minmax: [43, undefined],
-  types: _objectSpread({}, sharedTypes)
+  types: _objectSpread(_objectSpread({}, sharedTypes), {}, {
+    RefCount: 'RefCountTo259'
+  })
 }];
 var _default = versioned;
 exports.default = _default;
@@ -37519,7 +37380,7 @@ exports.default = void 0;
 // SPDX-License-Identifier: Apache-2.0
 const upgrades = {
   genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-  versions: [[0, 1020], [26669, 1021], [38245, 1022], [54248, 1023], [59659, 1024], [67651, 1025], [82191, 1027], [83238, 1028], [101503, 1029], [203466, 1030], [295787, 1031], [461692, 1032], [504329, 1033], [569327, 1038], [587687, 1039], [653183, 1040], [693488, 1042], [901442, 1045], [1375086, 1050], [1445458, 1051], [1472960, 1052], [1475648, 1053], [1491596, 1054], [1574408, 1055], [2064961, 1058], [2201991, 1062], [2671528, 2005], [2704202, 2007], [2728002, 2008], [2832534, 2011], [2962294, 2012], [3240000, 2013], [3274408, 2015], [3323565, 2019], [3534175, 2022], [3860281, 2023]]
+  versions: [[0, 1020], [26669, 1021], [38245, 1022], [54248, 1023], [59659, 1024], [67651, 1025], [82191, 1027], [83238, 1028], [101503, 1029], [203466, 1030], [295787, 1031], [461692, 1032], [504329, 1033], [569327, 1038], [587687, 1039], [653183, 1040], [693488, 1042], [901442, 1045], [1375086, 1050], [1445458, 1051], [1472960, 1052], [1475648, 1053], [1491596, 1054], [1574408, 1055], [2064961, 1058], [2201991, 1062], [2671528, 2005], [2704202, 2007], [2728002, 2008], [2832534, 2011], [2962294, 2012], [3240000, 2013], [3274408, 2015], [3323565, 2019], [3534175, 2022], [3860281, 2023], [4143129, 2024]]
 };
 var _default = upgrades;
 exports.default = _default;
@@ -37549,7 +37410,7 @@ exports.default = void 0;
 // SPDX-License-Identifier: Apache-2.0
 const upgrades = {
   genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-  versions: [[214356, 4], [392764, 7], [409740, 8], [809976, 20], [877581, 24], [879238, 25], [889472, 26], [902937, 27], [932751, 28], [991142, 29], [1030162, 31], [1119657, 32], [1199282, 33], [1342534, 34], [1392263, 35], [1431703, 36], [1433369, 37], [1490972, 41], [2087397, 43]]
+  versions: [[214356, 4], [392764, 7], [409740, 8], [809976, 20], [877581, 24], [879238, 25], [889472, 26], [902937, 27], [932751, 28], [991142, 29], [1030162, 31], [1119657, 32], [1199282, 33], [1342534, 34], [1392263, 35], [1431703, 36], [1433369, 37], [1490972, 41], [2087397, 43], [2316688, 44]]
 };
 var _default = upgrades;
 exports.default = _default;
@@ -48768,6 +48629,21 @@ exports.default = void 0;
 /* eslint-disable sort-keys */
 var _default = {
   rpc: {
+    proveFinality: {
+      description: 'Prove finality for the range (begin; end] hash.',
+      params: [{
+        name: 'begin',
+        type: 'BlockHash'
+      }, {
+        name: 'end',
+        type: 'BlockHash'
+      }, {
+        name: 'authoritiesSetId',
+        type: 'u64',
+        isOptional: true
+      }],
+      type: 'Option<EncodedFinalityProofs>'
+    },
     roundState: {
       description: 'Returns the state of the current best round state as well as the ongoing background rounds',
       params: [],
@@ -48784,6 +48660,7 @@ var _default = {
     AuthorityIndex: 'u64',
     AuthorityList: 'Vec<NextAuthority>',
     AuthorityWeight: 'u64',
+    EncodedFinalityProofs: 'Bytes',
     GrandpaEquivocation: {
       _enum: {
         Prevote: 'GrandpaEquivocationValue',
@@ -51084,7 +50961,8 @@ var _default = {
         Initialization: 'Null'
       }
     },
-    RefCount: 'u8',
+    RefCount: 'u32',
+    RefCountTo259: 'u8',
     TransactionValidityError: {
       _enum: {
         Invalid: 'InvalidTransaction',
@@ -51116,6 +50994,37 @@ exports.default = void 0;
 var _default = {
   rpc: {},
   types: {
+    Bounty: {
+      proposer: 'AccountId',
+      value: 'Balance',
+      fee: 'Balance',
+      curatorDeposit: 'Balance',
+      bond: 'Balance',
+      status: 'BountyStatus'
+    },
+    BountyIndex: 'u32',
+    BountyStatus: {
+      _enum: {
+        Proposed: 'Null',
+        Approved: 'Null',
+        Funded: 'Null',
+        CuratorProposed: 'BountyStatusCuratorProposed',
+        Active: 'BountyStatusActive',
+        PendingPayout: 'BountyStatusPendingPayout'
+      }
+    },
+    BountyStatusActive: {
+      curator: 'AccountId',
+      updateDue: 'BlockNumber'
+    },
+    BountyStatusCuratorProposed: {
+      curator: 'AccountId'
+    },
+    BountyStatusPendingPayout: {
+      curator: 'AccountId',
+      beneficiary: 'AccountId',
+      unlockAt: 'BlockNumber'
+    },
     OpenTip: {
       reason: 'Hash',
       who: 'AccountId',
@@ -51213,7 +51122,7 @@ exports.default = _default;
 },{}],492:[function(require,module,exports){
 module.exports={
   "name": "@polkadot/types",
-  "version": "1.34.1",
+  "version": "1.35.0-beta.5",
   "description": "Implementation of the Parity codec",
   "main": "index.js",
   "keywords": [
@@ -51240,7 +51149,7 @@ module.exports={
   "homepage": "https://github.com/polkadot-js/api/tree/master/packages/types#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@polkadot/metadata": "1.34.1",
+    "@polkadot/metadata": "1.35.0-beta.5",
     "@polkadot/util": "^3.4.1",
     "@polkadot/util-crypto": "^3.4.1",
     "@types/bn.js": "^4.11.6",
