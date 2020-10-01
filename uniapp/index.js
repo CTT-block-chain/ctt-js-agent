@@ -1,5 +1,7 @@
-const Sub = require("../lib/sub");
-const Comment = require("../interface/comment");
+const Sub = require('../lib/sub');
+const Comment = require('../interface/comment');
+const AddApp = require('../interface/addApp');
+const PowerComplain = require('../interface/powerComplain');
 
 window.subInitKeyring = () => Sub.initKeyring();
 window.subInitApi = (node) => Sub.initApi(node);
@@ -43,7 +45,7 @@ window.subComment = (
   let comment = Comment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
 
   // TODO: sender and owner sign
-  return Sub.createComment(comment, server_addr, server_sign, sender_addr, "0x0");
+  return Sub.createComment(comment, server_addr, server_sign, sender_addr, '0x0');
 };
 
 /**
@@ -79,3 +81,31 @@ window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
+
+// democracy
+/**
+ * 应用许可
+ * @param {*} app_name 应用名称 String
+ * @param {*} app_type 应用类型 （通过queryAppTypes 获取可用类型）String
+ * @param {*} identity_key 应用身份公钥 String
+ * @param {*} admin_key 应用管理公钥 String
+ * @param {*} return_rate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
+ * @param {*} sender_pub_key 发送账户公钥 String
+ */
+window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key) => {
+  let addApp = AddApp.create(app_name, app_type, identity_key, admin_key, return_rate);
+  return Sub.democracyAddApp(addApp, sender_pub_key);
+};
+
+/**
+ * 算力投诉
+ * @param {*} app_id 应用ID String or Number
+ * @param {*} cart_id 购物车ID String
+ * @param {*} comment_id 评论ID String
+ * @param {*} comment_content 评论内容 String
+ * @param {*} sender_pub_key 发送账户公钥
+ */
+window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key) => {
+  let powerComplain = PowerComplain.create(app_id, comment_id, cart_id, comment_content);
+  return Sub.democracyPowerComplain(powerComplain, sender_pub_key);
+};

@@ -8,6 +8,7 @@ const document = require('../interface/document');
 const comment = require('../interface/comment');
 const model = require('../interface/model');
 const powerComplain = require('../interface/powerComplain');
+const appAdd = require('../interface/addApp');
 
 const server_white_list = require('./keys/wl.json');
 
@@ -1039,59 +1040,6 @@ server.expose('queryCommodityPower', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`queryCommodityPower error: ${e}`);
-    sendResult(callback, { error: e.message });
-  }
-});
-
-// Democracy
-/**
- * 算力投诉
- * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
- *    }
- *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
- *      app_id: 应用ID String
- *      cart_id: 购物车ID String
- *      comment_id: 投诉评论ID String
- *      comment: 投诉内容 String
- *    }
- *    app_sign: 用户数据签名 String
- *    sender_sign: 发送者签名 String
- * }
- */
-server.expose('democracyPowerComplain', (args, opt, callback) => {
-  const param = JSON.parse(args[0]);
-  console.log(`democracyPowerComplain:${args[0]}`);
-  const { sender_pub_key, sender_data, sender_sign, app_pub_key, app_sign } = param;
-  const { app_id, cart_id, comment_id, comment } = param.app_data;
-
-  const verifyResult = verifyServerSign(param);
-
-  if (!verifyResult.isOk) {
-    sendResult(callback, { error: verifyResult.msg });
-    return;
-  }
-
-  try {
-    sub
-      .democracyPowerComplain(
-        powerComplain.create(app_id, comment_id, cart_id, comment),
-        app_pub_key,
-        app_sign,
-        sender_pub_key,
-        sender_sign
-      )
-      .then((result) => {
-        console.log('democracyPowerComplain result:', result);
-        sendResult(callback, { result });
-      })
-      .catch((err) => {
-        sendResult(callback, { error: err });
-      });
-  } catch (e) {
-    console.error(`democracyPowerComplain error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
