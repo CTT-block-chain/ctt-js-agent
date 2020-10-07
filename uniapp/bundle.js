@@ -23722,18 +23722,7 @@ const transfer = async (srcAddress, targetAddress, amount, password) => {
   return result;
 };
 
-const devTransfer = async (target, num) => {
-  isKeyringReady();
-  isApiReady();
-  //const txHash = await this.api.tx.balances.transfer(target, num).signAndSend(this.alice);
-
-  const txInfo = {
-    module: 'balances',
-    call: 'transfer',
-    pubKey: this.alice.address,
-  };
-
-  // expect num is a float string rep, like "3.564"
+const convertBalance = (num) => {
   let sep = num.split('.');
   let int = sep[0];
   let dec = sep[1];
@@ -23747,7 +23736,24 @@ const devTransfer = async (target, num) => {
     .mul(new BN(Math.pow(10, DEC_NUM), 10))
     .add(new BN(dec, 10).mul(new BN(Math.pow(10, DEC_NUM - decLen))));
 
-  console.log('num convert:', convert.toString());
+  console.log('convertBalance:', convert.toString());
+
+  return convert;
+};
+
+const devTransfer = async (target, num) => {
+  isKeyringReady();
+  isApiReady();
+  //const txHash = await this.api.tx.balances.transfer(target, num).signAndSend(this.alice);
+
+  const txInfo = {
+    module: 'balances',
+    call: 'transfer',
+    pubKey: this.alice.address,
+  };
+
+  // expect num is a float string rep, like "3.564"
+  let convert = convertBalance(num);
 
   const result = await sendTx(txInfo, [target, convert]);
   console.log('transfer result:', result);
@@ -24388,7 +24394,7 @@ const democracyAddApp = async (appAdd, sender_pub_key) => {
   let { app_name, app_type, identity_key, admin_key, return_rate } = appAdd;
 
   // TODO: check owner_pub_key is tech member
-  let imageHash = createPreImage('kp', 'democracy_add_app', [app_type, app_name, identity_key, admin_key, return_rate]);
+  let imageHash = createPreImage('kp', 'democracyAddApp', [app_type, app_name, identity_key, admin_key, return_rate]);
   console.log('imageHash:', imageHash);
 
   // submit purposol
@@ -24403,6 +24409,33 @@ const democracyAddApp = async (appAdd, sender_pub_key) => {
 
   const result = await sendTx(txInfo, [imageHash, min], false);
   console.log('democracyAddApp result:', result);
+
+  return result;
+};
+
+const democracyAppFinanced = async (appId, kptAmount, exchangeRate, sender_pub_key) => {
+  isKeyringReady();
+  isApiReady();
+
+  let imageHash = createPreImage('kp', 'democracyAppFinanced', [
+    Number(appId),
+    convertBalance(kptAmount),
+    convertBalance(exchangeRate),
+  ]);
+  console.log('imageHash:', imageHash);
+
+  // submit purposol
+  const txInfo = {
+    module: 'democracy',
+    call: 'propose',
+    pubKey: sender_pub_key,
+  };
+
+  let min = this.api.consts.democracy.minimumDeposit;
+  console.log('democracyAppFinanced min required balance:', min.toString());
+
+  const result = await sendTx(txInfo, [imageHash, min], false);
+  console.log('democracyAppFinanced result:', result);
 
   return result;
 };
@@ -24520,6 +24553,7 @@ module.exports = {
   // democracy
   democracyPowerComplain: democracyPowerComplain,
   democracyAddApp: democracyAddApp,
+  democracyAppFinanced: democracyAppFinanced,
 
   // state query
   queryKpDocuments: queryKpDocuments,
@@ -110265,6 +110299,17 @@ window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit
 window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key) => {
   let addApp = AddApp.create(app_name, app_type, identity_key, admin_key, return_rate);
   return Sub.democracyAddApp(addApp, sender_pub_key);
+};
+
+/**
+ * 应用融资
+ * @param {*} appId app_id Number String
+ * @param {*} kptAmount 融资发行KPT数量 String, 单位KPT
+ * @param {*} exchangeRate 1法币可兑换多少KPT String
+ * @param {*} sender_pub_key 发送账户公钥 String
+ */
+window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) => {
+  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key);
 };
 
 /**

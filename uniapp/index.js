@@ -98,6 +98,17 @@ window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_ra
 };
 
 /**
+ * 应用融资
+ * @param {*} appId app_id Number String
+ * @param {*} kptAmount 融资发行KPT数量 String, 单位KPT
+ * @param {*} exchangeRate 1法币可兑换多少KPT String
+ * @param {*} sender_pub_key 发送账户公钥 String
+ */
+window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) => {
+  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key);
+};
+
+/**
  * 算力投诉
  * @param {*} app_id 应用ID String or Number
  * @param {*} cart_id 购物车ID String
