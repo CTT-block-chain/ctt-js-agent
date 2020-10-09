@@ -1196,10 +1196,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let v = sub.constBalanceExistentialDeposit();
   console.log(v);*/
 
-  /*sub.rpcGetCommodityPower('a01', ['001', '002', '003']).then((result) => {
-    console.log('result:', result);
+  sub.rpcGetCommodityPower('a01', ['001', '002', '003345']).then((result) => {
+    console.log('rpcGetCommodityPower result:', result);
   });
-
+  /*
   let r = sub.isAccountActive('5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG');
   console.log('r:', r);
 

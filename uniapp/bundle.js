@@ -23417,6 +23417,22 @@ const rpc = {
       ],
       type: 'PowerSize',
     },
+
+    isCommodityPowerExist: {
+      description: 'Check if commodify knowledge power exist.',
+      params: [
+        {
+          name: 'query',
+          type: 'QueryCommodityPowerParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'bool',
+    },
   },
   members: {
     isPlatformExpert: {
@@ -24311,18 +24327,29 @@ const rpcGetAccountPower = async (accountId) => {
 const rpcGetCommodityPower = async (appId, cartIds) => {
   appId = Number(appId);
   let queue = [];
+
+  const querySingle = (cartId) =>
+    this.api.rpc.kP.isCommodityPowerExist({ appId, cartId }).then((isExist) => {
+      console.log('isCommodityPowerExist:', cartId, isExist.toHuman());
+      if (isExist.toHuman()) {
+        return this.api.rpc.kP.commodityPower({ appId, cartId }).then((power) => {
+          return {
+            cartId,
+            power: power.toString(),
+          };
+        });
+      } else {
+        return {
+          cartId,
+          power: 'N',
+        };
+      }
+    });
+
   for (let i = 0; i < cartIds.length; i++) {
-    queue.push(this.api.rpc.kP.commodityPower({ appId, cartId: cartIds[i] }));
+    queue.push(querySingle(cartIds[i]));
   }
-  let pws = await Promise.all(queue);
-
-  pws = pws.map((item) => {
-    return item.toString();
-  });
-
-  console.log('pws:', pws);
-
-  return pws;
+  return Promise.all(queue);
 };
 
 const rpcCheckAccountIsPlatformExpert = async (accountId, appId) => {
