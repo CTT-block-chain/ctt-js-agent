@@ -24388,6 +24388,24 @@ const createPreImage = (txModule, method, paramList) => {
   return blake2AsHex(tx.method.toHex());
 };
 
+const getDeposit = (deposit) => {
+  let min = this.api.consts.democracy.minimumDeposit;
+
+  if (!!deposit) {
+    deposit = convertBalance(deposit);
+    if (min.gt(deposit)) {
+      // deposit too small, use min
+      deposit = min;
+    }
+  } else {
+    deposit = min;
+  }
+
+  console.log('getDeposit:', min.toString(), deposit.toString());
+
+  return deposit;
+};
+
 const democracyPowerComplain = async (powerComplain, sender_pub_key, deposit) => {
   isKeyringReady();
   isApiReady();
@@ -24405,19 +24423,7 @@ const democracyPowerComplain = async (powerComplain, sender_pub_key, deposit) =>
     pubKey: sender_pub_key,
   };
 
-  let min = this.api.consts.democracy.minimumDeposit;
-  console.log('democracyPowerComplain min required balance:', min.toString());
-
-  if (!!deposit) {
-    deposit = convertBalance(deposit);
-    if (min.cmp(deposit) == 1) {
-      // deposit too small, use min
-      deposit = min;
-    }
-  } else {
-    deposit = min;
-  }
-
+  deposit = getDeposit(deposit);
   const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyPowerComplain result:', result);
 
@@ -24441,19 +24447,7 @@ const democracyAddApp = async (appAdd, sender_pub_key, deposit) => {
     pubKey: sender_pub_key,
   };
 
-  let min = this.api.consts.democracy.minimumDeposit;
-  console.log('democracyAddApp min required balance:', min.toString());
-
-  if (!!deposit) {
-    deposit = convertBalance(deposit);
-    if (min.cmp(deposit) == 1) {
-      // deposit too small, use min
-      deposit = min;
-    }
-  } else {
-    deposit = min;
-  }
-
+  deposit = getDeposit(deposit);
   const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyAddApp result:', result);
 
@@ -24478,19 +24472,7 @@ const democracyAppFinanced = async (appId, kptAmount, exchangeRate, sender_pub_k
     pubKey: sender_pub_key,
   };
 
-  let min = this.api.consts.democracy.minimumDeposit;
-  console.log('democracyAppFinanced min required balance:', min.toString());
-
-  if (!!deposit) {
-    deposit = convertBalance(deposit);
-    if (min.cmp(deposit) == 1) {
-      // deposit too small, use min
-      deposit = min;
-    }
-  } else {
-    deposit = min;
-  }
-
+  deposit = getDeposit(deposit);
   const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyAppFinanced result:', result);
 
