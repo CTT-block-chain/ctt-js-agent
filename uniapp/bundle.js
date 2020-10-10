@@ -24388,7 +24388,7 @@ const createPreImage = (txModule, method, paramList) => {
   return blake2AsHex(tx.method.toHex());
 };
 
-const democracyPowerComplain = async (powerComplain, sender_pub_key) => {
+const democracyPowerComplain = async (powerComplain, sender_pub_key, deposit) => {
   isKeyringReady();
   isApiReady();
 
@@ -24408,13 +24408,23 @@ const democracyPowerComplain = async (powerComplain, sender_pub_key) => {
   let min = this.api.consts.democracy.minimumDeposit;
   console.log('democracyPowerComplain min required balance:', min.toString());
 
-  const result = await sendTx(txInfo, [imageHash, min], false);
+  if (!!deposit) {
+    deposit = convertBalance(deposit);
+    if (min.cmp(deposit) == 1) {
+      // deposit too small, use min
+      deposit = min;
+    }
+  } else {
+    deposit = min;
+  }
+
+  const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyPowerComplain result:', result);
 
   return result;
 };
 
-const democracyAddApp = async (appAdd, sender_pub_key) => {
+const democracyAddApp = async (appAdd, sender_pub_key, deposit) => {
   isKeyringReady();
   isApiReady();
 
@@ -24434,13 +24444,23 @@ const democracyAddApp = async (appAdd, sender_pub_key) => {
   let min = this.api.consts.democracy.minimumDeposit;
   console.log('democracyAddApp min required balance:', min.toString());
 
-  const result = await sendTx(txInfo, [imageHash, min], false);
+  if (!!deposit) {
+    deposit = convertBalance(deposit);
+    if (min.cmp(deposit) == 1) {
+      // deposit too small, use min
+      deposit = min;
+    }
+  } else {
+    deposit = min;
+  }
+
+  const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyAddApp result:', result);
 
   return result;
 };
 
-const democracyAppFinanced = async (appId, kptAmount, exchangeRate, sender_pub_key) => {
+const democracyAppFinanced = async (appId, kptAmount, exchangeRate, sender_pub_key, deposit) => {
   isKeyringReady();
   isApiReady();
 
@@ -24461,7 +24481,17 @@ const democracyAppFinanced = async (appId, kptAmount, exchangeRate, sender_pub_k
   let min = this.api.consts.democracy.minimumDeposit;
   console.log('democracyAppFinanced min required balance:', min.toString());
 
-  const result = await sendTx(txInfo, [imageHash, min], false);
+  if (!!deposit) {
+    deposit = convertBalance(deposit);
+    if (min.cmp(deposit) == 1) {
+      // deposit too small, use min
+      deposit = min;
+    }
+  } else {
+    deposit = min;
+  }
+
+  const result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log('democracyAppFinanced result:', result);
 
   return result;
@@ -24473,6 +24503,31 @@ const queryKpDocuments = async () => {
   isApiReady();
 
   const entry = await this.api.query.kp.kPDocumentDataByIdHash;
+  //console.log('queryKpModels:', await entry.keys());
+  const store = await entry.entries();
+  console.log('queryKpDocuments len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
+const queryKpModels = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.kPModelDataByIdHash;
   //console.log('queryKpModels:', await entry.keys());
   const store = await entry.entries();
   console.log('queryKpModels len:', store.length);
@@ -24585,6 +24640,7 @@ module.exports = {
   // state query
   queryKpDocuments: queryKpDocuments,
   queryAppTypes: queryAppTypes,
+  queryKpModels: queryKpModels,
 };
 
 },{"@polkadot/api":276,"@polkadot/keyring":295,"@polkadot/util":674,"@polkadot/util-crypto":563,"bn.js":757,"fs":1}],164:[function(require,module,exports){
@@ -110323,9 +110379,9 @@ window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit
  * @param {*} return_rate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
  * @param {*} sender_pub_key 发送账户公钥 String
  */
-window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key) => {
+window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key, deposit) => {
   let addApp = AddApp.create(app_name, app_type, identity_key, admin_key, return_rate);
-  return Sub.democracyAddApp(addApp, sender_pub_key);
+  return Sub.democracyAddApp(addApp, sender_pub_key, deposit);
 };
 
 /**
@@ -110335,8 +110391,8 @@ window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_ra
  * @param {*} exchangeRate 1法币可兑换多少KPT String
  * @param {*} sender_pub_key 发送账户公钥 String
  */
-window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) => {
-  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key);
+window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key, deposit) => {
+  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key, deposit);
 };
 
 /**
@@ -110347,9 +110403,9 @@ window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) =
  * @param {*} comment_content 评论内容 String
  * @param {*} sender_pub_key 发送账户公钥
  */
-window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key) => {
+window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key, deposit) => {
   let powerComplain = PowerComplain.create(app_id, comment_id, cart_id, comment_content);
-  return Sub.democracyPowerComplain(powerComplain, sender_pub_key);
+  return Sub.democracyPowerComplain(powerComplain, sender_pub_key, deposit);
 };
 
 },{"../interface/addApp":160,"../interface/comment":161,"../interface/powerComplain":162,"../lib/sub":163}]},{},[1134]);

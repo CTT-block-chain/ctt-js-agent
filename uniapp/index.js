@@ -92,9 +92,9 @@ window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit
  * @param {*} return_rate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
  * @param {*} sender_pub_key 发送账户公钥 String
  */
-window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key) => {
+window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key, deposit) => {
   let addApp = AddApp.create(app_name, app_type, identity_key, admin_key, return_rate);
-  return Sub.democracyAddApp(addApp, sender_pub_key);
+  return Sub.democracyAddApp(addApp, sender_pub_key, deposit);
 };
 
 /**
@@ -104,8 +104,8 @@ window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_ra
  * @param {*} exchangeRate 1法币可兑换多少KPT String
  * @param {*} sender_pub_key 发送账户公钥 String
  */
-window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) => {
-  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key);
+window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key, deposit) => {
+  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key, deposit);
 };
 
 /**
@@ -116,7 +116,7 @@ window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key) =
  * @param {*} comment_content 评论内容 String
  * @param {*} sender_pub_key 发送账户公钥
  */
-window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key) => {
+window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key, deposit) => {
   let powerComplain = PowerComplain.create(app_id, comment_id, cart_id, comment_content);
-  return Sub.democracyPowerComplain(powerComplain, sender_pub_key);
+  return Sub.democracyPowerComplain(powerComplain, sender_pub_key, deposit);
 };

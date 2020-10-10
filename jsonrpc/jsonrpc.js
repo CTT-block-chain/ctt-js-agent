@@ -1235,9 +1235,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu
   /*sub.rpcCheckAccountIsPlatformExpert('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', '12345678').then((result) => {
     console.log('check result:', result);
-  });
-
-  sub.queryKpDocuments().then((result) => {
-    console.log(result);
   });*/
+
+  sub.queryKpModels().then((result) => {
+    console.log('queryKpModels:', result);
+  });
 });
