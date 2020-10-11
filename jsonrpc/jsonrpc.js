@@ -360,7 +360,7 @@ server.expose('subProductTry', (args, opt, callback) => {
     let doc = document.create(
       app_id,
       document_id,
-      1,
+      2,
       model_id,
       product_id,
       content_hash,
@@ -504,7 +504,7 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
     let doc = document.create(
       app_id,
       document_id,
-      3,
+      4,
       model_id,
       product_id,
       content_hash,
@@ -1237,7 +1237,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  sub.queryKpModels().then((result) => {
-    console.log('queryKpModels:', result);
+  sub.queryKpDocuments().then((result) => {
+    console.log('queryKpDocuments:');
   });
 });
