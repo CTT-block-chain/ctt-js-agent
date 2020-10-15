@@ -40,9 +40,11 @@ const init = () => {
       return setupCommodityTypes()
         .then((result) => {
           console.log('update commodity types done!!!');
+          process.exit();
         })
         .catch((err) => {
           console.error(err);
+          process.exit();
         });
     });
   });

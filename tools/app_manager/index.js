@@ -25,9 +25,11 @@ const init = () => {
       return updateAppAdmin()
         .then((result) => {
           console.log('updateAppAdmin done!!!');
+          process.exit();
         })
         .catch((err) => {
           console.error(err);
+          process.exit();
         });
     });
   });

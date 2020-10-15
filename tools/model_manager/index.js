@@ -23,9 +23,11 @@ const init = () => {
       return updateAppModelMaxCount()
         .then((result) => {
           console.log('updateAppModelMaxCount done!!!');
+          process.exit();
         })
         .catch((err) => {
           console.error(err);
+          process.exit();
         });
     });
   });

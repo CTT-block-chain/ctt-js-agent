@@ -963,6 +963,47 @@ server.expose('membersAddDeveloper', (args, opt, callback) => {
   }
 });
 
+/**
+ 等额兑换
+ * {
+ *    sender_pub_key: 发送者公钥 String, app admin 公钥
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID Number String
+ *      cash_receipt: 现金交易号 String
+ *      amount: KPT兑换数量 String
+ *      receiver_address: 接收账户 String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('membersStableExchange', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersStableExchange:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+    const { app_id, cash_receipt, amount, receiver_address } = param.sender_data;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: 'sign veify fail' });
+      return;
+    }
+
+    sub
+      .membersStableExchange(app_id, cash_receipt, receiver_address, amount, sender_pub_key)
+      .then((result) => {
+        console.log('membersStableExchange result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersStableExchange error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // power related query
 /**
  * 查询全网算力
@@ -1145,8 +1186,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5EYCAe5ijiYfyeZ2JJCGq56LmPyNRAKzpG4QkoQkkQNB5e6Z balance:', info);
   });
 
-  sub.balancesAll('5FenQHhRgGfqYgJtTYLWz8u31tmznv2XV8qiXNpNBKScZT1t').then((info) => {
-    console.log('5FenQHhRgGfqYgJtTYLWz8u31tmznv2XV8qiXNpNBKScZT1t balance:', info);
+  sub.balancesAll('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM').then((info) => {
+    console.log('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM balance:', info);
   });
 
   //sub.devTransfer("5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg", "10000");
