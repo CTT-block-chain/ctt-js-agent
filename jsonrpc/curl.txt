@@ -19,3 +19,10 @@ curl -X POST \
      -H 'Content-Type: application/json' \
      -d '{"jsonrpc":"2.0","id":"id","method":"subLock","params":["{\"address\": \"5C5YBafD2cG3zp9CpSqrNEB8LgCfDat1592SeSqkiZGC2DgC\"}"]}' \
      http://39.106.116.92:5080
+
+
+
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"membersStableExchange","params":["{\"sender_sign\":\"0x16d1eee2ebb011dc53496323e182b8e6b4822d4f7e5b607c550eb2b8d2b6366be2837659f43c76bdef8e7aaf4397954465b887d16a2efd3ebe8354f6412a4186\",\"sender_pub_key\":\"5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg\",\"sender_data\":{\"amount\":\"1234\",\"receiver_address\":\"5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL\",\"cash_receipt\":\"r10003220201016152229\",\"app_id\":\"12345678\"}}"]}' \
+     http://39.106.116.92:5080
