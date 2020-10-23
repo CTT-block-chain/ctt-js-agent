@@ -2,6 +2,7 @@ const Sub = require('../lib/sub');
 const Comment = require('../interface/comment');
 const AddApp = require('../interface/addApp');
 const PowerComplain = require('../interface/powerComplain');
+const ModelDispute = require('../interface/modelDispute');
 
 window.subInitKeyring = () => Sub.initKeyring();
 window.subInitApi = (node) => Sub.initApi(node);
@@ -120,3 +121,17 @@ window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, s
   let powerComplain = PowerComplain.create(app_id, comment_id, cart_id, comment_content);
   return Sub.democracyPowerComplain(powerComplain, sender_pub_key, deposit);
 };
+
+/**
+ * 
+ * @param {*} app_id 应用ID String or Number
+ * @param {*} comment_id 评论ID String
+ * @param {*} modle_id 模型ID String
+ * @param {*} comment_content 评论内容 String
+ * @param {*} dispute_type 复议级别 Number String（'0': 一般性非故意错误， '1': 一般性故意错误 '2': 严重错误 ）
+ * @param {*} deposit 抵押金额 Number String
+ */
+window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, dispute_type, deposit) => {
+  let modelDispute = ModelDispute.create(app_id, comment_id, modle_id, comment_content, dispute_type, deposit);
+  return Sub.democracyModelDispute(modelDispute, sender_pub_key, deposit);
+}
