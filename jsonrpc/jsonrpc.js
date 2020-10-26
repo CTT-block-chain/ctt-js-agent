@@ -669,6 +669,78 @@ server.expose('subSaleStat', (args, opt, callback) => {
   }
 });
 
+/**
+ * 触发排行榜创建
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID Number String
+ *      model_id: 模型ID String
+ *    }
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('createPowerLeader', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`createPowerLeader:${args[0]}`);
+    const { sender_pub_key, sender_data, sender_sign } = param;
+
+    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
+    if (!verify.isValid) {
+      sendResult(callback, { error: 'sign veify fail' });
+      return;
+    }
+
+    const { app_id, model_id } = param.sender_data;
+
+    sub
+      .createPowerLeaderBoard(app_id, model_id)
+      .then((result) => {
+        console.log('createPowerLeader result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`createPowerLeader error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 查询排行榜
+ * {
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID Number String
+ *      model_id: 模型ID String
+ *      block: 区块号 （createPowerLeader 获得）
+ *    }
+ * }
+ */
+server.expose('queryPowerLeader', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`queryPowerLeader:${args[0]}`);
+    const { app_id, model_id, block } = param.sender_data;
+
+    sub
+      .rpcLeaderBoardLoad(app_id, model_id, block)
+      .then((result) => {
+        console.log('queryPowerLeader result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryPowerLeader error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+
 // server vote related interfaces
 
 /**
