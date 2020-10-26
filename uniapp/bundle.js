@@ -110567,6 +110567,7 @@ window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key, d
  * @param {*} comment_id 评论ID String
  * @param {*} comment_content 评论内容 String
  * @param {*} sender_pub_key 发送账户公钥
+ * @param {*} deposit 抵押金额 Number String
  */
 window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, sender_pub_key, deposit) => {
   let powerComplain = PowerComplain.create(app_id, comment_id, cart_id, comment_content);
@@ -110580,10 +110581,11 @@ window.democracyPowerComplain = (app_id, cart_id, comment_id, comment_content, s
  * @param {*} modle_id 模型ID String
  * @param {*} comment_content 评论内容 String
  * @param {*} dispute_type 复议级别 Number String（'0': 一般性非故意错误， '1': 一般性故意错误 '2': 严重错误 ）
+ * @param {*} sender_pub_key 发送账户公钥
  * @param {*} deposit 抵押金额 Number String
  */
-window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, dispute_type, deposit) => {
-  let modelDispute = ModelDispute.create(app_id, comment_id, modle_id, comment_content, dispute_type, deposit);
+window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, dispute_type, sender_pub_key, deposit) => {
+  let modelDispute = ModelDispute.create(app_id, comment_id, modle_id, comment_content, dispute_type);
   return Sub.democracyModelDispute(modelDispute, sender_pub_key, deposit);
 }
 
