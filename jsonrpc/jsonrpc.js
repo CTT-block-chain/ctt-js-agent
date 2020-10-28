@@ -1353,4 +1353,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
   });
+
+  sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
+    console.log('rpcGetCommodityPower:', result);
+  });
 });

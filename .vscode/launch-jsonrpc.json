@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "program": "./node_modules/jest/bin/jest.js",
+      "program": "${workspaceFolder}/jsonrpc/jsonrpc.js",
       "args": ["--sub_endpoint=ws://localhost:9944"]
     }
   ]
