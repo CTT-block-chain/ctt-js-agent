@@ -1352,13 +1352,21 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   /*sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
-  });
+  });*/
 
-  sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
+  /*sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
     console.log('rpcGetCommodityPower:', result);
   });*/
 
-  sub.rpcLeaderBoardLoad('12345678', '0', '196620').then(result => {
+  /*sub.rpcLeaderBoardLoad('12345678', '0', '880').then(result => {
     console.log('rpcLeaderBoardLoad:', result);
   });
+
+  sub.queryLeaderBoardRecords().then((result) => {
+    console.log('queryLeaderBoardRecords');
+  });
+
+  sub.queryRealtimeLeaderBoard().then((result) => {
+    console.log('queryRealtimeLeaderBoard');
+  });*/
 });
