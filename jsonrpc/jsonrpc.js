@@ -1350,11 +1350,15 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  sub.queryKpDocuments().then((result) => {
+  /*sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
   });
 
   sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
     console.log('rpcGetCommodityPower:', result);
+  });*/
+
+  sub.rpcLeaderBoardLoad('12345678', '0', '196620').then(result => {
+    console.log('rpcLeaderBoardLoad:', result);
   });
 });
