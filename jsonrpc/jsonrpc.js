@@ -595,6 +595,52 @@ server.expose('subModelOperate', (args, opt, callback) => {
   }
 });
 
+/**
+ * 应用等值赎回
+ * {
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_data: { 发送端数据
+ *      app_id: 应用ID String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_data: {  应用数据
+ *      amount: String 等值赎回金额,例如 “23.5”
+ *      cash_transaction_id: String 现金交易ID
+ *    }
+ *    app_sign: 用户数据签名 String
+ *    sender_sign: 发送者签名 String
+ * } 
+ */
+server.expose('appRedeemKpt', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`appRedeemKpt:${args[0]}`);
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
+    const { app_id } = param.sender_data;
+    const { amount, cash_transaction_id } = param.app_data;
+
+    const verifyResult = verifyServerSign(param);
+
+    if (!verifyResult.isOk) {
+      sendResult(callback, { error: verifyResult.msg });
+      return;
+    }
+
+    sub.appRedeemKpt(app_id, amount, cash_transaction_id, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log('appRedeemKpt result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`appRedeemKpt error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 /** Add new commodity type
  * {
  *    sender_pub_key: 发送者公钥 String
