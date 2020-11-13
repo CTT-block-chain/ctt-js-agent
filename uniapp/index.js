@@ -68,6 +68,14 @@ window.membersAddExpert = (app_id, modle_id, model_creator, model_creator_sign, 
     kpt_profit_rate
   );
 
+/**
+ * 应用等值赎回
+ * @param {*} app_id 
+ * @param {*} cash_receipt 
+ * @param {*} sender_pub_key 
+ */
+window.memberStableRedeem = (app_id, cash_receipt, sender_pub_key) => Sub.membersStabelRedeem(app_id, cash_receipt, sender_pub_key);
+
 window.walletBalanceAll = (address) => Sub.balancesAll(address);
 window.walletTransfer = (srcAddress, destAddress, amount, password) =>
   Sub.transfer(srcAddress, destAddress, amount, password);

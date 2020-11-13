@@ -9,6 +9,18 @@ const updateAppAdmin = async () => {
     });
 
   console.log('result:', result);
+  return result;
+};
+
+const updateAppRedeemAcount = async () => {
+  let result = await sub
+    .setAppRedeemAccount('12345678', '5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg')
+    .catch((err) => {
+      console.error('sub.setAppRedeemAccount error:', err);
+    });
+
+  console.log('result:', result);
+  return result;
 };
 
 function sub_notify_cb(method, data) {
@@ -24,8 +36,10 @@ const init = () => {
       console.log('init api done!');
       return updateAppAdmin()
         .then((result) => {
-          console.log('updateAppAdmin done!!!');
-          process.exit();
+          return updateAppRedeemAcount().then(result => {
+            console.log('updateAppAdmin done!!!');
+            process.exit();
+          });
         })
         .catch((err) => {
           console.error(err);

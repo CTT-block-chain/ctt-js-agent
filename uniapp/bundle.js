@@ -23212,7 +23212,7 @@ module.exports = {
 const fs = require('fs');
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { Keyring } = require('@polkadot/keyring');
-const { stringToU8a, u8aToHex, hexToU8a } = require('@polkadot/util');
+const { stringToU8a, u8aToHex, hexToU8a, hexToString } = require('@polkadot/util');
 const { blake2AsHex, mnemonicGenerate, cryptoWaitReady, signatureVerify } = require('@polkadot/util-crypto');
 
 const { BN } = require('bn.js');
@@ -23286,6 +23286,23 @@ const chainDataTypes = {
   KPModelCreateData: {
     producerCount: 'PowerSize',
     productCount: 'PowerSize',
+  },
+
+  LeaderBoardItem: {
+    cartId: 'Vec<u8>',
+    power: 'PowerSize',
+    owner: 'AccountId',
+  },
+
+  LeaderBoardItemRPC: {
+    cart_id: 'Bytes',
+    power: 'PowerSize',
+    owner: 'AccountId',
+  },
+
+  LeaderBoardResultRPC: {
+    accounts: 'Vec<AccountId>',
+    board: 'Vec<LeaderBoardItemRPC>',
   },
 
   ModelStatus: {
@@ -23407,6 +23424,24 @@ const chainDataTypes = {
     typeId: 'u32',
     typeDesc: 'Vec<u8>',
   },
+
+  QueryLeaderBoardParams: {
+    appId: 'u32',
+    modelId: 'Bytes',
+    block: 'u32',
+  },
+
+  LeaderBoardResult: {
+    accounts: 'Vec<AccountId>',
+    board: 'Vec<LeaderBoardItem>',
+  },
+
+  CommodityLeaderBoardData: {
+    cartId: 'Vec<u8>',
+    cartIdHash: 'T::Hash',
+    power: 'PowerSize',
+    owner: 'AccountId',
+  },
 };
 
 const rpc = {
@@ -23463,6 +23498,22 @@ const rpc = {
         },
       ],
       type: 'bool',
+    },
+
+    leaderBoardResult: {
+      description: 'read power leader board result.',
+      params: [
+        {
+          name: 'query',
+          type: 'QueryLeaderBoardParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'LeaderBoardResult',
     },
   },
   members: {
@@ -23640,7 +23691,7 @@ const verify = (address, msg, sign) => {
 
 const hash = (msg) => blake2AsHex(msg);
 
-const _extractEvents = (result) => {
+const _extractEvents = (result, eventHolder) => {
   if (!result || !result.events) {
     return;
   }
@@ -23650,6 +23701,12 @@ const _extractEvents = (result) => {
   result.events
     .filter((event) => !!event.event)
     .map(({ event: { data, method, section } }) => {
+      let eventData = {
+        section,
+        method,
+        data: data ? data.toJSON() : null,
+      };
+
       if (section === 'system' && method === 'ExtrinsicFailed') {
         const [dispatchError] = data;
         let message = dispatchError.type;
@@ -23665,23 +23722,19 @@ const _extractEvents = (result) => {
             console.error('_extractEvents error:', error);
           }
         }
+        eventData.message = message;
+        eventHolder.push(eventData);
+        
         if (this.notify_cb) {
-          this.notify_cb('txUpdateEvent', {
-            //title: `${section}.${method}`,
-            section,
-            method,
-            message,
-          });
+          this.notify_cb('txUpdateEvent', eventData);
         }
         error = message;
       } else {
+        eventData.message = 'ok';
         if (this.notify_cb) {
-          this.notify_cb('txUpdateEvent', {
-            section,
-            method,
-            message: 'ok',
-          });
+          this.notify_cb('txUpdateEvent', eventData);
         }
+        eventHolder.push(eventData);
         if (section == 'system' && method == 'ExtrinsicSuccess') {
           success = true;
         }
@@ -23690,10 +23743,11 @@ const _extractEvents = (result) => {
   return { success, error };
 };
 
-const sendTx = (txInfo, paramList, isSudo) => {
+const sendTx = (txInfo, paramList, isSudo, eventCB) => {
   return new Promise((resolve) => {
     console.log('sendTx params:', paramList);
     let tx = this.api.tx[txInfo.module][txInfo.call](...paramList);
+    let eventHolder = [];
 
     if (isSudo) {
       tx = this.api.tx.sudo.sudo(tx);
@@ -23702,9 +23756,9 @@ const sendTx = (txInfo, paramList, isSudo) => {
     let unsub = () => {};
     const onStatusChange = (result) => {
       if (result.status.isInBlock || result.status.isFinalized) {
-        const { success, error } = _extractEvents(result);
+        const { success, error } = _extractEvents(result, eventHolder);
         if (success) {
-          resolve({ hash: tx.hash.hash.toHuman() });
+          resolve({ hash: tx.hash.hash.toHuman(), events: eventHolder });
         }
         if (error) {
           resolve({ error });
@@ -23989,6 +24043,38 @@ const addCommodityType = async (type_id, type_desc) => {
   return sendTx(txInfo, [type_id, type_desc], true);
 };
 
+const createPowerLeaderBoard = async (app_id, model_id, sender_pub_key, sender_sign) => {
+  app_id = Number(app_id);
+
+  let txInfo = {
+    module: 'kp',
+    call: 'createPowerLeaderBoard',
+    pubKey: getDevAdmin().address,
+  };
+
+  model_id = model_id === '0' ? '' : model_id;
+
+  params = [app_id, model_id];
+  const result = await sendTx(txInfo, params, true);
+  console.log('createPowerLeaderBoard result:', result);
+  // here we care about 'LeaderBoardsCreated' event
+  for (var event of result.events) {
+    console.log("check event:", event);
+    if (event.method === 'LeaderBoardsCreated') {
+      console.log("found match event:", event);
+      // found
+      result.data = {
+        block: String(event.data[0]),
+        app_id: String(event.data[1]),
+        model_id: hexToString(event.data[2]),
+      }
+      break;
+    }
+  }
+   
+  return result;
+}
+
 // member interfaces
 /**
  * 设置APP root账户，仅在SUDO启用有效
@@ -24203,6 +24289,21 @@ const membersRemoveDeveloper = async (developer) => {
   return result;
 };
 
+const stableRedeem = async (app_id, cash_transaction_id, sender_pub_key) => {
+  app_id = Number(app_id);
+  
+  let txInfo = {
+    module: 'members',
+    call: 'stableRedeem',
+    pubKey: sender_pub_key,
+  };
+
+  params = [app_id, cash_transaction_id];
+  const result = await sendTx(txInfo, params);
+  console.log('stableRedeem result:', result);
+  return result;
+}
+
 const setModelMax = async (app_id, max_count) => {
   isKeyringReady();
   isApiReady();
@@ -24404,6 +24505,16 @@ const rpcCheckAccountIsModelCreator = async (accountId, appId, modelId) => {
   let result = await this.api.rpc.members.isModelCreator(accountId, { appId, modelId });
   console.log('rpcCheckAccountIsModelCreator result:', result);
   return JSON.stringify(result) === 'true';
+};
+
+const rpcLeaderBoardLoad = async (appId, modelId, block) => {
+  appId = Number(appId);
+  modelId = modelId === '0' ? '' : modelId;
+  block = Number(block);
+  let result = await this.api.rpc.kP.leaderBoardResult({appId, modelId, block});
+  console.log('rpcLeaderBoardLoad result:', result);
+
+  return result.toHuman();
 };
 
 // chain constant api
@@ -24712,6 +24823,57 @@ const queryAccountAttendPower = async () => {
   return results;
 };
 
+const queryLeaderBoardRecords = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.appLeaderBoardRcord;
+
+  const store = await entry.entries();
+  console.log('queryLeaderBoardRecords len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
+//AppModelCommodityLeaderBoards
+const queryRealtimeLeaderBoard = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.appModelCommodityLeaderBoards;
+
+  const store = await entry.entries();
+  console.log('queryRealtimeLeaderBoard len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
 const stableExchange = async (app_id, cash_receipt, receiver, amount, sender_pub_key) => {
   isKeyringReady();
   isApiReady();
@@ -24753,6 +24915,7 @@ module.exports = {
   createModel: createModel,
   disableModel: disableModel,
   addCommodityType: addCommodityType,
+  createPowerLeaderBoard: createPowerLeaderBoard,
 
   setModelMax: setModelMax, // needs root
 
@@ -24767,6 +24930,7 @@ module.exports = {
   membersAddDeveloper: membersAddDeveloper,
   membersRemoveDeveloper: membersRemoveDeveloper,
   membersStableExchange: stableExchange,
+  membersStabelRedeem: stableRedeem,
 
   // wallet interfaces:
   // accounts:
@@ -24787,6 +24951,7 @@ module.exports = {
   rpcCheckAccountIsPlatformExpert: rpcCheckAccountIsPlatformExpert,
   rpcCheckAccountIsModelExpert: rpcCheckAccountIsModelExpert,
   rpcCheckAccountIsModelCreator: rpcCheckAccountIsModelCreator,
+  rpcLeaderBoardLoad: rpcLeaderBoardLoad,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -24805,6 +24970,8 @@ module.exports = {
   queryKpComments: queryKpComments,
   queryMinerPower: queryMinerPower,
   queryAccountAttendPower: queryAccountAttendPower,
+  queryLeaderBoardRecords: queryLeaderBoardRecords,
+  queryRealtimeLeaderBoard: queryRealtimeLeaderBoard,
 };
 
 },{"@polkadot/api":277,"@polkadot/keyring":296,"@polkadot/util":675,"@polkadot/util-crypto":564,"bn.js":758,"fs":1}],165:[function(require,module,exports){
@@ -110518,6 +110685,14 @@ window.membersAddExpert = (app_id, modle_id, model_creator, model_creator_sign, 
     new_member_pub_key,
     kpt_profit_rate
   );
+
+/**
+ * 应用等值赎回
+ * @param {*} app_id 
+ * @param {*} cash_receipt 
+ * @param {*} sender_pub_key 
+ */
+window.memberStableRedeem = (app_id, cash_receipt, sender_pub_key) => Sub.membersStabelRedeem(app_id, cash_receipt, sender_pub_key);
 
 window.walletBalanceAll = (address) => Sub.balancesAll(address);
 window.walletTransfer = (srcAddress, destAddress, amount, password) =>
