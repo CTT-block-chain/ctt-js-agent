@@ -1,3 +1,4 @@
+const fs = require("fs");
 const XLSX = require('js-xlsx');
 const xlsx = require('node-xlsx');
 
@@ -31,7 +32,13 @@ function sub_notify_cb(method, data) {
 }
 
 const init = () => {
-  return sub.initKeyring().then(() => {
+  let sudojson = fs.readFileSync("./jsonrpc/keys/sudo.json");
+  if (sudojson) {
+    sudojson = JSON.parse(sudojson);
+    console.log(sudojson);
+  }
+
+  return sub.initKeyring(sudojson, sudojson.pwd).then(() => {
     const apiAddr = config.get('sub_endpoint');
     console.log('trying to connect to:', apiAddr);
 

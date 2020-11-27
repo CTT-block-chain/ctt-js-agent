@@ -1266,7 +1266,13 @@ const loadKeys = () => {
 
 // TODO: init api connection
 console.log('init keyring...');
-sub.initKeyring().then(() => {
+let sudojson = fs.readFileSync("./jsonrpc/keys/sudo.json");
+if (sudojson) {
+  sudojson = JSON.parse(sudojson);
+  console.log(sudojson);
+}
+
+sub.initKeyring(sudojson, sudojson.pwd).then(() => {
   console.log('init keyring done!');
   loadKeys();
 
@@ -1304,8 +1310,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5EYCAe5ijiYfyeZ2JJCGq56LmPyNRAKzpG4QkoQkkQNB5e6Z balance:', info);
   });
 
-  sub.balancesAll('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM').then((info) => {
-    console.log('5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM balance:', info);
+  sub.balancesAll('5EWfrDLxovYSxL16VZzbUbQjWjzzkk7ttrRxseJonhFfqhXE').then((info) => {
+    console.log('5EWfrDLxovYSxL16VZzbUbQjWjzzkk7ttrRxseJonhFfqhXE balance:', info);
   });
 
   //sub.devTransfer("5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg", "10000");
