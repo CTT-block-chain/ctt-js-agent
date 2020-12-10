@@ -1422,7 +1422,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('queryRealtimeLeaderBoard');
   });*/
 
-  sub.rpcStakeToVote("5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP", "100").then(result => {
+  sub.rpcStakeToVote("5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP", "99").then(result => {
     console.log("rpcStakeToVote result:", result);
   });
+
+  sub.queryAccountCommodities().then(result => {});
 });
