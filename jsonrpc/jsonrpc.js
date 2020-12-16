@@ -1422,9 +1422,30 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('queryRealtimeLeaderBoard');
   });*/
 
-  sub.rpcStakeToVote("5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP", "99").then(result => {
+  /*sub.rpcStakeToVote("5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP", "99").then(result => {
     console.log("rpcStakeToVote result:", result);
   });
 
-  sub.queryAccountCommodities().then(result => {});
+  sub.queryAccountCommodities().then(result => {});*/
+
+  /*sub.rpcLeaderBoardLoad('1000', '', '124045').then(result => {
+    console.log('rpcLeaderBoardLoad:', result);
+  });*/
+
+  /*sub.queryLeaderBoardRecords().then((result) => {
+    console.log('queryLeaderBoardRecords');
+  });*/
+
+  /*sub.queryRealtimeLeaderBoard().then((result) => {
+    console.log('queryRealtimeLeaderBoard');
+  });*/
+
+  /*sub.createPowerLeaderBoard('1000', '').then(result => {
+    console.log('createPowerLeaderBoard:', result);
+  })*/
+
+  sub.queryAccountInfoWithBlockNum('5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw', 2953).then(result => {});
+  sub.queryTotalIssuance();
+
+  sub.rpcAppFinanceRecord('1000', 'abc');
 });
