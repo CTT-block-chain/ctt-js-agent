@@ -786,6 +786,155 @@ server.expose('queryPowerLeader', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询账户可兑换融资额度
+ * {
+ *    sender_data: { 发送端数据
+ *      address: 账户地址 String
+ *      appId: 应用ID Number String
+ *      proposalId: 融资提案标识 String
+ *    }
+ *    返回值： 本次可兑换额度，只含整数部分 例如 '135'
+ * }
+ */
+server.expose('queryAppFinancedPortion', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`queryAppFinancedPortion:${args[0]}`);
+    const { address, appId, proposalId } = param.sender_data;
+
+    sub
+      .queryAppFinancedUserPortion(address, appId, proposalId)
+      .then((result) => {
+        console.log('queryAppFinancedPortion result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryAppFinancedPortion error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 应用融资提案
+ * {
+ *    data: { 
+ *      app_id: 应用ID Number String
+ *      proposal_id: 融资提案标识 String
+ *      kpt_amount: 融资KPT
+ *      exchange_amount: 融资法币
+ *    }
+ *    user_pub_key: 用户账户公钥 String (投资者账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_sign: 授信签名
+ * }
+ */
+server.expose('democracyAppFinanced', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`democracyAppFinanced:${args[0]}`);
+    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
+    const { app_id, proposal_id, kpt_amount, exchange_amount } = data;
+
+    // TODO: sign process
+
+    sub
+      .democracyAppFinanced(app_id, proposal_id, kpt_amount, exchange_amount, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .then((result) => {
+        console.log('democracyAppFinanced result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`democracyAppFinanced error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 用户融资兑换申请
+ * appId, proposalId, amount, user_key, user_sign, server_key, server_sign
+ * {
+ *    data: { 
+ *      app_id: 应用ID Number String
+ *      proposal_id: 融资提案标识 String
+ *      amount: 兑换KPT（经过了用户端提交及服务端校验的可兑换额度）
+ *    }
+ *    user_pub_key: 用户账户公钥 String (投资者账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_sign: 授信签名
+ * }
+ */
+server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`appFinancedUserExchangeRequest:${args[0]}`);
+    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
+    const { app_id, proposal_id, amount } = data;
+
+    // TODO: sign process
+    
+    sub
+      .appFinancedUserExchangeRequest(app_id, proposal_id, amount, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .then((result) => {
+        console.log('appFinancedUserExchangeRequest result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`appFinancedUserExchangeRequest error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 用户融资兑换确认
+ * appId, proposalId, user_key, user_sign, server_key, server_sign
+ * {
+ *    data: { 
+ *      app_id: 应用ID Number String
+ *      proposal_id: 融资提案标识 String
+ *    }
+ *    user_pub_key: 用户账户公钥 String (投资者账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_sign: 授信签名
+ * }
+ */
+server.expose('appFinancedUserExchangeConfirm', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`appFinancedUserExchangeConfirm:${args[0]}`);
+    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
+    const { app_id, proposal_id } = data;
+
+    // TODO: sign process
+    
+    sub
+      .appFinancedUserExchangeConfirm(app_id, proposal_id, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .then((result) => {
+        console.log('appFinancedUserExchangeConfirm result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`appFinancedUserExchangeConfirm error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+
 
 // server vote related interfaces
 
@@ -1402,9 +1551,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  sub.queryKpDocuments().then((result) => {
+  /*sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
-  });
+  });*/
 
   /*sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
     console.log('rpcGetCommodityPower:', result);

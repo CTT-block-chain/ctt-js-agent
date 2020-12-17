@@ -87,6 +87,14 @@ window.walletFetchReferendums = () => Sub.fetchCouncilVotes();
 window.queryTotalPower = () => Sub.rpcGetTotalPower();
 window.queryAccountPower = (address) => Sub.rpcGetAccountPower(address);
 window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_id, cart_ids);
+/**
+ * 查询指定账户在某次应用融资中的可兑换额度
+ * @param {*} address 账户地址 String
+ * @param {*} appId 应用ID Number or String
+ * @param {*} proposalId 融资提案标识 String
+ * 返回值： 本次可兑换额度，只含整数部分 例如 '135'
+ */
+window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFinancedUserPortion(address, appId, proposalId);
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
