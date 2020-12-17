@@ -2,11 +2,11 @@ const fs = require("fs");
 const sub = require('../../lib/sub');
 const config = require('../../config/config');
 
-const updateAppAdmin = async () => {
+const registerApp = async () => {
   let result = await sub
-    .membersSetAppAdmin('12345678', '5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc')
+    .sudoAddApp("Jainfa", "commodity_general", "5FBu3ez1KhVoZvJP6ikmLZzuCvMNhxGLycBHki4Ut4Zackxb", "5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc", 1)
     .catch((err) => {
-      console.error('sub.membersSetAppAdmin error:', err);
+      console.error('sub.sudoAddApp error:', err);
     });
 
   console.log('result:', result);
@@ -51,7 +51,7 @@ const init = () => {
 
     return sub.initApi(apiAddr, sub_notify_cb).then(() => {
       console.log('init api done!');
-      return updateAppAdmin()
+      return registerApp()
         .then((result) => {
           return updateAppRedeemAcount().then(result => {
             console.log('updateAppAdmin done!!!');

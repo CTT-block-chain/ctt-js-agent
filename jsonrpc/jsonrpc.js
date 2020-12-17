@@ -1402,9 +1402,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  /*sub.queryKpDocuments().then((result) => {
+  sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
-  });*/
+  });
 
   /*sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
     console.log('rpcGetCommodityPower:', result);
@@ -1444,8 +1444,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('createPowerLeaderBoard:', result);
   })*/
 
-  sub.queryAccountInfoWithBlockNum('5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw', 2953).then(result => {});
+  /*sub.queryAccountInfoWithBlockNum('5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw', 2953).then(result => {});
   sub.queryTotalIssuance();
 
-  sub.rpcAppFinanceRecord('1000', 'abc');
+  sub.rpcAppFinanceRecord('1000', 'abc');*/
 });
