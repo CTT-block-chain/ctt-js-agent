@@ -1352,6 +1352,27 @@ server.expose('queryCommodityPower', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询应用类型
+ * 无参数
+ */
+server.expose('queryAppTypes', (args, opt, callback) => {
+  try {
+    sub
+      .queryAppTypes()
+      .then((result) => {
+        console.log('queryAppTypes result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryAppTypes error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 // verify server api sign
 const verifyServerSign = (param) => {
@@ -1555,9 +1576,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('queryKpDocuments:');
   });*/
 
-  /*sub.rpcGetCommodityPower('12345678', ['178']).then(result => {
+  sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
     console.log('rpcGetCommodityPower:', result);
-  });*/
+  });
 
   /*sub.rpcLeaderBoardLoad('12345678', '0', '880').then(result => {
     console.log('rpcLeaderBoardLoad:', result);
@@ -1577,7 +1598,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.queryAccountCommodities().then(result => {});*/
 
-  /*sub.rpcLeaderBoardLoad('1000', '', '124045').then(result => {
+  /*sub.rpcLeaderBoardLoad('12345678', '36', '53836').then(result => {
     console.log('rpcLeaderBoardLoad:', result);
   });*/
 
@@ -1589,7 +1610,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('queryRealtimeLeaderBoard');
   });*/
 
-  /*sub.createPowerLeaderBoard('1000', '').then(result => {
+  /*sub.createPowerLeaderBoard('12345678', '').then(result => {
     console.log('createPowerLeaderBoard:', result);
   })*/
 
@@ -1597,4 +1618,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.queryTotalIssuance();
 
   sub.rpcAppFinanceRecord('1000', 'abc');*/
+
+  sub.queryAppTypes().then(result => {
+    console.log("result:", result);
+  })
 });

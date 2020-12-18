@@ -1,6 +1,6 @@
 curl -X POST \
      -H 'Content-Type: application/json' \
-     -d '{"jsonrpc":"2.0","id":"id","method":"subNewAccount","params":["{\"name\": \"bob\", \"pwd\": \"123456\"}"]}' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"queryCommodityPower","params":[{\"sender_data\":{\"app_id\":\"12345678\",\"cart_ids\":[\"174\"]}}]}' \
      http://39.106.116.92:5080
 
 
