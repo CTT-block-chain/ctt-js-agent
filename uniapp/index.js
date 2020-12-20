@@ -25,9 +25,10 @@ window.subHash = (msg) => Sub.hash(msg);
  * @param {*} comment_hash
  * @param {*} comment_fee // 点评费用（元）String: "0.00"
  * @param {*} comment_trend // 点评趋势 String：正点评"0" 负点评"1"
- * @param {*} sender_addr // APP钱包公钥
- * @param {*} server_addr // APP服务端公钥
- * @param {*} server_sign // APP服务端签名
+ * @param {*} owner_pub_key // 点评用户钱包公钥  交易发送方
+ * @param {*} owner_sign // 用户签名
+ * @param {*} auth_pub_key // APP服务端公钥
+ * @param {*} auth_sign // APP服务端签名
  */
 window.subComment = (
   app_id,
@@ -36,17 +37,34 @@ window.subComment = (
   comment_hash,
   comment_fee,
   comment_trend,
-  sender_addr,
-  server_addr,
-  server_sign
+  owner_pub_key,
+  owner_sign,
+  auth_pub_key,
+  auth_sign
 ) => {
   // data conversion
-  comment_fee = Math.round(Number(comment_fee) * 100);
-  comment_trend = Number(comment_trend);
   let comment = Comment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
+  return Sub.createComment(comment, owner_pub_key, owner_sign, auth_pub_key, auth_sign);
+};
 
-  // TODO: sender and owner sign
-  return Sub.createComment(comment, server_addr, server_sign, sender_addr, '0x0');
+// generate comment sign
+window.subCommentSign = (
+  appId,
+  documentId,
+  commentId,
+  commentHash,
+  commentFee,
+  commentTrend,
+  signer_addr,
+) => {
+  return Sub.paramsSign('CommentData', {
+    appId, 
+    documentId, 
+    commentId, 
+    commentHash, 
+    commentFee, 
+    commentTrend
+  }, signer_addr);
 };
 
 /**

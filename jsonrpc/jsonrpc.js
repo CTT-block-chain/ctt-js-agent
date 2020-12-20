@@ -5,7 +5,8 @@ const util = require('../lib/util');
 const config = require('../config/config');
 
 const document = require('../interface/document');
-const comment = require('../interface/comment');
+const InterfaceComment = require('../interface/comment');
+const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const model = require('../interface/model');
 const powerComplain = require('../interface/powerComplain');
 const appAdd = require('../interface/addApp');
@@ -1373,6 +1374,65 @@ server.expose('queryAppTypes', (args, opt, callback) => {
   }
 });
 
+// signer interfaces
+/**
+ * signParams 参数签名
+ * {
+ *    params_type: 类型 String 例如 CommentData
+ *    params_data: 数据，对于不同params_type, params_data不同
+ *    signer_address: 签名账户地址，确保已经加载
+ *    ---------------------------------------------------
+ *    curl example:
+ *    curl -X POST \
+ *    -H 'Content-Type: application/json' \
+ *    -d '{"jsonrpc":"2.0","id":"id","method":"signParams","params":["{\"params_type\":\"CommentData\",\"params_data\":{\"appId\":\"1000\",\"documentId\":\"123\",\"commentId\":\"1234\",\"commentHash\":\"0x998e22798b83792ab29ae246dc7d9f694be6d47ada6fd5f0014b662e2e609e76\",\"commentFee\":\"0.01\",\"commentTrend\":\"0\"},\"signer_address\":\"5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP\"}"]}' \
+ *    http://39.106.116.92:5080 
+ *    ---------------------------------------------------
+ *    对于 params_type 是 "CommentData":
+ *    params_data 传入以下JSON:
+ *    {
+ *      "appId": "1000"
+ *      "documentId": "123"
+ *      "commentId": "123" 
+ *      "commentHash" "0xxxx" 
+ *      "commentFee": "0.01" 
+ *      "commentTrend" "0"
+ *    }    
+ * }
+ */
+server.expose('signParams', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`signParams:${args[0]}`);
+  const { params_type, params_data, signer_address } = param;
+
+  let interfaceObj;
+  switch (params_type) {
+    case 'AppFinancedProposalParams': {
+      const {account, appId, proposalId, exchange, amount} = params_data; 
+      interfaceObj = InterfaceAppFinancedProposalParams.create(account, appId, proposalId, exchange, amount);
+      break;
+    }
+    case 'CommentData': {
+      const {app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend} = params_data;
+      interfaceObj = InterfaceComment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
+      break;
+    }
+    default:
+      console.error("signParams unknown type:", params_type);
+      sendResult(callback, { error: "unknown type"});
+      return;
+  }
+
+  try {
+    result = sub.paramsSign(params_type, interfaceObj, signer_address);
+    console.log('signParams result:', result);
+    sendResult(callback, { result });      
+  } catch (e) {
+    console.error(`signParams error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // support functions
 // verify server api sign
 const verifyServerSign = (param) => {
@@ -1619,7 +1679,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.rpcAppFinanceRecord('1000', 'abc');*/
 
-  sub.queryAppTypes().then(result => {
+  /*sub.queryAppTypes().then(result => {
     console.log("result:", result);
-  })
+  })*/
+
+  sub.test();
 });
