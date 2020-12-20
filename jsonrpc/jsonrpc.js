@@ -7,6 +7,7 @@ const config = require('../config/config');
 const document = require('../interface/document');
 const InterfaceComment = require('../interface/comment');
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
+const InterfaceAddAppParams = require('../interface/addAppParams');
 const model = require('../interface/model');
 const powerComplain = require('../interface/powerComplain');
 const appAdd = require('../interface/addApp');
@@ -828,9 +829,9 @@ server.expose('queryAppFinancedPortion', (args, opt, callback) => {
  *      kpt_amount: 融资KPT
  *      exchange_amount: 融资法币
  *    }
- *    user_pub_key: 用户账户公钥 String (投资者账户)
+ *    user_key: 用户账户公钥 String (投资者账户)
  *    user_sign: 用户数据签名 String
- *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_key: 授信服务器以及发送者公钥 String
  *    auth_sign: 授信签名
  * }
  */
@@ -838,13 +839,13 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`democracyAppFinanced:${args[0]}`);
-    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
+    const { data, user_key, user_sign, auth_key, auth_sign } = param;
     const { app_id, proposal_id, kpt_amount, exchange_amount } = data;
 
     // TODO: sign process
 
     sub
-      .democracyAppFinanced(app_id, proposal_id, kpt_amount, exchange_amount, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .democracyAppFinanced(app_id, proposal_id, kpt_amount, exchange_amount, user_key, user_sign, auth_key, auth_sign)
       .then((result) => {
         console.log('democracyAppFinanced result:', result);
         sendResult(callback, { result });
@@ -854,6 +855,46 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`democracyAppFinanced error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 注册应用提案
+ * {
+ *    app_data: { 
+ *      appType: 应用类型 （通过queryAppTypes 获取可用类型）String
+ *      appName: 应用名称 String
+ *      appKey: 应用身份公钥 String
+ *      appAdminKey: 应用管理公钥 String （确保该账户满足最小抵押）
+ *      returnRate：返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
+ *    }
+ *    user_key: 用户账户公钥 String (投资者账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_key: 授信服务器以及发送者公钥 String
+ *    auth_sign: 授信签名
+ * }
+ */
+server.expose('democracyAddApp', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`democracyAddApp:${args[0]}`);
+    const { app_data, user_key, user_sign, auth_key, auth_sign } = param;
+    const { appType, appName, appKey, appAdminKey, returnRate } = app_data;
+
+    let interfaceData = InterfaceAddAppParams.create(appType, appName, appKey, appAdminKey, returnRate);
+    
+    sub
+      .democracyAddApp(interfaceData, user_key, user_sign, auth_key, auth_sign)
+      .then((result) => {
+        console.log('democracyAddApp result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`democracyAddApp error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -1415,6 +1456,11 @@ server.expose('signParams', (args, opt, callback) => {
     case 'CommentData': {
       const {app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend} = params_data;
       interfaceObj = InterfaceComment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
+      break;
+    }
+    case 'AddAppParams': {
+      const {appType, appName, appKey, appAdminKey, returnRate} = params_data;
+      interfaceObj = InterfaceAddAppParams.create(appType, appName, appKey, appAdminKey, returnRate);
       break;
     }
     default:

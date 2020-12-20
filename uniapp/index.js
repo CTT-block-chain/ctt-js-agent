@@ -68,6 +68,32 @@ window.subCommentSign = (
 };
 
 /**
+ * 应用许可参数签名
+ * @param {*} appName 应用名称 String
+ * @param {*} appType 应用类型 （通过queryAppTypes 获取可用类型）String
+ * @param {*} identityKey 应用身份公钥 String
+ * @param {*} adminKey 应用管理公钥 String
+ * @param {*} returnRate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
+ * @param {*} signer_addr 签名公钥 String
+ */
+window.subAddAppParamsSign = (
+  appType,
+  appName,
+  appKey,
+  appAdminKey,
+  return_rate,
+  signer_addr
+) => {
+  return Sub.paramsSign('AddAppParams', {
+    appType,
+    appName,
+    appKey,
+    appAdminKey,
+    return_rate,
+  }, signer_addr);
+};
+
+/**
  * 增加模型专家组成员
  * @param {*} app_id
  * @param {*} modle_id
@@ -118,20 +144,6 @@ window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFin
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
 
 // democracy
-/**
- * 应用许可
- * @param {*} app_name 应用名称 String
- * @param {*} app_type 应用类型 （通过queryAppTypes 获取可用类型）String
- * @param {*} identity_key 应用身份公钥 String
- * @param {*} admin_key 应用管理公钥 String
- * @param {*} return_rate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
- * @param {*} sender_pub_key 发送账户公钥 String
- */
-window.democracyAddApp = (app_name, app_type, identity_key, admin_key, return_rate, sender_pub_key, deposit) => {
-  let addApp = AddApp.create(app_name, app_type, identity_key, admin_key, return_rate);
-  return Sub.democracyAddApp(addApp, sender_pub_key, deposit);
-};
-
 /**
  * 应用融资
  * @param {*} appId app_id Number String
