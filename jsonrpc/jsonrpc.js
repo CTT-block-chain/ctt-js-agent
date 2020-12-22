@@ -4,8 +4,6 @@ const sub = require('../lib/sub');
 const util = require('../lib/util');
 const config = require('../config/config');
 
-const document = require('../interface/document');
-const InterfaceComment = require('../interface/comment');
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAddAppParams = require('../interface/addAppParams');
 
