@@ -24561,20 +24561,9 @@ const democracyAppFinanced = async (appId, proposalId, kptAmount, exchangeAmount
 };
 
 // SUDO test code for app financed
-const sudoAppFinance = async (appId, proposalId, kptAmount, exchangeAmount, investorAccount, investorSign, authServerAccount, authSign) => {
+const sudoAppFinance = async (params, investorAccount, investorSign, authServerAccount, authSign) => {
   isKeyringReady();
   isApiReady();
-
-  let appFinancedProposalParams = {
-    account: investorAccount,
-    appId: Number(appId),
-    proposalId,
-    exchange: convertBalance(exchangeAmount),
-    amount: convertBalance(kptAmount),
-  };
-
-  let u8a = encode('AppFinancedProposalParams', appFinancedProposalParams);
-  investorSign = signU8a(investorAccount, u8a);
 
   const txInfo = {
     module: 'kp',
@@ -24582,7 +24571,7 @@ const sudoAppFinance = async (appId, proposalId, kptAmount, exchangeAmount, inve
     pubKey: getDevAdmin().address,
   };
 
-  const result = await sendTx(txInfo, [appFinancedProposalParams, investorAccount, investorSign, authServerAccount, authSign], true);
+  const result = await sendTx(txInfo, [params, investorAccount, investorSign, authServerAccount, authSign], true);
   console.log('sudoAppFinance result:', result);
 
   return result;
