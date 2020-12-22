@@ -8,9 +8,16 @@ const document = require('../interface/document');
 const InterfaceComment = require('../interface/comment');
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAddAppParams = require('../interface/addAppParams');
+
 const InterfaceAuthParamsCreateModel = require('../interface/authParamsCreateModel');
 const InterfaceClientParamsCreateModel = require('../interface/clientParamsCreateModel');
+
 const InterfaceClientParamsCreatePublishDoc = require('../interface/clientParamsCreatePublishDoc');
+const InterfaceClientParamsCreateIdentifyDoc = require('../interface/clientParamsCreateIdentifyDoc');
+const InterfaceClientParamsCreateTryDoc = require('../interface/clientParamsCreateTryDoc');
+const InterfaceClientParamsCreateChooseDoc = require('../interface/clientParamsCreateChooseDoc');
+const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCreateModelDoc');
+
 const powerComplain = require('../interface/powerComplain');
 const appAdd = require('../interface/addApp');
 
@@ -181,7 +188,7 @@ server.expose('subHash', (args, opt, callback) => {
 /**
  * product parameters publish
  * {
- *    data: { 发送端数据
+ *    data: {
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
@@ -221,24 +228,21 @@ server.expose('subProductPublish', (args, opt, callback) => {
 });
 
 /**
- * product indentify
+ * product identify document
  * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
+ *    data: {
  *      app_id: 应用ID String
+ *      document_id: 文章ID  String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *      cart_id: 购物车id String
  *      goods_price: 商品价格 String
  *      ident_rate: 参数鉴别率 String
  *      ident_consistence: 鉴别核实一致性  String
  *    }
  *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
- *      document_id: 文章ID  String
- *      model_id: 商品模型ID String
- *      product_id: 产品ID String
- *      content_hash: 文章hash String
- *      cart_id: 购物车id String
- *    }
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String 
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -247,37 +251,12 @@ server.expose('subProductIdentify', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
-    let { app_id, goods_price, ident_rate, ident_consistence } = param.sender_data;
+    const { app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id } = param.data;
+    
+    let params = InterfaceClientParamsCreateIdentifyDoc.create(app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id);
 
-    const verifyResult = verifyServerSign(param);
-
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    // conver $ to cent
-    goods_price = Math.round(Number(goods_price) * 100);
-    ident_rate = Math.round(Number(ident_rate) * 100);
-    ident_consistence = Math.round(Number(ident_consistence) * 100);
-
-    let doc = document.create(
-      app_id,
-      document_id,
-      1,
-      model_id,
-      product_id,
-      content_hash,
-      0,
-      0,
-      goods_price,
-      ident_rate,
-      ident_consistence,
-      cart_id
-    );
     sub
-      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .createDocument(1, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
         console.log('createDocument result:', result);
         sendResult(callback, { result });
@@ -292,24 +271,21 @@ server.expose('subProductIdentify', (args, opt, callback) => {
 });
 
 /**
- * product try
+ * product try document
  * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
+ *    data: {
  *      app_id: 应用ID String
+ *      document_id: 文章ID  String
+ *      product_id: 产品ID String
+ *      content_hash: 文章hash String
+ *      cart_id: 购物车id String
  *      goods_price: 商品价格 String
  *      offset_rate: 品鉴偏差率 String
  *      true_rate: 品鉴真实度 String
  *    }
  *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
- *      document_id: 文章ID  String
- *      model_id: 商品模型ID String
- *      product_id: 产品ID String
- *      content_hash: 文章hash String
- *      cart_id: 购物车id String
- *    }
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -319,38 +295,12 @@ server.expose('subProductTry', (args, opt, callback) => {
     console.log(`subProductIdentify:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { document_id, model_id, product_id, content_hash, cart_id } = param.app_data;
-    let { app_id, goods_price, offset_rate, true_rate } = param.sender_data;
+    const { app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id } = param.data;
+    
+    let params = InterfaceClientParamsCreateTryDoc.create(app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id);
 
-    const verifyResult = verifyServerSign(param);
-
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    goods_price = Math.round(Number(goods_price) * 100);
-    offset_rate = Math.round(Number(offset_rate) * 100);
-    true_rate = Math.round(Number(true_rate) * 100);
-
-    let doc = document.create(
-      app_id,
-      document_id,
-      2,
-      model_id,
-      product_id,
-      content_hash,
-      0,
-      0,
-      goods_price,
-      0,
-      0,
-      cart_id,
-      offset_rate,
-      true_rate
-    );
     sub
-      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .createDocument(2, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
         console.log('createDocument result:', result);
         sendResult(callback, { result });
@@ -365,22 +315,20 @@ server.expose('subProductTry', (args, opt, callback) => {
 });
 
 /**
- * product choose
+ * product choose document
  * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
+ *    data: {
  *      app_id: 应用ID String
- *      sell_count: 销售数量 Number String
- *      try_count: 体验数量 Number String
- *    }
- *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
  *      product_id: 产品ID String
  *      content_hash: 文章hash String
+ *      sell_count: 销售数量 Number String
+ *      try_count: 体验数量 Number String
  *    }
+ *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -390,41 +338,12 @@ server.expose('subProductChooseDoc', (args, opt, callback) => {
     console.log(`subProductIdentify:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { document_id, model_id, product_id, content_hash } = param.app_data;
-    let { app_id, sell_count, try_count } = param.sender_data;
+    const { app_id, document_id, model_id, product_id, content_hash, sell_count, try_count } = param.data;
 
-    const verifyResult = verifyServerSign(param);
+    let params = InterfaceClientParamsCreateChooseDoc.create(app_id, document_id, model_id, product_id, content_hash, sell_count, try_count);
 
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    sell_count = Number(sell_count);
-    try_count = Number(try_count);
-
-    let doc = document.create(
-      app_id,
-      document_id,
-      3,
-      model_id,
-      product_id,
-      content_hash,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      sell_count,
-      try_count,
-      0,
-      0
-    );
     sub
-      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .createDocument(3, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
         console.log('createDocument result:', result);
         sendResult(callback, { result });
@@ -441,20 +360,18 @@ server.expose('subProductChooseDoc', (args, opt, callback) => {
 /**
  * model create document
  * {
- *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
  *      app_id: 应用ID String
- *      producer_count: 生产数量 Number String
- *      product_count: 产品数量 Number String
- *    }
- *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
  *      product_id: 产品ID String
  *      content_hash: 文章hash String
+ *      producer_count: 生产数量 Number String
+ *      product_count: 产品数量 Number String
  *    }
+ *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -464,41 +381,12 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
     console.log(`subModelCreateDoc:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { document_id, model_id, product_id, content_hash } = param.app_data;
-    let { app_id, producer_count, product_count } = param.sender_data;
+    let { app_id, document_id, model_id, product_id, content_hash, producer_count, product_count } = param.data;
 
-    const verifyResult = verifyServerSign(param);
+    let params = InterfaceClientParamsCreateModelDoc.create(app_id, document_id, model_id, product_id, content_hash, producer_count, product_count);
 
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    producer_count = Number(producer_count);
-    product_count = Number(product_count);
-
-    let doc = document.create(
-      app_id,
-      document_id,
-      4,
-      model_id,
-      product_id,
-      content_hash,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      producer_count,
-      product_count
-    );
     sub
-      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .createDocument(4, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
         console.log('createDocument result:', result);
         sendResult(callback, { result });
