@@ -1,4 +1,5 @@
 {
   "prettier.printWidth": 120,
-  "yaml.format.printWidth": 120
+  "yaml.format.printWidth": 120,
+  "editor.formatOnSave": true
 }
