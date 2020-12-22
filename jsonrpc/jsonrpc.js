@@ -188,7 +188,7 @@ server.expose('subHash', (args, opt, callback) => {
 /**
  * product parameters publish
  * {
- *    data: {
+ *    data: { // ClientParamsCreatePublishDoc
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
@@ -230,7 +230,7 @@ server.expose('subProductPublish', (args, opt, callback) => {
 /**
  * product identify document
  * {
- *    data: {
+ *    data: { // ClientParamsCreateIdentifyDoc
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      product_id: 产品ID String
@@ -273,7 +273,7 @@ server.expose('subProductIdentify', (args, opt, callback) => {
 /**
  * product try document
  * {
- *    data: {
+ *    data: { // ClientParamsCreateTryDoc
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      product_id: 产品ID String
@@ -317,7 +317,7 @@ server.expose('subProductTry', (args, opt, callback) => {
 /**
  * product choose document
  * {
- *    data: {
+ *    data: { // ClientParamsCreateChooseDoc
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
@@ -360,7 +360,7 @@ server.expose('subProductChooseDoc', (args, opt, callback) => {
 /**
  * model create document
  * {
- *    sender_data: { 发送端数据
+ *    data: { // ClientParamsCreateModelDoc 
  *      app_id: 应用ID String
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
@@ -404,11 +404,11 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
  * 创建模型 
  * {
  *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
+ *    sender_data: { // AuthParamsCreateModel
  *      model_id: 商品模型ID String
  *    }
  *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
+ *    app_data: {  // ClientParamsCreateModel
  *      app_id: 应用ID String
  *      expert_id: 专家ID String
  *      commodity_name: 商品名称 String
