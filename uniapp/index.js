@@ -1,6 +1,4 @@
 const Sub = require('../lib/sub');
-const Comment = require('../interface/comment');
-const AddApp = require('../interface/addApp');
 const PowerComplain = require('../interface/powerComplain');
 const ModelDispute = require('../interface/modelDispute');
 
@@ -18,80 +16,47 @@ window.subHash = (msg) => Sub.hash(msg);
 
 // comment interface
 /**
- *
- * @param {*} app_id
- * @param {*} document_id
- * @param {*} comment_id
- * @param {*} comment_hash
- * @param {*} comment_fee // 点评费用（元）String: "0.00"
- * @param {*} comment_trend // 点评趋势 String：正点评"0" 负点评"1"
+ * @param {*} comment_params: {
+ *              app_id
+ *              document_id
+ *              comment_id
+ *              comment_hash
+ *              comment_fee // 点评费用（元）String: "0.00"
+ *              comment_trend // 点评趋势 String：正点评"0" 负点评"1"
+ *            }
  * @param {*} owner_pub_key // 点评用户钱包公钥  交易发送方
  * @param {*} owner_sign // 用户签名
  * @param {*} auth_pub_key // APP服务端公钥
  * @param {*} auth_sign // APP服务端签名
  */
 window.subComment = (
-  app_id,
-  document_id,
-  comment_id,
-  comment_hash,
-  comment_fee,
-  comment_trend,
+  comment_params,
   owner_pub_key,
   owner_sign,
   auth_pub_key,
   auth_sign
 ) => {
   // data conversion
-  let comment = Comment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
+  let comment = Sub.createSignObject('CommentData', comment_params);
   return Sub.createComment(comment, owner_pub_key, owner_sign, auth_pub_key, auth_sign);
 };
 
-// generate comment sign
-window.subCommentSign = (
-  appId,
-  documentId,
-  commentId,
-  commentHash,
-  commentFee,
-  commentTrend,
-  signer_addr,
-) => {
-  return Sub.paramsSign('CommentData', {
-    appId, 
-    documentId, 
-    commentId, 
-    commentHash, 
-    commentFee, 
-    commentTrend
-  }, signer_addr);
-};
-
 /**
- * 应用许可参数签名
- * @param {*} appName 应用名称 String
- * @param {*} appType 应用类型 （通过queryAppTypes 获取可用类型）String
- * @param {*} identityKey 应用身份公钥 String
- * @param {*} adminKey 应用管理公钥 String
- * @param {*} returnRate 返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
- * @param {*} signer_addr 签名公钥 String
+ * 对象签名
+ * @param {*} params_type 参数对象类型 String 具体包括以下：
+ * @param {*} params_obj 参数对象值，与接口调用对象一致
+ * @param {*} signer_key 签名公钥，需确保已加载
  */
-window.subAddAppParamsSign = (
-  appType,
-  appName,
-  appKey,
-  appAdminKey,
-  return_rate,
-  signer_addr
-) => {
-  return Sub.paramsSign('AddAppParams', {
-    appType,
-    appName,
-    appKey,
-    appAdminKey,
-    return_rate,
-  }, signer_addr);
-};
+window.signParams = (params_type, params_obj, signer_key) => {
+  let sign_obj = Sub.createSignObject(params_type, params_obj);
+  if (!sign_obj) {
+    console.error("create sign object fail", params_type, params_obj);
+    return null;
+  }
+
+  return Sub.paramsSign(params_type, sign_obj, signer_key);
+}
+
 
 /**
  * 增加模型专家组成员

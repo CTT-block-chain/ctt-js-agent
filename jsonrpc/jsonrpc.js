@@ -8,7 +8,9 @@ const document = require('../interface/document');
 const InterfaceComment = require('../interface/comment');
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAddAppParams = require('../interface/addAppParams');
-const model = require('../interface/model');
+const InterfaceAuthParamsCreateModel = require('../interface/authParamsCreateModel');
+const InterfaceClientParamsCreateModel = require('../interface/clientParamsCreateModel');
+const InterfaceClientParamsCreatePublishDoc = require('../interface/clientParamsCreatePublishDoc');
 const powerComplain = require('../interface/powerComplain');
 const appAdd = require('../interface/addApp');
 
@@ -179,20 +181,18 @@ server.expose('subHash', (args, opt, callback) => {
 /**
  * product parameters publish
  * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
+ *    data: { 发送端数据
  *      app_id: 应用ID String
- *      para_issue_rate: 参数发布率 String
- *      self_issue_rate: 自证参数发布率 String
- *    }
- *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
  *      document_id: 文章ID  String
  *      model_id: 商品模型ID String
  *      product_id: 产品ID String
  *      content_hash: 文章hash String
+ *      para_issue_rate: 参数发布率 String
+ *      self_issue_rate: 自证参数发布率 String
  *    }
+ *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -201,38 +201,12 @@ server.expose('subProductPublish', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { document_id, model_id, product_id, content_hash } = param.app_data;
-    let { app_id, para_issue_rate, self_issue_rate } = param.sender_data;
+    let { app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate } = param.data;
 
-    const verifyResult = verifyServerSign(param);
+    let params = InterfaceClientParamsCreatePublishDoc.create(app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate);
 
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    // TODO: data fields validation check
-    para_issue_rate = Math.round(Number(para_issue_rate) * 100);
-    self_issue_rate = Math.round(Number(self_issue_rate) * 100);
-
-    let doc = document.create(
-      app_id,
-      document_id,
-      0,
-      model_id,
-      product_id,
-      content_hash,
-      para_issue_rate,
-      self_issue_rate,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    );
     sub
-      .createDocument(doc, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .createDocument(0, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
         console.log('createDocument result:', result);
         sendResult(callback, { result });
@@ -539,17 +513,16 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
 });
 
 /**
- *  product model operation
+ * 创建模型 
  * {
  *    sender_pub_key: 发送者公钥 String
  *    sender_data: { 发送端数据
- *      app_id: 应用ID String
  *      model_id: 商品模型ID String
- *      expert_id: 专家ID String
- *      interface_status: 接口状态 String("0": 废止, "1": 创建)
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_data: {  应用数据
+ *      app_id: 应用ID String
+ *      expert_id: 专家ID String
  *      commodity_name: 商品名称 String
  *      commodity_type: 商品类型 String
  *      content_hash: String
@@ -558,41 +531,29 @@ server.expose('subModelCreateDoc', (args, opt, callback) => {
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose('subModelOperate', (args, opt, callback) => {
+server.expose('subModelCreate', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`subModelOperate:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { commodity_name, commodity_type, content_hash } = param.app_data;
-    const { app_id, model_id, expert_id, interface_status } = param.sender_data;
+    const { app_id, expert_id, commodity_name, commodity_type, content_hash } = param.app_data;
+    const { model_id } = param.sender_data;
 
-    const verifyResult = verifyServerSign(param);
+    
+    let clientParams = InterfaceClientParamsCreateModel.create(app_id, expert_id, commodity_name, commodity_type, content_hash);
+    let authParams = InterfaceAuthParamsCreateModel.create(model_id);
 
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
-    let api;
-    let mod = model.create(app_id, model_id, expert_id, commodity_name, Number(commodity_type), content_hash);
-
-    if (interface_status === '1') {
-      api = sub.createModel;
-    } else {
-      api = sub.disableModel;
-    }
-
-    api(mod, app_pub_key, app_sign, sender_pub_key, sender_sign)
+    sub.createModel(clientParams, authParams, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log('modelOperate result:', result);
+        console.log('subModelCreate result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
         sendResult(callback, { error: err });
       });
   } catch (e) {
-    console.error(`subModelOperate error: ${e}`);
+    console.error(`subModelCreate error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -1426,18 +1387,18 @@ server.expose('queryAppTypes', (args, opt, callback) => {
  *    curl example:
  *    curl -X POST \
  *    -H 'Content-Type: application/json' \
- *    -d '{"jsonrpc":"2.0","id":"id","method":"signParams","params":["{\"params_type\":\"CommentData\",\"params_data\":{\"appId\":\"1000\",\"documentId\":\"123\",\"commentId\":\"1234\",\"commentHash\":\"0x998e22798b83792ab29ae246dc7d9f694be6d47ada6fd5f0014b662e2e609e76\",\"commentFee\":\"0.01\",\"commentTrend\":\"0\"},\"signer_address\":\"5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP\"}"]}' \
+ *    -d '{"jsonrpc":"2.0","id":"id","method":"signParams","params":["{\"params_type\":\"CommentData\",\"params_data\":{\"app_id\":\"1000\",\"document_id\":\"123\",\"comment_id\":\"1234\",\"comment_hash\":\"0x998e22798b83792ab29ae246dc7d9f694be6d47ada6fd5f0014b662e2e609e76\",\"comment_fee\":\"0.01\",\"comment_trend\":\"0\"},\"signer_address\":\"5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP\"}"]}' \
  *    http://39.106.116.92:5080 
  *    ---------------------------------------------------
  *    对于 params_type 是 "CommentData":
  *    params_data 传入以下JSON:
  *    {
- *      "appId": "1000"
- *      "documentId": "123"
- *      "commentId": "123" 
- *      "commentHash" "0xxxx" 
- *      "commentFee": "0.01" 
- *      "commentTrend" "0"
+ *      "app_id": "1000"
+ *      "document_id": "123"
+ *      "comment_id": "123" 
+ *      "comment_hash" "0xxxx" 
+ *      "comment_fee": "0.01" 
+ *      "comment_trend" "0"
  *    }    
  * }
  */
@@ -1446,24 +1407,8 @@ server.expose('signParams', (args, opt, callback) => {
   console.log(`signParams:${args[0]}`);
   const { params_type, params_data, signer_address } = param;
 
-  let interfaceObj;
-  switch (params_type) {
-    case 'AppFinancedProposalParams': {
-      const {account, appId, proposalId, exchange, amount} = params_data; 
-      interfaceObj = InterfaceAppFinancedProposalParams.create(account, appId, proposalId, exchange, amount);
-      break;
-    }
-    case 'CommentData': {
-      const {app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend} = params_data;
-      interfaceObj = InterfaceComment.create(app_id, document_id, comment_id, comment_hash, comment_fee, comment_trend);
-      break;
-    }
-    case 'AddAppParams': {
-      const {appType, appName, appKey, appAdminKey, returnRate} = params_data;
-      interfaceObj = InterfaceAddAppParams.create(appType, appName, appKey, appAdminKey, returnRate);
-      break;
-    }
-    default:
+  let interfaceObj = sub.createSignObject(params_type, params_data);
+  if (!interfaceObj) {
       console.error("signParams unknown type:", params_type);
       sendResult(callback, { error: "unknown type"});
       return;
