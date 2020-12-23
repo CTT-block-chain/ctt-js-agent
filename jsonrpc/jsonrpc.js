@@ -17,7 +17,6 @@ const InterfaceClientParamsCreateChooseDoc = require('../interface/clientParamsC
 const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCreateModelDoc');
 
 const powerComplain = require('../interface/powerComplain');
-const appAdd = require('../interface/addApp');
 
 const server_white_list = require('./keys/wl.json');
 
