@@ -15,7 +15,7 @@ const InterfaceClientParamsCreateIdentifyDoc = require('../interface/clientParam
 const InterfaceClientParamsCreateTryDoc = require('../interface/clientParamsCreateTryDoc');
 const InterfaceClientParamsCreateChooseDoc = require('../interface/clientParamsCreateChooseDoc');
 const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCreateModelDoc');
-
+const InterfaceModelExpertDelMemberParams = require('../interface/modelExpertDelMemberParams');
 const powerComplain = require('../interface/powerComplain');
 
 const server_white_list = require('./keys/wl.json');
@@ -950,16 +950,14 @@ server.expose('membersOperatePlatformExpert', (args, opt, callback) => {
 /**
  * 删除模型专家组成员
  * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
- *    }
- *    app_pub_key: 应用公钥 String
- *    app_data: {  应用数据
+ *    data: {  应用数据
  *      app_id: 应用ID String
  *      model_id: 商品模型ID String
- *      old_member_pub_key: 待删除成员公钥 String
+ *      member: 待删除成员公钥 String
  *    }
+ *    app_pub_key: 用户公钥 String
  *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
@@ -967,21 +965,14 @@ server.expose('membersRemoveExpertByCreator', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersRemoveExpertByCreator:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign, app_pub_key, app_sign } = param;
-    const { app_id, model_id, old_member_pub_key } = param.app_data;
+    const { sender_pub_key, sender_sign, app_pub_key, app_sign } = param;
+    const { app_id, model_id, member } = param.data;
 
-    const verifyResult = verifyServerSign(param);
-
-    if (!verifyResult.isOk) {
-      sendResult(callback, { error: verifyResult.msg });
-      return;
-    }
-
+    let params = InterfaceModelExpertDelMemberParams.create(app_id, model_id, member);
+    
     sub
       .membersRemoveExpertByCreator(
-        app_id,
-        model_id,
-        old_member_pub_key,
+        params,
         app_pub_key,
         app_sign,
         sender_pub_key,
