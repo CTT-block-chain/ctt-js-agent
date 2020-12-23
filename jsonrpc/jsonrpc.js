@@ -715,23 +715,21 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
  *      appAdminKey: 应用管理公钥 String （确保该账户满足最小抵押）
  *      returnRate：返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
  *    }
- *    user_key: 用户账户公钥 String (投资者账户)
+ *    user_key: 用户账户公钥 String (appAdminKey)
  *    user_sign: 用户数据签名 String
- *    auth_key: 授信服务器以及发送者公钥 String
- *    auth_sign: 授信签名
  * }
  */
 server.expose('democracyAddApp', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`democracyAddApp:${args[0]}`);
-    const { app_data, user_key, user_sign, auth_key, auth_sign } = param;
+    const { app_data, user_key, user_sign } = param;
     const { appType, appName, appKey, appAdminKey, returnRate } = app_data;
 
     let interfaceData = InterfaceAddAppParams.create(appType, appName, appKey, appAdminKey, returnRate);
     
     sub
-      .democracyAddApp(interfaceData, user_key, user_sign, auth_key, auth_sign)
+      .democracyAddApp(interfaceData, user_key, user_sign)
       .then((result) => {
         console.log('democracyAddApp result:', result);
         sendResult(callback, { result });
