@@ -18,14 +18,13 @@
 
         console.log('start sign');
         let sign = signParams(
-          'CommentData',
+          'AddAppParams',
           {
-            app_id: '1000',
-            document_id: '123',
-            comment_id: '123',
-            comment_hash: '0x998e22798b83792ab29ae246dc7d9f694be6d47ada6fd5f0014b662e2e609e76',
-            comment_fee: '0.01',
-            comment_trend: '0',
+            app_type: 'test',
+            app_name: 'abc',
+            app_key: testAccount.json.address,
+            app_admin_key: testAccount.json.address,
+            return_rate: 1,
           },
           testAccount.json.address
         );
