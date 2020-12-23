@@ -9,8 +9,8 @@ module.exports = {
 			contentHash: content_hash,
 			goodsPrice: Math.round(Number(goods_price) * 100),
 			offsetRate: Math.round(Number(offset_rate) * 100),
-			true_rate: Math.round(Number(true_rate) * 100),
-			cart_id,
+			trueRate: Math.round(Number(true_rate) * 100),
+			cartId: cart_id,
     };
   },
 
