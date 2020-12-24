@@ -1038,21 +1038,14 @@ server.expose('membersAirDropNewUserBenefit', (args, opt, callback) => {
  *      app_id: 应用ID String
  *      investor: 投资账户地址 String
  *    }
- *    sender_sign: 发送者签名 String
  * }
  */
 server.expose('membersAddInvestor', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersAddInvestor:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign } = param;
-    const { app_id, investor } = param.sender_data;
-
-    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
-    if (!verify.isValid) {
-      sendResult(callback, { error: 'sign veify fail' });
-      return;
-    }
+    const { sender_pub_key, sender_data } = param;
+    const { app_id, investor } = sender_data;
 
     sub
       .membersAddInvestor(sender_pub_key, app_id, investor)
