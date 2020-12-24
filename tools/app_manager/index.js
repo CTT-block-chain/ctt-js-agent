@@ -4,7 +4,7 @@ const config = require('../../config/config');
 
 const registerApp = async () => {
   let result = await sub
-    .sudoAddApp("Jainfa", "commodity_general", "5FBu3ez1KhVoZvJP6ikmLZzuCvMNhxGLycBHki4Ut4Zackxb", "5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc", 1)
+    .sudoAddApp("Jainfa", "default", "5FBu3ez1KhVoZvJP6ikmLZzuCvMNhxGLycBHki4Ut4Zackxb", "5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc", 1)
     .catch((err) => {
       console.error('sub.sudoAddApp error:', err);
     });

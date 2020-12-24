@@ -3,7 +3,7 @@ const sub = require('../../lib/sub');
 const config = require('../../config/config');
 
 const updateAppModelMaxCount = async () => {
-  let result = await sub.setModelMax('12345678', 1000).catch((err) => {
+  let result = await sub.setModelMax('100000001', 1000).catch((err) => {
     console.error('sub.setModelMax error:', err);
   });
 
