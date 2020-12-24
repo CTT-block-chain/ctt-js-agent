@@ -1501,9 +1501,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('queryKpDocuments:');
   });*/
 
-  sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
+  /*sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
     console.log('rpcGetCommodityPower:', result);
-  });
+  });*/
 
   /*sub.rpcLeaderBoardLoad('12345678', '0', '880').then(result => {
     console.log('rpcLeaderBoardLoad:', result);
@@ -1548,5 +1548,21 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("result:", result);
   })*/
 
-  sub.test();
+  //sub.test();
+  sub.queryApps();
+
+  // test democracy
+  /*let addApp = sub.createSignObject('AddAppParams', {
+    app_type: 'commodity_general', 
+    app_name: 'mytest', 
+    app_key: sub.getDevAdmin().address, 
+    app_admin_key: sub.getDevAdmin().address, 
+    return_rate: '10'
+  });
+
+  let sign = sub.paramsSign('AddAppParams', addApp, sub.getDevAdmin().address);
+
+  sub.democracyAddApp(addApp, sub.getDevAdmin().address, sign).then(result => {
+    console.log('result:', result);
+  })*/
 });
