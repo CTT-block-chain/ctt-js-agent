@@ -670,6 +670,7 @@ server.expose('queryAppFinancedPortion', (args, opt, callback) => {
  * 应用融资提案
  * {
  *    data: { 
+ *      account: 融资账户公钥
  *      app_id: 应用ID Number String
  *      proposal_id: 融资提案标识 String
  *      kpt_amount: 融资KPT
@@ -686,10 +687,11 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`democracyAppFinanced:${args[0]}`);
     const { data, user_key, user_sign, auth_key, auth_sign } = param;
-    const { app_id, proposal_id, kpt_amount, exchange_amount } = data;
+    
+    let financedParams = sub.createSignObject('AppFinancedProposalParams', data);
 
     sub
-      .democracyAppFinanced(app_id, proposal_id, kpt_amount, exchange_amount, user_key, user_sign, auth_key, auth_sign)
+      .democracyAppFinanced(financedParams, user_key, user_sign, auth_key, auth_sign)
       .then((result) => {
         console.log('democracyAppFinanced result:', result);
         sendResult(callback, { result });
