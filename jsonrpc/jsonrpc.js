@@ -709,11 +709,11 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
  * 注册应用提案
  * {
  *    app_data: { 
- *      appType: 应用类型 （通过queryAppTypes 获取可用类型）String
- *      appName: 应用名称 String
- *      appKey: 应用身份公钥 String
- *      appAdminKey: 应用管理公钥 String （确保该账户满足最小抵押）
- *      returnRate：返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
+ *      app_type: 应用类型 （通过queryAppTypes 获取可用类型）String
+ *      app_name: 应用名称 String
+ *      app_key: 应用身份公钥 String
+ *      app_admin_key: 应用管理公钥 String （确保该账户满足最小抵押）
+ *      return_rate：返点比例 '0' - '9999'  万分比 例如 ‘100’ 为 100/10000 即 1% String
  *    }
  *    user_key: 用户账户公钥 String (appAdminKey)
  *    user_sign: 用户数据签名 String
@@ -724,9 +724,9 @@ server.expose('democracyAddApp', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`democracyAddApp:${args[0]}`);
     const { app_data, user_key, user_sign } = param;
-    const { appType, appName, appKey, appAdminKey, returnRate } = app_data;
+    
 
-    let interfaceData = InterfaceAddAppParams.create(appType, appName, appKey, appAdminKey, returnRate);
+    let interfaceData = sub.createSignObject('AddAppParams', app_data);
     
     sub
       .democracyAddApp(interfaceData, user_key, user_sign)
