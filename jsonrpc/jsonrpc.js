@@ -688,8 +688,6 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
     const { data, user_key, user_sign, auth_key, auth_sign } = param;
     const { app_id, proposal_id, kpt_amount, exchange_amount } = data;
 
-    // TODO: sign process
-
     sub
       .democracyAppFinanced(app_id, proposal_id, kpt_amount, exchange_amount, user_key, user_sign, auth_key, auth_sign)
       .then((result) => {
@@ -724,7 +722,6 @@ server.expose('democracyAddApp', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`democracyAddApp:${args[0]}`);
     const { app_data, user_key, user_sign } = param;
-    
 
     let interfaceData = sub.createSignObject('AddAppParams', app_data);
     
@@ -765,8 +762,6 @@ server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
     const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
     const { app_id, proposal_id, amount } = data;
 
-    // TODO: sign process
-    
     sub
       .appFinancedUserExchangeRequest(app_id, proposal_id, amount, user_pub_key, user_sign, auth_pub_key, auth_sign)
       .then((result) => {
