@@ -1539,7 +1539,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  sub.queryApps();
+  // sub.queryApps();
 
   // test democracy
   /*let addApp = sub.createSignObject('AddAppParams', {
@@ -1555,4 +1555,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.democracyAddApp(addApp, sub.getDevAdmin().address, sign).then(result => {
     console.log('result:', result);
   })*/
+
+  //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608889493000').then(result => {});
+  sub.queryAppFinancedRecords();
 });
