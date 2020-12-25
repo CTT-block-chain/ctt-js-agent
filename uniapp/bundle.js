@@ -23356,8 +23356,12 @@ const chainDataTypes = {
     appId: 'u32',
     modelId: 'Vec<u8>',
     member: 'AccountId'
-  }
+  },
 
+  AppData: {
+    name: 'Vec<u8>',
+    returnRate: 'u32'
+  }
 };
 
 const rpc = {
@@ -24480,8 +24484,33 @@ const constBalanceExistentialDeposit = () => {
 // democracy
 const createPreImage = (txModule, method, paramList) => {
   let tx = this.api.tx[txModule][method](...paramList);
-  // console.log('createPreImage:', tx);
-  return blake2AsHex(tx.method.toHex());
+  return tx.method.toHex();
+};
+
+const submitPreimage = async (image, pubKey) => {
+  const txInfo = {
+    module: 'democracy',
+    call: 'notePreimage',
+    pubKey,
+  };
+
+  let result = await sendTx(txInfo, [image], false);
+  console.log('submitPreimage result:', result);
+  return result;
+}
+
+const submitProposal = async (imageHash, deposit, pubKey) => {
+  const txInfo = {
+    module: 'democracy',
+    call: 'propose',
+    pubKey,
+  };
+
+  deposit = getDeposit(deposit);
+  result = await sendTx(txInfo, [imageHash, deposit], false);
+  console.log('submitProposal result:', result);
+
+  return result;
 };
 
 const getDeposit = (deposit) => {
@@ -24509,19 +24538,13 @@ const democracyPowerComplain = async (powerComplain, sender_pub_key, deposit) =>
   let { app_id, cart_id, comment_id } = powerComplain;
   app_id = Number(app_id);
 
-  let imageHash = createPreImage('kp', 'democracySlashCommodityPower', [app_id, cart_id, comment_id, sender_pub_key]);
+  let image = createPreImage('kp', 'democracySlashCommodityPower', [app_id, cart_id, comment_id, sender_pub_key]);
+  let imageHash = blake2AsHex(image);
   console.log('imageHash:', imageHash);
 
-  // submit purposol
-  const txInfo = {
-    module: 'democracy',
-    call: 'propose',
-    pubKey: sender_pub_key,
-  };
-
-  deposit = getDeposit(deposit);
-  const result = await sendTx(txInfo, [imageHash, deposit], false);
-  console.log('democracyPowerComplain result:', result);
+  // submit pre-image first
+  await submitPreimage(image, sender_pub_key);
+  const result = await submitProposal(imageHash, deposit, sender_pub_key);
 
   return result;
 };
@@ -24533,19 +24556,13 @@ const democracyModelDispute = async (modelDispute, sender_pub_key, deposit) => {
   let { app_id, model_id, dispute_type, comment_id } = modelDispute;
   app_id = Number(app_id);
 
-  let imageHash = createPreImage('kp', 'democracyModelDispute', [app_id, model_id, dispute_type, comment_id, sender_pub_key]);
+  let image = createPreImage('kp', 'democracyModelDispute', [app_id, model_id, dispute_type, comment_id, sender_pub_key]);
+  let imageHash = blake2AsHex(image);
   console.log('imageHash:', imageHash);
 
-  // submit purposol
-  const txInfo = {
-    module: 'democracy',
-    call: 'propose',
-    pubKey: sender_pub_key,
-  };
-
-  deposit = getDeposit(deposit);
-  const result = await sendTx(txInfo, [imageHash, deposit], false);
-  console.log('democracyModelDispute result:', result);
+  // submit pre-image first
+  await submitPreimage(image, sender_pub_key);
+  const result = await submitProposal(imageHash, deposit, sender_pub_key);
 
   return result;
 };
@@ -24554,19 +24571,13 @@ const democracyAddApp = async (appAdd, user_key, user_sign, deposit) => {
   isKeyringReady();
   isApiReady();
 
-  let imageHash = createPreImage('kp', 'democracyAddApp', [appAdd, user_key, user_sign]);
+  let image = createPreImage('kp', 'democracyAddApp', [appAdd, user_key, user_sign]);
+  let imageHash = blake2AsHex(image);
   console.log('imageHash:', imageHash);
 
-  // submit purposol
-  const txInfo = {
-    module: 'democracy',
-    call: 'propose',
-    pubKey: auth_key,
-  };
-
-  deposit = getDeposit(deposit);
-  const result = await sendTx(txInfo, [imageHash, deposit], false);
-  console.log('democracyAddApp result:', result);
+  // submit pre-image first
+  await submitPreimage(image, user_key);
+  const result = await submitProposal(imageHash, deposit, user_key);
 
   return result;
 };
@@ -24612,25 +24623,20 @@ const democracyAppFinanced = async (appId, proposalId, kptAmount, exchangeAmount
     amount: convertBalance(kptAmount),
   };
 
-  let imageHash = createPreImage('kp', 'democracyAppFinanced', [
+  let image = createPreImage('kp', 'democracyAppFinanced', [
     appFinancedProposalParams,
     investorAccount,
     investorSign,
     authServerAccount,
     authSign
   ]);
+  
+  let imageHash = blake2AsHex(image);
   console.log('imageHash:', imageHash);
 
-  // submit purposol
-  const txInfo = {
-    module: 'democracy',
-    call: 'propose',
-    pubKey: authServerAccount,
-  };
-
-  deposit = getDeposit(deposit);
-  const result = await sendTx(txInfo, [imageHash, deposit], false);
-  console.log('democracyAppFinanced result:', result);
+  // submit pre-image first
+  await submitPreimage(image, authServerAccount);
+  const result = await submitProposal(imageHash, deposit, authServerAccount);
 
   return result;
 };
@@ -24885,6 +24891,31 @@ const queryAccountCommodities = async () => {
 
   const store = await entry.entries();
   console.log('queryAccountCommodities len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
+const queryApps = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.members.appDataMap;
+
+  const store = await entry.entries();
+  console.log('queryApps len:', store.length);
 
   let results = [];
 
@@ -25199,6 +25230,7 @@ module.exports = {
   queryTotalIssuance: queryTotalIssuance,
   queryAccountInfoWithBlockNum: queryAccountInfoWithBlockNum,
   queryAppFinancedUserPortion: queryAppFinancedUserPortion,
+  queryApps: queryApps,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
@@ -91024,18 +91056,6 @@ window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFin
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
-
-// democracy
-/**
- * 应用融资
- * @param {*} appId app_id Number String
- * @param {*} kptAmount 融资发行KPT数量 String, 单位KPT
- * @param {*} exchangeRate 1法币可兑换多少KPT String
- * @param {*} sender_pub_key 发送账户公钥 String
- */
-window.democracyAppFinanced = (appId, kptAmount, exchangeRate, sender_pub_key, deposit) => {
-  return Sub.democracyAppFinanced(appId, kptAmount, exchangeRate, sender_pub_key, deposit);
-};
 
 /**
  * 算力投诉
