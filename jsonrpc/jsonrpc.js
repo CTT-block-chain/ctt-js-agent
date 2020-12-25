@@ -673,8 +673,8 @@ server.expose('queryAppFinancedPortion', (args, opt, callback) => {
  *      account: 融资账户公钥
  *      app_id: 应用ID Number String
  *      proposal_id: 融资提案标识 String
- *      kpt_amount: 融资KPT
- *      exchange_amount: 融资法币
+ *      amount: 融资KPT
+ *      exchange: 融资法币
  *    }
  *    user_key: 用户账户公钥 String (投资者账户)
  *    user_sign: 用户数据签名 String
