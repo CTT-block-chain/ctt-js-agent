@@ -775,9 +775,9 @@ server.expose('democracyAddApp', (args, opt, callback) => {
  *      proposal_id: 融资提案标识 String
  *      amount: 兑换KPT（经过了用户端提交及服务端校验的可兑换额度）
  *    }
- *    user_pub_key: 用户账户公钥 String (投资者账户)
+ *    user_key: 用户账户公钥 String (投资者账户)
  *    user_sign: 用户数据签名 String
- *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_key: 授信服务器以及发送者公钥 String
  *    auth_sign: 授信签名
  * }
  */
@@ -785,12 +785,30 @@ server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`appFinancedUserExchangeRequest:${args[0]}`);
-    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
+    const { data, user_key, user_sign, auth_key, auth_sign } = param;
     
     let signObj = sub.createSignObject(AppFinancedUserExchangeParams, data);
 
+    // verify sign
+    let buf = InterfaceAppFinancedUserExchangeParams.encode(signObj);
+    let verify = sub.verify(auth_key, buf, auth_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for auth';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
+    verify = sub.verify(user_key, buf, user_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for user';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
     sub
-      .appFinancedUserExchangeRequest(signObj, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .appFinancedUserExchangeRequest(signObj, user_key, user_sign, auth_key, auth_sign)
       .then((result) => {
         console.log('appFinancedUserExchangeRequest result:', result);
         sendResult(callback, { result });
@@ -813,18 +831,19 @@ server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
  *      proposal_id: 融资提案标识 String
  *      pay_id: 支付号 String
  *    }
- *    auth_pub_key: 授信服务器以及发送者公钥 String
+ *    auth_key: 授信服务器以及发送者公钥 String
  * }
  */
 server.expose('appFinancedUserExchangeConfirm', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`appFinancedUserExchangeConfirm:${args[0]}`);
-    const { data } = param;
-    const { app_id, proposal_id, account, pay_id } = data;
+    const { data, auth_key } = param;
+    
+    let signObj = InterfaceAppFinancedUserExchangeConfirmParams.create(data);
 
     sub
-      .appFinancedUserExchangeConfirm(app_id, proposal_id, account, pay_id, auth_pub_key)
+      .appFinancedUserExchangeConfirm(signObj, auth_key)
       .then((result) => {
         console.log('appFinancedUserExchangeConfirm result:', result);
         sendResult(callback, { result });
@@ -1584,7 +1603,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.setupAccountByJson(json);
   sub.unlock(json.address, '123456');
 
-  let data = JSON.parse('{"amount":"1200000","proposal_id":"1608904281000","account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","exchange":"120000"}');
+  let data = JSON.parse('{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","proposal_id":"1608958475000","exchange":"10","amount":"1000000"}');
 
   let signObj = sub.createSignObject(AppFinancedProposalParams, data);
   console.log("signObj:", signObj);
@@ -1592,11 +1611,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let sign = sub.paramsSign(AppFinancedProposalParams, signObj, json.address);
   console.log('sign:', sign);
 
-  let testSign = '0xb4af62f15cb8c1edd62669e0bdf1bfcd0e855450c92686240a57695678aa76350ce71aa08d002cc4b2481684e1af652e329e63ad709d83df4501beb0b31c5580';
+  let testSign = '0x6e0302a5ec20d4a00f4c87925b2a35d764b96ae405359975847be9fd65bb3f3dc98649af78f6d5ce66bfeabd2ec023e7c53bf2a963e9c14e862fd1fda188b087';
   let authSign = '0x02f5751434ab81f8bcb54235747e3370e99c443f253f33af3a78dec2e571ef0e41b3bf9a75d9f3d475183a4030a6f52dd9b987112cdb24c57b5961ec5e303d85';
 
   let u8a = InterfaceAppFinancedProposalParams.encode(signObj);
-  let verify = sub.verify(sub.getDevAdmin().address, u8a, authSign);
+  let verify = sub.verify('5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW', u8a, testSign);
   console.log("verify:", verify);*/
-
 });
