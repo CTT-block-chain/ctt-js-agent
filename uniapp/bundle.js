@@ -23279,6 +23279,18 @@ const chainDataTypes = {
     proposalId: 'Bytes',
   },
 
+  AppFinanceExchangeDataParams: {
+    appId: 'u32',
+    proposalId: 'Bytes',
+    account: 'AccountId'
+  },
+
+  AppFinanceExchangeDataRPC: {
+    exchangeAmount: 'u64',
+    status: 'u8', // 0: initial state, 1: reserved, 2: received cash and burned
+    payId: 'Bytes'
+  },
+
   AppFinancedUserExchangeConfirmParams: {
     account: 'AccountId',
     appId: 'u32',
@@ -23503,6 +23515,38 @@ const rpc = {
         },
       ],
       type: 'AppFinanceDataRPC',
+    },
+
+    appFinanceExchangeAccounts: {
+      description: 'get app finance exchange record accounts.',
+      params: [
+        {
+          name: 'params',
+          type: 'AppFinanceRecordParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'Vec<AccountId>',
+    },
+
+    appFinanceExchangeData: {
+      description: 'get app finance exchange data.',
+      params: [
+        {
+          name: 'params',
+          type: 'AppFinanceExchangeDataParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'AppFinanceExchangeDataRPC',
     },
   },
   members: {
@@ -24515,6 +24559,30 @@ const rpcAppFinanceRecord = async (appId, proposalId) => {
   return converted;
 }
 
+const getAppFinanceExchangeRecords = async (appId, proposalId) => {
+  // get accounts set first
+  appId = Number(appId);
+  let combines = [];
+
+  let accounts = await this.api.rpc.kp.appFinanceExchangeAccounts({appId, proposalId});
+  console.log('accounts:', accounts);
+  if (!!accounts && accounts.length > 0) {
+    // go through to get details
+    accounts.forEach(async (account) => {
+      data = await this.api.rpc.kp.appFinanceExchangeData({appId, proposalId, account});
+      console.log('getAppFinanceExchangeRecords data:', account, data.toHuman());
+      combines.push({
+        account,
+        exchange_amount: convertBN(data.exchangeAmount.mul(new BN(1e10))),
+        status: data.status.toString(),
+        pay_id: data.payId.toString()
+      });
+    });
+  }
+
+  return combines;
+}
+
 // chain constant api
 const constBalanceExistentialDeposit = () => {
   let v = this.api.consts.balances.existentialDeposit;
@@ -25275,6 +25343,7 @@ module.exports = {
   rpcLeaderBoardLoad: rpcLeaderBoardLoad,
   rpcStakeToVote: rpcStakeToVote,
   rpcAppFinanceRecord: rpcAppFinanceRecord,
+  getAppFinanceExchangeRecords: getAppFinanceExchangeRecords,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
