@@ -18,6 +18,12 @@ const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCr
 const InterfaceModelExpertDelMemberParams = require('../interface/modelExpertDelMemberParams');
 const powerComplain = require('../interface/powerComplain');
 
+const { AppFinancedProposalParams, AppFinancedUserExchangeParams, CommentData,
+  AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
+  ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
+  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams } = require('../lib/signParamsDefine');
+
+
 const server_white_list = require('./keys/wl.json');
 
 const server = rpc.Server.$create({
@@ -690,6 +696,24 @@ server.expose('democracyAppFinanced', (args, opt, callback) => {
     
     let financedParams = sub.createSignObject('AppFinancedProposalParams', data);
 
+    // verify sign
+    let buf = InterfaceAppFinancedProposalParams.encode(financedParams);
+    let verify = sub.verify(auth_key, buf, auth_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for auth';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
+    verify = sub.verify(user_key, buf, user_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for user';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
     sub
       .democracyAppFinanced(financedParams, user_key, user_sign, auth_key, auth_sign)
       .then((result) => {
@@ -744,9 +768,9 @@ server.expose('democracyAddApp', (args, opt, callback) => {
 
 /**
  * 用户融资兑换申请
- * appId, proposalId, amount, user_key, user_sign, server_key, server_sign
  * {
  *    data: { 
+ *      account: user_pub_key
  *      app_id: 应用ID Number String
  *      proposal_id: 融资提案标识 String
  *      amount: 兑换KPT（经过了用户端提交及服务端校验的可兑换额度）
@@ -762,10 +786,11 @@ server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`appFinancedUserExchangeRequest:${args[0]}`);
     const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
-    const { app_id, proposal_id, amount } = data;
+    
+    let signObj = sub.createSignObject(AppFinancedUserExchangeParams, data);
 
     sub
-      .appFinancedUserExchangeRequest(app_id, proposal_id, amount, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .appFinancedUserExchangeRequest(signObj, user_pub_key, user_sign, auth_pub_key, auth_sign)
       .then((result) => {
         console.log('appFinancedUserExchangeRequest result:', result);
         sendResult(callback, { result });
@@ -781,29 +806,25 @@ server.expose('appFinancedUserExchangeRequest', (args, opt, callback) => {
 
 /**
  * 用户融资兑换确认
- * appId, proposalId, user_key, user_sign, server_key, server_sign
  * {
- *    data: { 
+ *    data: {
+ *      account: 用户账户公钥
  *      app_id: 应用ID Number String
  *      proposal_id: 融资提案标识 String
+ *      pay_id: 支付号 String
  *    }
- *    user_pub_key: 用户账户公钥 String (投资者账户)
- *    user_sign: 用户数据签名 String
  *    auth_pub_key: 授信服务器以及发送者公钥 String
- *    auth_sign: 授信签名
  * }
  */
 server.expose('appFinancedUserExchangeConfirm', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`appFinancedUserExchangeConfirm:${args[0]}`);
-    const { data, user_pub_key, user_sign, auth_pub_key, auth_sign } = param;
-    const { app_id, proposal_id } = data;
+    const { data } = param;
+    const { app_id, proposal_id, account, pay_id } = data;
 
-    // TODO: sign process
-    
     sub
-      .appFinancedUserExchangeConfirm(app_id, proposal_id, user_pub_key, user_sign, auth_pub_key, auth_sign)
+      .appFinancedUserExchangeConfirm(app_id, proposal_id, account, pay_id, auth_pub_key)
       .then((result) => {
         console.log('appFinancedUserExchangeConfirm result:', result);
         sendResult(callback, { result });
@@ -1539,7 +1560,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  // sub.queryApps();
+  //sub.queryApps();
 
   // test democracy
   /*let addApp = sub.createSignObject('AddAppParams', {
@@ -1557,5 +1578,25 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608889493000').then(result => {});
-  sub.queryAppFinancedRecords();
+  //sub.queryAppFinancedRecords();
+
+  /*let json = JSON.parse('{"encoded":"Fx2EJWx3L6MB3ojlDa0zMNQKX0NZ6KNITTQg3pqQQlsAgAAAAQAAAAgAAAABapNIRzhJEtGn744N94RucYcbFTUbtAa0CG2DeoZCCVtkIKp6CHTP+85wvl75WyBDx83bW8k/vLj6qcDRq6O3hdUsb9ok7VQpu2U5Bka1u0sc2x5lS6SYTEbh9t+Ova38VhSvsXcPBS4F4og3sKMJ+KmVLOtYl7OtH8jtjRQTdVWnrrZ4UwIDAQgUCcxNUjFXh5kOM2noDey4ACXM","meta":{"name":"oNVB19","userId":100072},"encoding":{"content":["pkcs8","sr25519"],"version":"3","type":["scrypt","xsalsa20-poly1305"]},"address":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW"}');
+  sub.setupAccountByJson(json);
+  sub.unlock(json.address, '123456');
+
+  let data = JSON.parse('{"amount":"1200000","proposal_id":"1608904281000","account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","exchange":"120000"}');
+
+  let signObj = sub.createSignObject(AppFinancedProposalParams, data);
+  console.log("signObj:", signObj);
+
+  let sign = sub.paramsSign(AppFinancedProposalParams, signObj, json.address);
+  console.log('sign:', sign);
+
+  let testSign = '0xb4af62f15cb8c1edd62669e0bdf1bfcd0e855450c92686240a57695678aa76350ce71aa08d002cc4b2481684e1af652e329e63ad709d83df4501beb0b31c5580';
+  let authSign = '0x02f5751434ab81f8bcb54235747e3370e99c443f253f33af3a78dec2e571ef0e41b3bf9a75d9f3d475183a4030a6f52dd9b987112cdb24c57b5961ec5e303d85';
+
+  let u8a = InterfaceAppFinancedProposalParams.encode(signObj);
+  let verify = sub.verify(sub.getDevAdmin().address, u8a, authSign);
+  console.log("verify:", verify);*/
+
 });
