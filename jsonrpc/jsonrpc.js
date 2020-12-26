@@ -691,7 +691,7 @@ server.expose('queryAppFinanceExchangeRecords', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`queryAppFinanceExchangeRecords:${args[0]}`);
-    const { address, appId, proposalId } = param.sender_data;
+    const { appId, proposalId } = param.sender_data;
 
     sub
       .getAppFinanceExchangeRecords(appId, proposalId)
