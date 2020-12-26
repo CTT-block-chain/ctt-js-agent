@@ -24506,7 +24506,8 @@ const rpcAppFinanceRecord = async (appId, proposalId) => {
     exchange: convertBN(result.exchange.mul(factor)),
     block: result.block.toString(),
     totalBalance: convertBN(result.totalBalance.mul(factor)),
-    exchanged: convertBN(result.exchanged.mul(factor))
+    exchanged: convertBN(result.exchanged.mul(factor)),
+    org_result: result,
   }
   
   console.log('rpcAppFinanceRecord:', converted);
@@ -25011,6 +25012,8 @@ const queryAccountInfoWithBlockNum = async (accountId, blockNum) => {
 
 const queryAppFinancedUserPortion = async (accountId, appId, proposalId) => {
   let appFinancedRecord = await rpcAppFinanceRecord(Number(appId), proposalId);
+
+  appFinancedRecord = appFinancedRecord.org_result;
   if (appFinancedRecord.block.eq(new BN(0))) {
     console.error("queryAppFinancedUserPortion not found record", appId, proposalId)
     return null;

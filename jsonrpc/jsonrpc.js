@@ -1619,4 +1619,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   console.log("verify:", verify);*/
 
   sub.rpcAppFinanceRecord('100000001', '1608971556000');
+
+  sub.queryAppFinancedUserPortion('5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW', '100000001', '1608971556000');
 });
