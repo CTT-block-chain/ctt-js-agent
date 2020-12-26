@@ -24019,18 +24019,11 @@ const appFinancedUserExchangeRequest = async (params, user_key, user_sign, serve
 };
 
 // this function only could be invoked from trust server
-const appFinancedUserExchangeConfirm = async (appId, proposalId, user_key, server_key) => {
+const appFinancedUserExchangeConfirm = async (params, auth_key) => {
   let txInfo = {
     module: 'kp',
     call: 'appFinancedUserExchangeConfirm',
-    pubKey: server_key,
-  };
-
-  let params = {
-    account: user_key,
-    appId: Number(appId),
-    proposalId,
-    exchangeAmount: 0, // don't care
+    pubKey: auth_key,
   };
 
   const result = await sendTx(txInfo, [params]);
@@ -24504,10 +24497,21 @@ const rpcAppFinanceRecord = async (appId, proposalId) => {
   appId = Number(appId);
 
   let result = await this.api.rpc.kp.appFinanceRecord({appId, proposalId});
-  
-  console.log('rpcAppFinanceRecord:', result);
 
-  return result;
+  const factor = new BN(1e10);
+
+  // convert result:'
+  converted = {
+    amount: convertBN(result.amount.mul(factor)),
+    exchange: convertBN(result.exchange.mul(factor)),
+    block: result.block.toString(),
+    totalBalance: convertBN(result.totalBalance.mul(factor)),
+    exchanged: convertBN(result.exchanged.mul(factor))
+  }
+  
+  console.log('rpcAppFinanceRecord:', converted);
+
+  return converted;
 }
 
 // chain constant api
@@ -91149,4 +91153,10 @@ window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, d
   return Sub.democracyModelDispute(modelDispute, sender_pub_key, deposit);
 }
 
+/**
+ * 查询融资记录
+ * @param {*} app_id 
+ * @param {*} proposal_id 
+ */
+window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(app_id, proposal_id);
 },{"../interface/modelDispute":169,"../interface/powerComplain":172,"../lib/sub":176}]},{},[1114]);

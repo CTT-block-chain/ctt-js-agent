@@ -138,3 +138,10 @@ window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, d
   let modelDispute = ModelDispute.create(app_id, comment_id, modle_id, comment_content, dispute_type);
   return Sub.democracyModelDispute(modelDispute, sender_pub_key, deposit);
 }
+
+/**
+ * 查询融资记录
+ * @param {*} app_id 
+ * @param {*} proposal_id 
+ */
+window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(app_id, proposal_id);
