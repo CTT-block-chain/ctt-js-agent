@@ -673,6 +673,42 @@ server.expose('queryAppFinancedPortion', (args, opt, callback) => {
 });
 
 /**
+ * 查询指定融资提案下的兑换账户列表数据
+ * {
+ *    sender_data: { 发送端数据
+ *      appId: 应用ID Number String
+ *      proposalId: 融资提案标识 String
+ *    }
+ *    返回值： [{
+ *       account: 兑换账户地址 String
+ *       exchange_amount: 兑换数量 String
+ *       status: 兑换状态 "1": 用户已提交申请，并锁定相应KTP, "2": 已确认兑换，并燃烧锁定KPT 
+ *       pay_id: 支付单号 String
+ *    }]
+ * }
+ */
+server.expose('queryAppFinanceExchangeRecords', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`queryAppFinanceExchangeRecords:${args[0]}`);
+    const { address, appId, proposalId } = param.sender_data;
+
+    sub
+      .getAppFinanceExchangeRecords(appId, proposalId)
+      .then((result) => {
+        console.log('queryAppFinanceExchangeRecords result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryAppFinanceExchangeRecords error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 应用融资提案
  * {
  *    data: { 
@@ -1620,5 +1656,5 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.rpcAppFinanceRecord('100000001', '1608971556000');
 
-  sub.queryAppFinancedUserPortion('5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW', '100000001', '1608971556000');
+  sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
 });
