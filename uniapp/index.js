@@ -145,3 +145,12 @@ window.democracyModelDispute = (app_id, comment_id, modle_id, comment_content, d
  * @param {*} proposal_id 
  */
 window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(app_id, proposal_id);
+
+
+/**
+ * 查询用户账户在指定融资中的最大赎回份额
+ * @param {*} account 
+ * @param {*} app_id 
+ * @param {*} proposal_id 
+ */
+window.queryAppFinancedUserPortion = (account, app_id, proposal_id) => Sub.queryAppFinancedUserPortion(account, app_id, proposal_id);
