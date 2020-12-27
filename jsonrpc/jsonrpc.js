@@ -1654,7 +1654,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let verify = sub.verify('5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW', u8a, testSign);
   console.log("verify:", verify);*/
 
-  sub.rpcAppFinanceRecord('100000001', '1608971556000');
+  //sub.rpcAppFinanceRecord('100000001', '1608971556000');
 
-  sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
+  //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
+
+  //sub.getAppFinanceExchangeRecords('100000001', '1608971556000');
 });
