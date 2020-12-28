@@ -24563,6 +24563,9 @@ const rpcAppFinanceRecord = async (appId, proposalId) => {
 }
 
 const getAppFinanceExchangeRecords = async (appId, proposalId) => {
+  isKeyringReady();
+  isApiReady();
+
   // get accounts set first
   appId = Number(appId);
   let combines = [];
@@ -25084,7 +25087,7 @@ const queryAccountInfoWithBlockNum = async (accountId, blockNum) => {
 const queryAppFinancedUserPortion = async (accountId, appId, proposalId) => {
   isKeyringReady();
   isApiReady();
-  
+
   let appFinancedRecord = await rpcAppFinanceRecord(Number(appId), proposalId);
 
   appFinancedRecord = appFinancedRecord.org_result;
