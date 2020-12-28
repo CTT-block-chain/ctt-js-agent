@@ -5,6 +5,9 @@ const util = require('../lib/util');
 const config = require('../config/config');
 
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
+const InterfaceAppFinancedUserExchangeParams = require('../interface/appFinancedUserExchangeParams');
+const InterfaceAppFinancedUserExchangeConfirmParams = require('../interface/appFinancedUserExchangeConfirmParams');
+
 const InterfaceAddAppParams = require('../interface/addAppParams');
 
 const InterfaceAuthParamsCreateModel = require('../interface/authParamsCreateModel');
