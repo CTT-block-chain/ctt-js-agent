@@ -24538,6 +24538,9 @@ const rpcStakeToVote = async (account, stake) => {
 }
 
 const rpcAppFinanceRecord = async (appId, proposalId) => {
+  isKeyringReady();
+  isApiReady();
+
   appId = Number(appId);
 
   let result = await this.api.rpc.kp.appFinanceRecord({appId, proposalId});
@@ -25079,6 +25082,9 @@ const queryAccountInfoWithBlockNum = async (accountId, blockNum) => {
 };
 
 const queryAppFinancedUserPortion = async (accountId, appId, proposalId) => {
+  isKeyringReady();
+  isApiReady();
+  
   let appFinancedRecord = await rpcAppFinanceRecord(Number(appId), proposalId);
 
   appFinancedRecord = appFinancedRecord.org_result;

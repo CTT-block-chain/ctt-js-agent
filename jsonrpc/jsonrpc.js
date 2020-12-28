@@ -1615,7 +1615,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  //sub.queryApps();
+  sub.queryApps();
 
   // test democracy
   /*let addApp = sub.createSignObject('AddAppParams', {
@@ -1658,5 +1658,5 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
 
-  //sub.getAppFinanceExchangeRecords('100000001', '1608971556000');
+  sub.getAppFinanceExchangeRecords('100010005', 'testp-Sun Dec 27 2020 18:22:33 GMT+0800 (中国标准时间)');
 });
