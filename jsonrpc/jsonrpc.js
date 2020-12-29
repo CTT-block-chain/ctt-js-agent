@@ -21,7 +21,7 @@ const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCr
 const InterfaceModelExpertDelMemberParams = require('../interface/modelExpertDelMemberParams');
 const powerComplain = require('../interface/powerComplain');
 
-const { AppFinancedProposalParams, AppFinancedUserExchangeParams, CommentData,
+const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
   ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams } = require('../lib/signParamsDefine');
@@ -879,7 +879,7 @@ server.expose('appFinancedUserExchangeConfirm', (args, opt, callback) => {
     console.log(`appFinancedUserExchangeConfirm:${args[0]}`);
     const { data, auth_key } = param;
     
-    let signObj = InterfaceAppFinancedUserExchangeConfirmParams.create(data);
+    let signObj = sub.createSignObject(AppFinancedUserExchangeConfirmParams, data);
 
     sub
       .appFinancedUserExchangeConfirm(signObj, auth_key)
@@ -1657,11 +1657,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let verify = sub.verify('5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW', u8a, testSign);
   console.log("verify:", verify);*/
 
-  //sub.rpcAppFinanceRecord('100000001', '1608971556000');
+  //sub.rpcAppFinanceRecord('100010001', 'testp-Tue Dec 29 2020 16:01:44 GMT+0800 (中国标准时间)');
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
 
-  sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
+  /*sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
     console.log("result:", result);
-  });
+  });*/
+
+  //sub.isPermitSubmitAppFinance();
 });
