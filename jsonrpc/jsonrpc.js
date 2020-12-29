@@ -1319,6 +1319,27 @@ server.expose('queryAppTypes', (args, opt, callback) => {
   }
 });
 
+/**
+ * 判断当前是否能够发起融提案
+ * 无参数
+ */
+server.expose('isPermitSubmitAppFinance', (args, opt, callback) => {
+  try {
+    sub
+      .isPermitSubmitAppFinance()
+      .then((result) => {
+        console.log('isPermitSubmitAppFinance result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`isPermitSubmitAppFinance error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -1661,9 +1682,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
 
-  /*sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
+  sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
     console.log("result:", result);
-  });*/
+  });
 
-  //sub.isPermitSubmitAppFinance();
+  //sub.isPermitSubmitAppFinance().then(result => console.log("isPermitSubmitAppFinance:", result));
 });
