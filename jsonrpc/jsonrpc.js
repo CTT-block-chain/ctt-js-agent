@@ -24,7 +24,7 @@ const powerComplain = require('../interface/powerComplain');
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
-  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams } = require('../lib/signParamsDefine');
+  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -921,7 +921,7 @@ server.expose('modelIncomesSubmit', (args, opt, callback) => {
     console.log(`modelIncomesSubmit:${args[0]}`);
     const { data, user_key, user_sign, auth_key, auth_sign } = param;
     
-    let signObj = sub.createSignObject(AppFinancedUserExchangeConfirmParams, data);
+    let signObj = sub.createSignObject(ModelIncomeCollectingParam, data);
 
     sub
       .setBatchModelPeriodIncome(signObj, user_key, user_sign, auth_key, auth_sign)
