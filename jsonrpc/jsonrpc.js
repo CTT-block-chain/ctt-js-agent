@@ -896,6 +896,72 @@ server.expose('appFinancedUserExchangeConfirm', (args, opt, callback) => {
   }
 });
 
+/**
+ * 提交周期模型收入
+ * {
+ *    data: {
+ *      app_id: 应用ID Number String
+ *      incomes: [ 模型收入JSON数组，最大不超过10个
+ *        {
+ *           model_id: 模型ID
+ *           income: 周期收入，单位元，String, 例如 "123.45"
+ *        },
+ *        ...
+ *      ]
+ *    },
+ *    user_key: 用户账户公钥 String (应用管理账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_key: 授信服务器以及发送者公钥（技术委员会） String
+ *    auth_sign: 授信签名   
+ * }
+ */
+server.expose('modelIncomesSubmit', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`modelIncomesSubmit:${args[0]}`);
+    const { data, user_key, user_sign, auth_key, auth_sign } = param;
+    
+    let signObj = sub.createSignObject(AppFinancedUserExchangeConfirmParams, data);
+
+    sub
+      .setBatchModelPeriodIncome(signObj, user_key, user_sign, auth_key, auth_sign)
+      .then((result) => {
+        console.log('modelIncomesSubmit result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`modelIncomesSubmit error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 查询模型增发奖励当前阶段
+ * 返回值：{
+ *  stage: '0':周期未结束 '1':模型收入统计中 '2':奖励申领阶段
+ *  left_seconds: 该阶段剩余的秒数
+ * }
+ */
+server.expose('queryCurrentModelRewardStage', (args, opt, callback) => {
+  try {
+    sub
+      .rpcModelIncomeCurrentStage()
+      .then((result) => {
+        console.log('queryCurrentModelRewardStage result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryCurrentModelRewardStage error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 
 
 // server vote related interfaces
@@ -1682,9 +1748,52 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608971556000');
 
-  sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
+  /*sub.getAppFinanceExchangeRecords('100000001', '1608971556000').then(result => {
     console.log("result:", result);
-  });
+  });*/
 
   //sub.isPermitSubmitAppFinance().then(result => console.log("isPermitSubmitAppFinance:", result));
+
+  // test sign
+  /*let params_data = {
+    app_id: '10000',
+    incomes: [
+      {
+        model_id: 'abc',
+        income: '123.5'
+      },
+      {
+        model_id: 'abc2',
+        income: '1123.5'
+      },
+      {
+        model_id: 'abc3',
+        income: '11233.5'
+      }
+    ]
+  };
+  let interfaceObj = sub.createSignObject('ModelIncomeCollectingParam', params_data);
+  let result = sub.paramsSign('ModelIncomeCollectingParam', interfaceObj, sub.getDevAdmin().address);
+  console.log('result:', result);*/
+
+  sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
+
+
+  /*const testJson = JSON.parse(
+    `{"address":"5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk","encoded":"0x2b48c01814f5329eb53021403039f2d5ceee84b470506d0f57c2e9c3e6ec6ccc08cf4e418b04528185d84c68023394ad77f5fe615590a35bbe26b16d1227a7e00ffa77ee946ac67e9b3cbc3cb4937d572b0c2995862e21c174d36ab2d1c938ce95ffa8a65caa755e428e3ab93fc9e64b8eaff6c200d45ed9954ec88bbb3236adfd08d49dc8e8abd84aab9c1af1eccf40a25ece9d35c8a5f757b8e3c495","encoding":{"content":["pkcs8","sr25519"],"type":"xsalsa20-poly1305","version":"2"},"meta":{"name":"bob"}}`
+  );
+  sub.setupAccountByJson(testJson);
+  sub.unlock(testJson.address, '123456');
+
+  sub.balancesAll(testJson.address).then(result => {
+    console.log("before b:", result);
+
+    sub.requestModelCycleReward('100010006', 'M02-1609390647866', testJson.address).then(result => {
+      sub.balancesAll(testJson.address).then(result => {
+        console.log("after:", result);
+      });
+    });
+  })*/
+
+  
 });

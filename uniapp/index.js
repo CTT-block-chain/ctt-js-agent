@@ -154,3 +154,21 @@ window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(
  * @param {*} proposal_id 
  */
 window.queryAppFinancedUserPortion = (account, app_id, proposal_id) => Sub.queryAppFinancedUserPortion(account, app_id, proposal_id);
+
+
+/**
+ * 模型增发奖励当前阶段
+ * 返回值：{
+ *  stage: '0':周期未结束 '1':模型收入统计中 '2':奖励申领阶段
+ *  left_seconds: 该阶段剩余的秒数
+ * }
+ */
+window.queryCurrentModelRewardStage = () => Sub.rpcModelIncomeCurrentStage();
+
+/**
+ * 模型增发奖励申领
+ * @param {*} app_id 
+ * @param {*} model_id 
+ * @param {*} user_address 
+ */
+window.requestModelCycleReward = (app_id, model_id, user_address) => Sub.requestModelCycleReward(app_id, model_id, user_address);
