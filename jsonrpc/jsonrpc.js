@@ -1406,6 +1406,35 @@ server.expose('isPermitSubmitAppFinance', (args, opt, callback) => {
   }
 });
 
+/**
+ * 获取当前注册应用数据
+ * 无参数
+ * 返回值：[
+ *     {
+ *       app_id: '100000001',
+ *       name: '减法app-3',
+ *       stake: '0',
+ *       return_rate: '30'
+ *     }
+ * ]
+ */
+server.expose('queryApps', (args, opt, callback) => {
+  try {
+    sub
+      .queryApps()
+      .then((result) => {
+        console.log('queryApps result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryApps error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -1705,7 +1734,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  sub.queryApps();
+  sub.queryApps().then(result => {
+    console.log('queryApps:', result);
+  })
 
   // test democracy
   /*let addApp = sub.createSignObject('AddAppParams', {
