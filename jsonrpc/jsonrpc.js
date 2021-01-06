@@ -179,6 +179,7 @@ server.expose('subHash', (args, opt, callback) => {
     if (!param.data) {
       console.log(`hash invalid params: ${param}`);
     } else {
+      console.log("hash params", param.data, param.data.length);
       result = sub.hash(param.data);
     }
     console.log(`hash result: ${result}`);
@@ -1734,8 +1735,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  sub.queryApps().then(result => {
-    console.log('queryApps:', result);
+  sub.queryModelCycleIncomeRewardStore().then(result => {
+    console.log('queryModelCycleIncomeRewardStore:', JSON.stringify(result));
   })
 
   // test democracy
@@ -1807,7 +1808,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let result = sub.paramsSign('ModelIncomeCollectingParam', interfaceObj, sub.getDevAdmin().address);
   console.log('result:', result);*/
 
-  sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
+  //sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
+
+  sub.queryKpModels();
 
 
   /*const testJson = JSON.parse(
@@ -1825,6 +1828,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
       });
     });
   })*/
+
+  /*const testStr = `稻谷花香，民以食为天 - 记大米模型的发布稻谷与大米大米是我们的传统主食，认识大米，让我们从标准开始。\n国家标准中，与大米有关的标准类型，有如下几个类别。\n大米是我们的传统主食，认识大米，让我们从标准开始。\n国家标准中，与大米有关的标准类型，有如下几个类别。\n首先是产品标准，有稻谷国家标准和大米国家标准，这是通用标准，是国家强制执行的；任何大米生产类企业都需要遵守。\n一类是地方或者产地标准，具有本地特色，如规定了稻谷品种，育种、耕作方式等等。一般来讲，地方标准，特别是地理标志产品标准， 要求明显要多于国家强制标准。产品标准是大米产品参数模型的主要遵守依据第二类标准，是稻谷或者大米的检测标准，是针对产品标准里的具体指标，国家制定的检测检验方法和基础比较数据。这类标准是我们建立稻谷、大米检测与鉴别的主要依据。消费者用这个模型来进行在线鉴别与检测。\n第三类标准是大米的品尝与评价标准。目前，我们国家优质稻谷品种的标准中，包含了加工性能、营养功能与食用品尝几个方面，这种方式是以稻谷品种而不是大米为评价对象的；同时，国家标准中还制定了专门的食用品尝标准，主要针对大米感官与品尝评价的。\n在制作大米模型的过程中，我们发现，所有的国内外大米标准中，中国的大米资料是最全面、也是最多的，国内对大米研究，涵盖高产、高质与存储等等方面，但日本是最精细的，特别强调食用品尝与味道。我们的模型制作正是基于这两个国家的标准大米品质的确定“减法”app的要求中，大米模型由大米参数模型、检测与鉴别模型，品尝评估模型组成，其中产品参数模型描述的是生产商发布的大米产品参数，大米检测与鉴别模型则是用于检验生产商产品参数描述的真实性，而品尝与评估模型完全是从消费者口感角度，来评估大米食用品质与感受的。\n国家标准中，大米的品质依次有加工品质，外观品质，营养品质与食用品尝品质四个方面。几种品质之间有一些内在关联，但现代科技研究成果表明，这种关系并不绝对。其中：\n加工品质主要是大米的加工性能，出米率等等，与品质关系不是很大，但与经济价值，和加工成本有关。育种方式，分为常规稻，杂交稻，超级杂交稻，转基因等等。从自然规律来说，高产与优质是矛盾的。所以，日本稻谷强调长期自然选择的常规稻，而我们则强调高产，不管哪种方式，都具有相应的价值。至于耕作耘方式，有机、绿色、无公害等等都是国家允许的方式，没有绝对品质之分，但成本不同，不同人群可以选用不同的耕作方式。多少付出，才有多少收获，这是老祖宗留给我们的财富。\n而大米的营养品质，除一些特种大米，如富砷米、富硒米等等，同类型的大米差别基本不大。\n上述除外，就是稻谷的新鲜程度与食用品质了，这是目前稻谷与大米研究除了育种外的最主要内容。\n稻谷的新鲜度有两个方面，一个是收割时间，一是存储品质完整的稻谷产品化时间，即精米加工时间。模型并不一定确定当年的大米新鲜度最好，主要是还处决于稻谷的存储方式是否得当。就这点来说，大米的新鲜度国家有专门的标准与指标来衡量，而不单单只是收割时间与年份。\n食用品质，应该最接近于我们平常老百姓所说的好大米，与不好大米了。这方面，模型主要采用了日本民间的评价方式，并结合了我国的国家标准。`;
+  console.log("testStr len:", testStr.length);
+  let hash = sub.hash(testStr);
+  console.log("hash:", hash);*/
 
   
 });
