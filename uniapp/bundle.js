@@ -27222,7 +27222,7 @@ const fs = require('fs');
 const { BN } = require('bn.js');
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { Keyring } = require('@polkadot/keyring');
-const { stringToU8a, u8aToHex, hexToU8a, hexToString } = require('@polkadot/util');
+const { stringToU8a, u8aToHex, hexToU8a, hexToString, u8aToString } = require('@polkadot/util');
 const { blake2AsHex, mnemonicGenerate, cryptoWaitReady, signatureVerify } = require('@polkadot/util-crypto');
 const { encode } = require('./codec');
 const { convertBalance } = require('./util');
@@ -27417,6 +27417,7 @@ const chainDataTypes = {
     contentHash: 'Hash',
     sender: 'AccountId',
     owner: 'AuthAccountId',
+    createReward: 'BalanceOf'
   },
 
   KPCommentDataOf: {
@@ -27652,6 +27653,13 @@ const chainDataTypes = {
   ModelIncomeCurrentStageRPC: {
     stage: 'u8',
     left: 'BlockNumber',
+  },
+
+  ModelCycleIncomeReward: {
+    account: 'AccountId',
+    appId: 'u32',
+    modelId: 'Vec<u8>',
+    reward: 'BalanceOf'
   }
 };
 
@@ -28884,6 +28892,22 @@ const getAppFinanceExchangeRecords = async (appId, proposalId) => {
   return combines;
 }
 
+const rpcAppFinanceExchangeData = async (appId, proposalId, account) => {
+  isKeyringReady();
+  isApiReady();
+
+  // get accounts set first
+  appId = Number(appId);
+
+  let data = await this.api.rpc.kp.appFinanceExchangeData({appId, proposalId, account});
+
+  return { 
+    exchange_amount: convertBN(data.exchangeAmount.mul(new BN(1e10))),
+    status: data.status.toString(),
+    pay_id: data.payId.toString()
+  };
+};
+
 // chain constant api
 const constBalanceExistentialDeposit = () => {
   let v = this.api.consts.balances.existentialDeposit;
@@ -29330,7 +29354,12 @@ const queryApps = async () => {
     console.log('key arguments:', result.key);
     console.log('     exposure:', result.value);
 
-    results.push(result);
+    results.push({
+      app_id: key.args[0].toString(),
+      name: u8aToString(exposure.name),
+      stake: result.value.stake,
+      return_rate: result.value.returnRate
+    });
   });
 
   return results;
@@ -29410,6 +29439,31 @@ const queryAppFinancedRecords = async () => {
 
   const store = await entry.entries();
   console.log('queryAppFinancedRecords len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
+const queryModelCycleIncomeRewardStore = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.modelCycleIncomeRewardStore;
+
+  const store = await entry.entries();
+  console.log('queryModelCycleIncomeRewardStore len:', store.length);
 
   let results = [];
 
@@ -29680,6 +29734,7 @@ module.exports = {
   rpcAppFinanceRecord: rpcAppFinanceRecord,
   rpcModelIncomeCurrentStage: rpcModelIncomeCurrentStage,
   getAppFinanceExchangeRecords: getAppFinanceExchangeRecords,
+  rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -29707,6 +29762,7 @@ module.exports = {
   queryAppFinancedUserPortion: queryAppFinancedUserPortion,
   queryApps: queryApps,
   queryAppFinancedRecords: queryAppFinancedRecords,
+  queryModelCycleIncomeRewardStore: queryModelCycleIncomeRewardStore,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
@@ -84887,6 +84943,14 @@ window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_
  * 返回值： 本次可兑换额度，只含整数部分 例如 '135'
  */
 window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFinancedUserPortion(address, appId, proposalId);
+
+/**
+ * 查询账户在某次融资中的兑换状态
+ * @param {*} appId 
+ * @param {*} proposalId 
+ * @param {*} account 
+ */
+window.queryAppFinancedExchangeStatus = (appId, proposalId, account) => Sub.rpcAppFinanceExchangeData(appId, proposalId, account);
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();

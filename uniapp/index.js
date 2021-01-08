@@ -107,6 +107,14 @@ window.queryCommodityPower = (app_id, cart_ids) => Sub.rpcGetCommodityPower(app_
  */
 window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFinancedUserPortion(address, appId, proposalId);
 
+/**
+ * 查询账户在某次融资中的兑换状态
+ * @param {*} appId 
+ * @param {*} proposalId 
+ * @param {*} account 
+ */
+window.queryAppFinancedExchangeStatus = (appId, proposalId, account) => Sub.rpcAppFinanceExchangeData(appId, proposalId, account);
+
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
 

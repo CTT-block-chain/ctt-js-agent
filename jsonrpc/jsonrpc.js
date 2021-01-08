@@ -1814,7 +1814,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
 
-  sub.queryKpModels();
+  //sub.queryKpModels();
+
+  sub.rpcAppFinanceExchangeData(100, 'x', "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then(result => {
+    console.log('rpcAppFinanceExchangeData result:', result);
+  })
 
 
   /*const testJson = JSON.parse(
