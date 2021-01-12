@@ -29675,7 +29675,7 @@ const bond = async (account, amount, reward_to) => {
     pubKey: account,
   };
 
-  const result = await sendTx(txInfo, [account, convertBalance(amount)], reward_to);
+  const result = await sendTx(txInfo, [account, convertBalance(amount), reward_to]);
   console.log("bond:", result);
   return result;
 }
