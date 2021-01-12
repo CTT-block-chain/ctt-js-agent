@@ -29664,6 +29664,22 @@ const test = () => {
   console.log('sign:', sign);
 }
 
+// Wallet required additional interfaces
+const bond = async (account, amount, reward_to) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'staking',
+    call: 'bond',
+    pubKey: account,
+  };
+
+  const result = await sendTx(txInfo, [account, convertBalance(amount)], reward_to);
+  console.log("bond:", result);
+  return result;
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -29766,6 +29782,9 @@ module.exports = {
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
+
+  // wallet
+  bond: bond,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -85017,4 +85036,19 @@ window.queryCurrentModelRewardStage = () => Sub.rpcModelIncomeCurrentStage();
  * @param {*} user_address 
  */
 window.requestModelCycleReward = (app_id, model_id, user_address) => Sub.requestModelCycleReward(app_id, model_id, user_address);
+
+/**
+ * 抵押金额加权知识算力
+ * @param {*} account 用户账户
+ * @param {*} stake 抵押值 String (例如 "100.53", 单位KPT)
+ */
+window.stakeToVote = (account, stake) => Sub.rpcStakeToVote(account, stake);
+
+/**
+ * 抵押
+ * @param {*} account 控制账户
+ * @param {*} amount 抵押金额，例如 "10.5"
+ * @param {*} reward_to 奖励处理方式：0:储值账户，收益自动抵押， 1:储值账户，收益不再抵押， 2:控制账户
+ */
+window.bond = (account, amount, reward_to) => Sub.bond(account, amount, reward_to);
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":209}]},{},[1147]);
