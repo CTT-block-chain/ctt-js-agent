@@ -1855,4 +1855,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   console.log(dec === testStr);
   let hash = sub.hash(testStr);
   console.log("hash:", hash);*/
+
+  sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
+
+  sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
 });

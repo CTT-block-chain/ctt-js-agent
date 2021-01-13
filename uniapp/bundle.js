@@ -29680,6 +29680,82 @@ const bond = async (account, amount, reward_to) => {
   return result;
 }
 
+const fetchStakingOverview = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const data = await Promise.all([
+    this.api.derive.staking.overview(),
+    this.api.derive.staking.stashes(),
+    this.api.query.staking.nominators.entries(),
+  ]);
+  const stakingOverview = data[0];
+  const allStashes = _accountsToString(data[1]);
+  const next = allStashes.filter(
+    (e) => !stakingOverview.validators.includes(e)
+  );
+  const nominators = _getNominators(data[2]);
+
+  const allElected = _accountsToString(stakingOverview.nextElected);
+  const validatorIds = _accountsToString(stakingOverview.validators);
+  const validators = _filterAccounts(validatorIds, []);
+  const elected = _filterAccounts(allElected, validatorIds);
+  const waiting = _filterAccounts(next, allElected);
+
+  return {
+    elected,
+    validators,
+    waiting,
+    nominators,
+  };
+};
+
+const fetchValidatorInfos = async () => {
+  isKeyringReady();
+  isApiReady();
+  let { info } = await this.api.derive.staking.electedInfo();
+  return info.map(item => {
+    let {accountId, exposure, validatorPrefs } = item;
+    return {
+      accountId: accountId.toString(),
+      bondInfo: {
+        total: exposure.total.toHuman(),
+        own: exposure.own.toHuman()
+      },
+      commission: validatorPrefs.commission.toString()
+    }
+  });
+}
+
+function _accountsToString(accounts) {
+  return accounts.map((accountId) => accountId.toString());
+}
+
+function _filterAccounts(accounts = [], without) {
+  return accounts.filter((accountId) => !without.includes(accountId));
+}
+
+function _getNominators(nominations) {
+  return nominations.reduce((mapped, [key, optNoms]) => {
+    if (optNoms.isSome) {
+      const nominatorId = key.args[0].toString();
+
+      optNoms.unwrap().targets.forEach((_validatorId, index) => {
+        const validatorId = _validatorId.toString();
+        const info = [nominatorId, index + 1];
+
+        if (!mapped[validatorId]) {
+          mapped[validatorId] = [info];
+        } else {
+          mapped[validatorId].push(info);
+        }
+      });
+    }
+
+    return mapped;
+  }, {});
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -29785,6 +29861,8 @@ module.exports = {
 
   // wallet
   bond: bond,
+  fetchStakingOverview: fetchStakingOverview,
+  fetchValidatorInfos: fetchValidatorInfos,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -85051,4 +85129,22 @@ window.stakeToVote = (account, stake) => Sub.rpcStakeToVote(account, stake);
  * @param {*} reward_to 奖励处理方式：0:储值账户，收益自动抵押， 1:储值账户，收益不再抵押， 2:控制账户
  */
 window.bond = (account, amount, reward_to) => Sub.bond(account, amount, reward_to);
+
+/**
+ * 验证节点信息
+ * 返回值：
+ * [
+    {
+      accountId: '5DZLq7gpzHfSpNruFamZKpUVnreNjB7z4E8uSLApJ36xjCWD',
+      bondInfo: { total: '502.0889 KPT', own: '502.0889 KPT' },
+      commission: '0'
+    },
+    {
+      accountId: '5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw',
+      bondInfo: { total: '502.0854 KPT', own: '502.0854 KPT' },
+      commission: '0'
+    }
+  ]
+ */
+window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":209}]},{},[1147]);

@@ -195,3 +195,21 @@ window.stakeToVote = (account, stake) => Sub.rpcStakeToVote(account, stake);
  * @param {*} reward_to 奖励处理方式：0:储值账户，收益自动抵押， 1:储值账户，收益不再抵押， 2:控制账户
  */
 window.bond = (account, amount, reward_to) => Sub.bond(account, amount, reward_to);
+
+/**
+ * 验证节点信息
+ * 返回值：
+ * [
+    {
+      accountId: '5DZLq7gpzHfSpNruFamZKpUVnreNjB7z4E8uSLApJ36xjCWD',
+      bondInfo: { total: '502.0889 KPT', own: '502.0889 KPT' },
+      commission: '0'
+    },
+    {
+      accountId: '5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw',
+      bondInfo: { total: '502.0854 KPT', own: '502.0854 KPT' },
+      commission: '0'
+    }
+  ]
+ */
+window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
