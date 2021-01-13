@@ -213,3 +213,11 @@ window.bond = (account, amount, reward_to) => Sub.bond(account, amount, reward_t
   ]
  */
 window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
+
+/**
+ * 获取账户抵押信息
+ * @param {*} account 可以是controller账户或者stash账户
+ * 返回值：
+ * { bond: '502.0854 KPT', unlocking: '0', redeemable: '0' } 
+ */
+window.getOwnStashInfo = (account) => Sub.getOwnStashInfo(account);

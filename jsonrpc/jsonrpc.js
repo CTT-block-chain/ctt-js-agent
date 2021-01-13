@@ -1856,7 +1856,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let hash = sub.hash(testStr);
   console.log("hash:", hash);*/
 
-  sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
+  //sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
 
-  sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
+  //sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
+
+  sub.getOwnStashInfo('5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw').then(result => console.log("getOwnStashInfo:", result));
 });
