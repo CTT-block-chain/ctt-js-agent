@@ -228,3 +228,24 @@ window.getOwnStashInfo = (account) => Sub.getOwnStashInfo(account);
  * @param {*} targets 目标验证人地址数组 ['xxx', 'xxx',...]
  */
 window.nominate = (account, targets) => Sub.nominate(account, targets);
+
+/**
+ * 读取公投提案
+ * @param {*} account 
+ */
+window.fetchReferendums = (account) => Sub.fetchReferendums(account);
+
+
+/**
+ * 读取提案列表
+ */
+window.fetchProposals = () => Sub.fetchProposals();
+
+
+/**
+ * 公投投票
+ * @param {*} id   公投ID Number
+ * @param {*} isYes  是否赞成 bool
+ * @param {*} amount 投票金额 例如："1.1"
+ */
+window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amount);

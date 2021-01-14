@@ -1860,5 +1860,5 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
 
-  sub.getOwnStashInfo('5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw').then(result => console.log("getOwnStashInfo:", result));
+  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => console.log("getOwnStashInfo:", result));
 });

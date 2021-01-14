@@ -28669,62 +28669,6 @@ const balancesAll = async (address) => {
 
 const balancesAllOrg = async (address) => this.api.derive.balances.all(address);
 
-const fetchReferendums = async (address) => {
-  const referendums = await api.derive.democracy.referendums();
-  const sqrtElectorate = await api.derive.democracy.sqrtElectorate();
-  const details = referendums.map(({ image, status, votedAye, votedNay, votedTotal, votes }) => {
-    if (!image.proposal) {
-      return {};
-    }
-    const callData = api.registry.findMetaCall(image.proposal.callIndex);
-    const parsedMeta = _extractMetaData(callData.meta);
-    image.proposal = image.proposal.toHuman();
-    if (image.proposal.method == 'setCode') {
-      const args = image.proposal.args;
-      image.proposal.args = [args[0].slice(0, 16) + '...' + args[0].slice(args[0].length - 16)];
-    }
-
-    const changes = approxChanges(status.threshold, sqrtElectorate, {
-      votedAye,
-      votedNay,
-      votedTotal,
-    });
-
-    const voted = votes.find((i) => i.accountId.toString() == address);
-    const userVoted = voted
-      ? {
-          balance: voted.balance,
-          vote: voted.vote.toHuman(),
-        }
-      : null;
-    return {
-      title: `${callData.section}.${callData.method}`,
-      content: callData.meta ? callData.meta.documentation.join(' ') : ' ',
-      changes: {
-        changeAye: changes.changeAye.toString(),
-        changeNay: changes.changeNay.toString(),
-      },
-      userVoted,
-      ...parsedMeta,
-    };
-  });
-  return { referendums, details };
-};
-
-const fetchCouncilVotes = async () => {
-  const councilVotes = await this.api.derive.council.votes();
-  return councilVotes.reduce((result, [voter, { stake, votes }]) => {
-    votes.forEach((candidate) => {
-      const address = candidate.toString();
-      if (!result[address]) {
-        result[address] = {};
-      }
-      result[address][voter] = stake;
-    });
-    return result;
-  }, {});
-};
-
 const txFeeEstimate = async (txInfo, paramList) => {
   const dispatchInfo = await this.api.tx[txInfo.module][txInfo.call](...paramList).paymentInfo(txInfo.address);
   console.log('txFeeEstimate:', dispatchInfo);
@@ -30015,7 +29959,111 @@ const nominate = async (account, targets) => {
   const result = await sendTx(txInfo, [targets]);
   console.log("nominate:", result);
   return result;
-}
+};
+
+const fetchReferendums = async (address) => {
+  isKeyringReady();
+  isApiReady();
+
+  const referendums = await this.api.derive.democracy.referendums();
+  const sqrtElectorate = await this.api.derive.democracy.sqrtElectorate();
+  const details = referendums.map(({ image, imageHash, status, votedAye, votedNay, votedTotal, votes }) => {
+    let callData;
+    let parsedMeta = {};
+    if (image && image.proposal) {
+      callData = api.registry.findMetaCall(image.proposal.callIndex);
+      parsedMeta = _extractMetaData(callData.meta);
+      image.proposal = image.proposal.toHuman();
+      if (image.proposal.method == "setCode") {
+        const args = image.proposal.args;
+        image.proposal.args = [args[0].slice(0, 16) + "..." + args[0].slice(args[0].length - 16)];
+      }
+    }
+
+    const changes = approxChanges(status.threshold, sqrtElectorate, {
+      votedAye,
+      votedNay,
+      votedTotal,
+    });
+
+    const voted = votes.find((i) => i.accountId.toString() == address);
+    const userVoted = voted
+      ? {
+          balance: voted.balance,
+          vote: voted.vote.toHuman(),
+        }
+      : null;
+    return {
+      title: callData ? `${callData.section}.${callData.method}` : null,
+      content: callData ? callData.meta?.documentation.join(" ") : null,
+      imageHash: imageHash.toHuman(),
+      changes: {
+        changeAye: changes.changeAye.toString(),
+        changeNay: changes.changeNay.toString(),
+      },
+      userVoted,
+    };
+  });
+  return { referendums, details };
+};
+
+const fetchCouncilVotes = async () => {
+  const councilVotes = await this.api.derive.council.votes();
+  return councilVotes.reduce((result, [voter, { stake, votes }]) => {
+    votes.forEach((candidate) => {
+      const address = candidate.toString();
+      if (!result[address]) {
+        result[address] = {};
+      }
+      result[address][voter] = stake;
+    });
+    return result;
+  }, {});
+};
+
+const fetchProposals = async () => {
+  return this.api.derive.democracy.proposals();  
+};
+
+const vote = async (account, id, isYes, amount) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'democracy',
+    call: 'vote',
+    pubKey: account,
+  };
+
+  let vote = {
+    Standard: {
+      balance: convertBalance(amount),
+      vote: {
+        aye: isYes,
+        conviction: 0
+      }
+    }
+  };
+
+  const result = await sendTx(txInfo, [id, vote]);
+  console.log("vote:", result);
+  return result;
+};
+
+const removeVote = async (account, id) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'democracy',
+    call: 'removeVote',
+    pubKey: account,
+  };
+
+  const result = await sendTx(txInfo, [id]);
+  console.log("removeVote:", result);
+  return result;
+};
 
 module.exports = {
   initKeyring: initKeyring,
@@ -30074,6 +30122,7 @@ module.exports = {
 
   // democracy:
   fetchReferendums: fetchReferendums, // get referendum detail
+  fetchProposals: fetchProposals,
 
   // RPC
   rpcGetTotalPower: rpcGetTotalPower,
@@ -30126,6 +30175,8 @@ module.exports = {
   fetchValidatorInfos: fetchValidatorInfos,
   getOwnStashInfo: getOwnStashInfo,
   nominate: nominate,
+  vote: vote,
+  removeVote: removeVote,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -85425,4 +85476,25 @@ window.getOwnStashInfo = (account) => Sub.getOwnStashInfo(account);
  * @param {*} targets 目标验证人地址数组 ['xxx', 'xxx',...]
  */
 window.nominate = (account, targets) => Sub.nominate(account, targets);
+
+/**
+ * 读取公投提案
+ * @param {*} account 
+ */
+window.fetchReferendums = (account) => Sub.fetchReferendums(account);
+
+
+/**
+ * 读取提案列表
+ */
+window.fetchProposals = () => Sub.fetchProposals();
+
+
+/**
+ * 公投投票
+ * @param {*} id   公投ID Number
+ * @param {*} isYes  是否赞成 bool
+ * @param {*} amount 投票金额 例如："1.1"
+ */
+window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amount);
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":209}]},{},[1147]);
