@@ -29916,6 +29916,7 @@ const _getInactives = async (stashId, nominees) => {
 
 const getOwnStashInfo = async (accountId) => {
   const [stashId, isOwnStash] = await _getOwnStash(accountId);
+  console.log(`getOwnStashInfo: ${stashId} ${isOwnStash}`)
   const [account, validators, allStashes, progress] = await Promise.all([
     this.api.derive.staking.account(stashId),
     this.api.query.staking.validators(stashId),
@@ -29939,8 +29940,10 @@ const getOwnStashInfo = async (accountId) => {
     unbondings,
   };*/
 
+  console.log("getOwnStashInfo account: ", JSON.stringify(account));
+
   return { 
-    bond: account.exposure.own.toHuman(),
+    bond: account.stakingLedger.total.toHuman(),
     unlocking: unbondings.total.toString(),
     redeemable: account.redeemable.toHuman()
   };
@@ -29995,7 +29998,7 @@ const fetchReferendums = async (address) => {
       : null;
     return {
       title: callData ? `${callData.section}.${callData.method}` : null,
-      content: callData ? callData.meta?.documentation.join(" ") : null,
+      content: callData ? (callData.meta ? callData.documentation.join(" ") : null) : null,
       imageHash: imageHash.toHuman(),
       changes: {
         changeAye: changes.changeAye.toString(),
