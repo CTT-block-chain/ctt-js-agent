@@ -221,3 +221,10 @@ window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
  * { bond: '502.0854 KPT', unlocking: '0', redeemable: '0' } 
  */
 window.getOwnStashInfo = (account) => Sub.getOwnStashInfo(account);
+
+/**
+ * 提名验证人，在抵押完成后可执行此操作
+ * @param {*} account 
+ * @param {*} targets 目标验证人地址数组 ['xxx', 'xxx',...]
+ */
+window.nominate = (account, targets) => Sub.nominate(account, targets);

@@ -29999,8 +29999,23 @@ const getOwnStashInfo = async (accountId) => {
     bond: account.exposure.own.toHuman(),
     unlocking: unbondings.total.toString(),
     redeemable: account.redeemable.toHuman()
-  }
+  };
 };
+
+const nominate = async (account, targets) => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'staking',
+    call: 'nominate',
+    pubKey: account,
+  };
+
+  const result = await sendTx(txInfo, [targets]);
+  console.log("nominate:", result);
+  return result;
+}
 
 module.exports = {
   initKeyring: initKeyring,
@@ -30110,6 +30125,7 @@ module.exports = {
   fetchStakingOverview: fetchStakingOverview,
   fetchValidatorInfos: fetchValidatorInfos,
   getOwnStashInfo: getOwnStashInfo,
+  nominate: nominate,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -85402,4 +85418,11 @@ window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
  * { bond: '502.0854 KPT', unlocking: '0', redeemable: '0' } 
  */
 window.getOwnStashInfo = (account) => Sub.getOwnStashInfo(account);
+
+/**
+ * 提名验证人，在抵押完成后可执行此操作
+ * @param {*} account 
+ * @param {*} targets 目标验证人地址数组 ['xxx', 'xxx',...]
+ */
+window.nominate = (account, targets) => Sub.nominate(account, targets);
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":209}]},{},[1147]);
