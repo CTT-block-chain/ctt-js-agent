@@ -29798,19 +29798,19 @@ function _extractStakerState(
     validateInfo,
   ]
 ) {
-  const isStashNominating = !!nominators?.length;
+  const isStashNominating = !!nominators && nominators.length > 0;
   const isStashValidating =
     !(Array.isArray(validateInfo)
       ? validateInfo[1].isEmpty
-      : validateInfo.isEmpty) || !!allStashes?.includes(stashId);
+      : validateInfo.isEmpty) || (!!allStashes && allStashes.includes(stashId));
   const nextConcat = u8aConcat(...nextSessionIds.map((id) => id.toU8a()));
   const currConcat = u8aConcat(...sessionIds.map((id) => id.toU8a()));
   const controllerId = _toIdString(_controllerId);
 
   return {
     controllerId,
-    destination: rewardDestination?.toString().toLowerCase(),
-    destinationId: rewardDestination?.toNumber() || 0,
+    destination: rewardDestination ? rewardDestination.toString().toLowerCase() : undefined,
+    destinationId: rewardDestination ? rewardDestination.toNumber() : 0,
     exposure,
     hexSessionIdNext: u8aToHex(nextConcat, 48),
     hexSessionIdQueue: u8aToHex(
@@ -29822,7 +29822,7 @@ function _extractStakerState(
     isStashNominating,
     isStashValidating,
     // we assume that all ids are non-null
-    nominating: nominators?.map(_toIdString),
+    nominating: nominators ? nominators.map(_toIdString) : undefined,
     sessionIds: (nextSessionIds.length ? nextSessionIds : sessionIds).map(
       _toIdString
     ),
@@ -29833,7 +29833,7 @@ function _extractStakerState(
 }
 
 function _extractUnbondings(stakingInfo, progress) {
-  if (!stakingInfo?.unlocking || !progress) {
+  if (!stakingInfo || !stakingInfo.unlocking || !progress) {
     return { mapped: [], total: BN_ZERO };
   }
 
@@ -29874,7 +29874,7 @@ function _extractInactiveState(
   submittedIn,
   exposures
 ) {
-  const max = api.consts.staking?.maxNominatorRewardedPerValidator;
+  const max = api.consts.staking ? api.consts.staking.maxNominatorRewardedPerValidator : undefined;
 
   // chilled
   const nomsChilled = nominees.filter((_, index) => {
