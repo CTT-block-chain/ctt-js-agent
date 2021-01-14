@@ -29943,9 +29943,9 @@ const getOwnStashInfo = async (accountId) => {
   console.log("getOwnStashInfo account: ", JSON.stringify(account));
 
   return { 
-    bond: account.stakingLedger.total.toHuman(),
-    unlocking: unbondings.total.toString(),
-    redeemable: account.redeemable.toHuman()
+    bond: convertBN(account.stakingLedger.total),
+    unlocking: convertBN(unbondings.total),
+    redeemable: convertBN(account.redeemable)
   };
 };
 
