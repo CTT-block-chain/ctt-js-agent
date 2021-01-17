@@ -4,6 +4,8 @@ const sub = require('../lib/sub');
 const util = require('../lib/util');
 const config = require('../config/config');
 
+const { hexToU8a, hexToString, u8aToString, u8aToBuffer } = require('@polkadot/util');
+
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAppFinancedUserExchangeParams = require('../interface/appFinancedUserExchangeParams');
 const InterfaceAppFinancedUserExchangeConfirmParams = require('../interface/appFinancedUserExchangeConfirmParams');
@@ -28,6 +30,7 @@ const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUse
 
 
 const server_white_list = require('./keys/wl.json');
+const { signU8a } = require('../lib/sub');
 
 const server = rpc.Server.$create({
   websocket: false, // is true by default
@@ -1440,6 +1443,35 @@ server.expose('queryApps', (args, opt, callback) => {
   }
 });
 
+/**
+ * sender_data: { 发送端数据
+ *      account:  String
+ *      msg: String 签名内容
+ *      sign: String 签名 0x
+ *    }
+ * 返回值 true or false
+ */
+server.expose('isTechMemberSign', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`isTechMemberSign:${args[0]}`);
+  const { account, msg, sign } = param.sender_data;
+
+  try {
+    sub
+      .rpcIsTechMemberSign(account, msg, sign)
+      .then((result) => {
+        console.log('isTechMemberSign result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`isTechMemberSign error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -1682,14 +1714,32 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     ''
   );*/
 
-  // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu
+  // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu   
   /*sub.rpcCheckAccountIsPlatformExpert('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', '12345678').then((result) => {
     console.log('check result:', result);
   });*/
 
   /*sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
-  });*/
+  });
+
+  sub.queryKpComments().then(result => {
+    console.log("comments:", result);
+  });
+
+  sub.queryKpDocumentPower().then(result => console.log("queryKpDocumentPower:", result));
+
+  sub.queryAccountAttendPower().then(result => console.log("queryAccountAttendPower:", result));
+
+  sub.queryAccountCommentStat().then(result => console.log("queryAccountCommentStat:", result));
+
+  sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));*/
+
+  let msg = "hello";
+  let sign = sub.sign(sub.getDevAdmin().address, msg);
+  sub.rpcIsTechMemberSign(sub.getDevAdmin().address, msg, sign).then(result => {
+    console.log("rpcIsTechMemberSign result:", result);
+  })
 
   /*sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
     console.log('rpcGetCommodityPower:', result);
@@ -1739,9 +1789,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.test();
-  sub.queryModelCycleIncomeRewardStore().then(result => {
+  /*sub.queryModelCycleIncomeRewardStore().then(result => {
     console.log('queryModelCycleIncomeRewardStore:', JSON.stringify(result));
-  })
+  })*/
 
   // test democracy
   /*let addApp = sub.createSignObject('AddAppParams', {
@@ -1816,9 +1866,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryKpModels();
 
-  sub.rpcAppFinanceExchangeData(100, 'x', "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then(result => {
+  /*sub.rpcAppFinanceExchangeData(100, 'x', "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then(result => {
     console.log('rpcAppFinanceExchangeData result:', result);
-  })
+  })*/
 
 
   /*const testJson = JSON.parse(
@@ -1860,9 +1910,16 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
 
-  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => console.log("getOwnStashInfo:", result));
+  /*sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => console.log("getOwnStashInfo:", result));
 
   sub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => {
     console.log("before b:", result);
-  });
+  });*/
+
+
+  /*sub.queryTotalIssuance().then(result => {
+    console.log("his total:", result);
+  });*/
+
+  //sub.bond(sub.getDevAdmin().address, '100', 0).then(result => console.log("bond result:", result));
 });
