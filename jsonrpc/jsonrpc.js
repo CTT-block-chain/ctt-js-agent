@@ -1614,6 +1614,14 @@ function sub_notify_cb(method, data) {
 sub.initApi(apiAddr, sub_notify_cb).then(() => {
   console.log('init api done!');
 
+  sub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL', 11103).then((info) => {
+    console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
+  });
+
+  sub.balancesAll(sub.getDevAdmin().address).then((info) => {
+    console.log('admin balance:', info);
+  });
+ 
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
   // sub.rpcGetCommodityPower("0x01", "0x01").then((res) => console.log("p:", res));

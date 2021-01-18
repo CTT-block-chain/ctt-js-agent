@@ -27660,6 +27660,18 @@ const chainDataTypes = {
     appId: 'u32',
     modelId: 'Vec<u8>',
     reward: 'BalanceOf'
+  },
+
+  KPCommentAccountRecord: {
+    count: 'PowerSize',
+    fees: 'PowerSize',
+    positiveCount: 'PowerSize'
+  },
+
+  TechMemberSignParams: {
+    account: 'AuthAccountId',
+    msg: 'Bytes',
+    sign: 'Bytes',
   }
 };
 
@@ -27809,6 +27821,22 @@ const rpc = {
         },
       ],
       type: 'ModelIncomeCurrentStageRPC',
+    },
+
+    isTechMemberSign: {
+      description: 'check if a signature is signed by tech member',
+      params: [
+        {
+          name: 'params',
+          type: 'TechMemberSignParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'bool',
     },
   },
   members: {
@@ -28645,7 +28673,10 @@ function convertBN(bnNum) {
 
 // Wallet interfaces
 // {"accountId":"5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk","accountNonce":0,"availableBalance":1000000000000,"freeBalance":1000000000000,"frozenFee":0,"frozenMisc":0,"isVesting":false,"lockedBalance":0,"lockedBreakdown":[],"reservedBalance":0,"vestedBalance":0,"vestingTotal":0,"votingBalance":1000000000000}
-const balancesAll = async (address) => {
+const balancesAll = async (address, at) => {
+  let result;
+
+  result = await this.api.derive.balances.all(address);
   const {
     votingBalance: total,
     reservedBalance: reserved,
@@ -28654,10 +28685,10 @@ const balancesAll = async (address) => {
     availableBalance: transferable,
     freeBalance: free,
     lockedBreakdown: lockDetails, // [{amount, reasons, use}]
-  } = await this.api.derive.balances.all(address);
+  } = result;
 
   return {
-    total: convertBN(total),
+    total: convertBN(total.add(reserved)),
     reserved: convertBN(reserved),
     locked: convertBN(locked),
     bonded: convertBN(bonded),
@@ -28850,6 +28881,17 @@ const rpcAppFinanceExchangeData = async (appId, proposalId, account) => {
     status: data.status.toString(),
     pay_id: data.payId.toString()
   };
+};
+
+const rpcIsTechMemberSign = async (account, msg, sign) => {
+  isKeyringReady();
+  isApiReady();
+
+  console.log(`params: ${account} ${msg} ${sign}`);
+  // convert sign
+  sign = sign.substr(2);
+
+  return this.api.rpc.kp.isTechMemberSign({account, msg, sign});
 };
 
 // chain constant api
@@ -29332,9 +29374,14 @@ const queryTotalIssuance = async () => {
   isKeyringReady();
   isApiReady();
 
-  let blockHash = await this.api.rpc.chain.getBlockHash(1);
+  let blockHash = await this.api.rpc.chain.getBlockHash(0);
   let balance = await this.api.query.balances.totalIssuance.at(blockHash);
-  console.log("totalIssuance:", balance.toString());
+  console.log("totalIssuance:", convertBN(balance));
+
+  let current = await this.api.query.balances.totalIssuance();
+
+  console.log("diff:", convertBN(current.sub(balance)));
+
   return balance;
 };
 
@@ -29383,6 +29430,56 @@ const queryAppFinancedRecords = async () => {
 
   const store = await entry.entries();
   console.log('queryAppFinancedRecords len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+};
+
+const queryCommodityPower = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.kPPurchasePowerByIdHash;
+
+  const store = await entry.entries();
+  console.log('queryCommodityPower len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+}
+
+const queryAccountCommentStat = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.kPCommentAccountRecordMap;
+
+  const store = await entry.entries();
+  console.log('queryAccountCommentStat len:', store.length);
 
   let results = [];
 
@@ -30140,6 +30237,7 @@ module.exports = {
   rpcModelIncomeCurrentStage: rpcModelIncomeCurrentStage,
   getAppFinanceExchangeRecords: getAppFinanceExchangeRecords,
   rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
+  rpcIsTechMemberSign: rpcIsTechMemberSign,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -30168,6 +30266,8 @@ module.exports = {
   queryApps: queryApps,
   queryAppFinancedRecords: queryAppFinancedRecords,
   queryModelCycleIncomeRewardStore: queryModelCycleIncomeRewardStore,
+  queryCommodityPower: queryCommodityPower,
+  queryAccountCommentStat: queryAccountCommentStat,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
