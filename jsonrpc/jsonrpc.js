@@ -1614,13 +1614,15 @@ function sub_notify_cb(method, data) {
 sub.initApi(apiAddr, sub_notify_cb).then(() => {
   console.log('init api done!');
 
-  sub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL', 11103).then((info) => {
+  /*ub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL', 11103).then((info) => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
   });
 
   sub.balancesAll(sub.getDevAdmin().address).then((info) => {
     console.log('admin balance:', info);
-  });
+  });*/
+
+  sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
  
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
@@ -1930,4 +1932,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   });*/
 
   //sub.bond(sub.getDevAdmin().address, '100', 0).then(result => console.log("bond result:", result));
+
+  sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
 });

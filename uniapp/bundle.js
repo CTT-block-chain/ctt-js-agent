@@ -28698,6 +28698,14 @@ const balancesAll = async (address, at) => {
   };
 };
 
+const accountInfo = async (address, block) => {
+  if (!!block) {
+    return queryAccountInfoWithBlockNum(address, block);
+  }
+
+  return this.api.query.system.account(address);
+}
+
 const balancesAllOrg = async (address) => this.api.derive.balances.all(address);
 
 const txFeeEstimate = async (txInfo, paramList) => {
@@ -30122,7 +30130,22 @@ const fetchCouncilVotes = async () => {
 };
 
 const fetchProposals = async () => {
-  return this.api.derive.democracy.proposals();  
+  isKeyringReady();
+  isApiReady();
+
+  let results = await this.api.derive.democracy.proposals();  
+
+  let converted = [];
+  results.forEach(item => {
+    converted.push({
+      balance: convertBN(item.balance),
+      index: item.index.toString(),
+      proposer: item.proposer.toString(),
+      call: item.image ? _transfromProposalMeta(item.image.proposal) : {}  
+    })
+  });
+
+  return converted;
 };
 
 const vote = async (account, id, isYes, amount) => {
@@ -30163,6 +30186,28 @@ const removeVote = async (account, id) => {
   const result = await sendTx(txInfo, [id]);
   console.log("removeVote:", result);
   return result;
+};
+
+const _transfromProposalMeta = (proposal) => {
+  const meta = this.api.registry.findMetaCall(proposal.callIndex).toJSON();
+  let doc = "";
+  for (let i = 0; i < meta.documentation.length; i++) {
+    if (meta.documentation[i].length) {
+      doc += meta.documentation[i];
+    } else {
+      break;
+    }
+  }
+  meta.documentation = doc;
+  const json = proposal.toHuman();
+  if (json.method == "setCode") {
+    const args = json.args;
+    json.args = [args[0].slice(0, 16) + "..." + args[0].slice(args[0].length - 16)];
+  }
+  return {
+    ...json,
+    meta,
+  };
 };
 
 module.exports = {
@@ -30268,6 +30313,7 @@ module.exports = {
   queryModelCycleIncomeRewardStore: queryModelCycleIncomeRewardStore,
   queryCommodityPower: queryCommodityPower,
   queryAccountCommentStat: queryAccountCommentStat,
+  accountInfo: accountInfo,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
