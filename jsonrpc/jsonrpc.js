@@ -1934,4 +1934,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.bond(sub.getDevAdmin().address, '100', 0).then(result => console.log("bond result:", result));
 
   sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
+
+  sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 });
