@@ -1616,13 +1616,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   /*ub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL', 11103).then((info) => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
-  });
-
-  sub.balancesAll(sub.getDevAdmin().address).then((info) => {
-    console.log('admin balance:', info);
   });*/
 
-  sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
+  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
+    console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL getOwnStashInfo:', info);
+  });
+
+  //sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
  
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
@@ -1745,11 +1745,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));*/
 
-  let msg = "hello";
+  /*let msg = "hello";
   let sign = sub.sign(sub.getDevAdmin().address, msg);
   sub.rpcIsTechMemberSign(sub.getDevAdmin().address, msg, sign).then(result => {
     console.log("rpcIsTechMemberSign result:", result);
-  })
+  })*/
 
   /*sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
     console.log('rpcGetCommodityPower:', result);
@@ -1933,7 +1933,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.bond(sub.getDevAdmin().address, '100', 0).then(result => console.log("bond result:", result));
 
-  sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
+  //sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
 
-  sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
+  //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 });
