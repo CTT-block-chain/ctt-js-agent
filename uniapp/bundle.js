@@ -27226,6 +27226,7 @@ const { stringToU8a, u8aToHex, hexToU8a, hexToString, u8aToString, u8aConcat, BN
 const { blake2AsHex, mnemonicGenerate, cryptoWaitReady, signatureVerify } = require('@polkadot/util-crypto');
 const { encode } = require('./codec');
 const { convertBalance } = require('./util');
+const { GenericCall, getTypeDef } = require("@polkadot/types");
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
@@ -30210,6 +30211,19 @@ const _transfromProposalMeta = (proposal) => {
   };
 };
 
+function _extractMetaData(value) {
+  const params = GenericCall.filterOrigin(value).map(({ name, type }) => ({
+    name: name.toString(),
+    type: getTypeDef(type.toString()),
+  }));
+  const values = value.args.map((value) => ({
+    isValid: true,
+    value,
+  }));
+  const hash = value.hash;
+  return { hash, params, values };
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -30336,7 +30350,7 @@ module.exports = {
   test: test,
 };
 
-},{"../interface/addAppParams":189,"../interface/appFinancedProposalParams":190,"../interface/appFinancedUserExchangeConfirmParams":191,"../interface/appFinancedUserExchangeParams":192,"../interface/authParamsCreateModel":193,"../interface/clientParamsCreateChooseDoc":194,"../interface/clientParamsCreateIdentifyDoc":195,"../interface/clientParamsCreateModel":196,"../interface/clientParamsCreateModelDoc":197,"../interface/clientParamsCreatePublishDoc":198,"../interface/clientParamsCreateTryDoc":199,"../interface/comment":200,"../interface/modelExpertAddMemberParams":202,"../interface/modelExpertDelMemberParams":203,"../interface/modelIncomeCollectingParam":204,"./codec":206,"./signParamsDefine":208,"./util":210,"@polkadot/api":322,"@polkadot/keyring":341,"@polkadot/util":707,"@polkadot/util-crypto":594,"bn.js":776,"fs":1}],210:[function(require,module,exports){
+},{"../interface/addAppParams":189,"../interface/appFinancedProposalParams":190,"../interface/appFinancedUserExchangeConfirmParams":191,"../interface/appFinancedUserExchangeParams":192,"../interface/authParamsCreateModel":193,"../interface/clientParamsCreateChooseDoc":194,"../interface/clientParamsCreateIdentifyDoc":195,"../interface/clientParamsCreateModel":196,"../interface/clientParamsCreateModelDoc":197,"../interface/clientParamsCreatePublishDoc":198,"../interface/clientParamsCreateTryDoc":199,"../interface/comment":200,"../interface/modelExpertAddMemberParams":202,"../interface/modelExpertDelMemberParams":203,"../interface/modelIncomeCollectingParam":204,"./codec":206,"./signParamsDefine":208,"./util":210,"@polkadot/api":322,"@polkadot/keyring":341,"@polkadot/types":471,"@polkadot/util":707,"@polkadot/util-crypto":594,"bn.js":776,"fs":1}],210:[function(require,module,exports){
 const { BN } = require('bn.js');
 
 // data field value will be truncated together to do sign check
