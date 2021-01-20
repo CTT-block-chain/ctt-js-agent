@@ -1937,5 +1937,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
-  sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
+  //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
+
+  //sub.getAccountRewardsEraOptions().then(result => console.log("getAccountRewardsEraOptions:", result));
+
+  //sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 32).then(result => console.log("loadAccountRewardsData:", result));
+
+  //sub.bondExtra(sub.getDevAdmin().address, '100').then(result => console.log("bondExtra:", result));
 });

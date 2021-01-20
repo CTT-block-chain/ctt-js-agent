@@ -197,6 +197,13 @@ window.stakeToVote = (account, stake) => Sub.rpcStakeToVote(account, stake);
 window.bond = (account, amount, reward_to) => Sub.bond(account, amount, reward_to);
 
 /**
+ * 追加绑定
+ * @param {*} stash  // stash账户地址 
+ * @param {*} amount // 金额 例如 “100.43”
+ */
+window.bondExtra = (stash, amount) => Sub.bondExtra(stash, amount);
+
+/**
  * 验证节点信息
  * 返回值：
  * [
