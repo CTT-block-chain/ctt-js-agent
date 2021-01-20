@@ -30409,6 +30409,12 @@ function _extractMetaData(value) {
   return { hash, params, values };
 }
 
+const queryBlockHeight = async () => {
+  isApiReady();
+  let result = await this.api.derive.chain.bestNumber();
+  return result.toString();
+};
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -30513,6 +30519,7 @@ module.exports = {
   queryCommodityPower: queryCommodityPower,
   queryAccountCommentStat: queryAccountCommentStat,
   accountInfo: accountInfo,
+  queryBlockHeight: queryBlockHeight,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
@@ -85851,4 +85858,9 @@ window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amoun
  * @param {*} bnNum 
  */
 window.convertBN = (bnNum) => Sub.convertBN(bnNum);
+
+/**
+ * 获取当前区块高度
+ */
+window.queryBlockHeight = () => Sub.queryBlockHeight();
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":210}]},{},[1148]);

@@ -255,3 +255,8 @@ window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amoun
  * @param {*} bnNum 
  */
 window.convertBN = (bnNum) => Sub.convertBN(bnNum);
+
+/**
+ * 获取当前区块高度
+ */
+window.queryBlockHeight = () => Sub.queryBlockHeight();

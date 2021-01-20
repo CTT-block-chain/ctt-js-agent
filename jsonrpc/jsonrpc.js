@@ -1618,9 +1618,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
   });*/
 
-  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
+  /*sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL getOwnStashInfo:', info);
-  });
+  });*/
 
   //sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
  
@@ -1729,9 +1729,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  sub.queryKpDocuments().then((result) => {
+  /*sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
-  });
+  });*/
 
   /*sub.queryKpComments().then(result => {
     console.log("comments:", result);
@@ -1936,4 +1936,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
+
+  sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 });
