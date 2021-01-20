@@ -30609,6 +30609,20 @@ const unbond = async (stash, amount) => {
   return result;
 }
 
+const setRewardDest = async (controller, dest) => {
+  isApiReady();
+
+  const txInfo = {
+    module: 'staking',
+    call: 'setPayee',
+    pubKey: controller,
+  };
+
+  const result = await sendTx(txInfo, [dest]);
+  console.log("setRewardDest:", result);
+  return result;
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -30722,6 +30736,7 @@ module.exports = {
   bond: bond,
   bondExtra: bondExtra,
   ubbond: unbond,
+  setRewardDest: setRewardDest,
   fetchStakingOverview: fetchStakingOverview,
   fetchValidatorInfos: fetchValidatorInfos,
   getOwnStashInfo: getOwnStashInfo,
@@ -86010,6 +86025,14 @@ window.bondExtra = (stash, amount) => Sub.bondExtra(stash, amount);
  * @param {*} amount // 解绑金额 例如 “100.43”
  */
 window.unbond = (stash, amount) => Sub.unbond(stash, amount);
+
+/**
+ * 更改收益处理方式
+ * @param {*} controller // 控制账户地址 
+ * @param {*} dest // 整数 0:储值账户，收益自动抵押， 1:储值账户，收益不再抵押， 2:控制账户
+ */
+window.setRewardDest = (controller, dest) => Sub.setRewardDest(controller, dest);
+
 /**
  * 验证节点信息
  * 返回值：
