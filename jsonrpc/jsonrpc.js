@@ -1626,7 +1626,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
  
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
-  // sub.rpcGetCommodityPower("0x01", "0x01").then((res) => console.log("p:", res));
+  sub.rpcGetCommodityPower(100000001, ["185"]).then((res) => console.log("rpcGetCommodityPower:", res));
 
   // check dev balances
   /*sub.balancesAll(sub.getDevAdmin().address).then((info) => {
@@ -1742,9 +1742,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.queryAccountAttendPower().then(result => console.log("queryAccountAttendPower:", result));
 
   sub.queryAccountCommentStat().then(result => console.log("queryAccountCommentStat:", result));
-
-  sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));*/
-
+*/
+  // sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));
+/*
   /*let msg = "hello";
   let sign = sub.sign(sub.getDevAdmin().address, msg);
   sub.rpcIsTechMemberSign(sub.getDevAdmin().address, msg, sign).then(result => {
@@ -1874,7 +1874,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
 
-  //sub.queryKpModels();
+  sub.queryKpModels();
 
   /*sub.rpcAppFinanceExchangeData(100, 'x', "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then(result => {
     console.log('rpcAppFinanceExchangeData result:', result);

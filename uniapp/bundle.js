@@ -30581,6 +30581,42 @@ const loadAccountRewardsData = async (stashId, maxEras) => {
   return { available: res.stashTotal, validators: res.validators };
 };
 
+/**
+ * 
+ * @param {*} account 
+ * @param {*} validators 
+ * {
+ *    validator,
+ *    eras
+ * }
+ */
+const payoutStakers = async (account, validators) => {
+  isApiReady();
+  let results = [];
+
+  const payout = async (validator, era) => {
+    const txInfo = {
+      module: 'staking',
+      call: 'payoutStakers',
+      pubKey: account,
+    };
+  
+    const result = await sendTx(txInfo, [validator, era]);
+    console.log("payout:", result);
+    return result;
+  };
+
+  validators.forEach(async (item) => {
+    let {validator, eras} = item;
+    eras.forEach(async (era) => {
+      let payoutResult = await payout(validator, era);
+      results.push(payoutResult);
+    });
+  })
+  
+  return results;
+};
+
 const bondExtra = async (stash, amount) => {
   isApiReady();
 
@@ -30745,6 +30781,7 @@ module.exports = {
   removeVote: removeVote,
   getAccountRewardsEraOptions: getAccountRewardsEraOptions,
   loadAccountRewardsData: loadAccountRewardsData,
+  payoutStakers: payoutStakers,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -86032,6 +86069,20 @@ window.unbond = (stash, amount) => Sub.unbond(stash, amount);
  * @param {*} dest // 整数 0:储值账户，收益自动抵押， 1:储值账户，收益不再抵押， 2:控制账户
  */
 window.setRewardDest = (controller, dest) => Sub.setRewardDest(controller, dest);
+
+/**
+ * 读取stash账户收益
+ * @param {*} stash 
+ * @param {*} maxErs // 整数，最大era, 应小于84 
+ */
+window.loadAccountRewardsData = (stash, maxErs) => Sub.loadAccountRewardsData(stash, maxErs);
+
+/**
+ * 支付奖励
+ * @param {*} account // 发起账户可以是任意账户地址
+ * @param {*} validators // 验证节点数组，通过loadAccountRewardsData获得 [{validator: 'xxx', eras: [1, 2, 34]}]
+ */
+window.payoutStakers = (account, validators) => Sub.payoutStakers(account, validators);
 
 /**
  * 验证节点信息

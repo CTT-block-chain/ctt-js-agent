@@ -218,6 +218,20 @@ window.unbond = (stash, amount) => Sub.unbond(stash, amount);
 window.setRewardDest = (controller, dest) => Sub.setRewardDest(controller, dest);
 
 /**
+ * 读取stash账户收益
+ * @param {*} stash 
+ * @param {*} maxErs // 整数，最大era, 应小于84 
+ */
+window.loadAccountRewardsData = (stash, maxErs) => Sub.loadAccountRewardsData(stash, maxErs);
+
+/**
+ * 支付奖励
+ * @param {*} account // 发起账户可以是任意账户地址
+ * @param {*} validators // 验证节点数组，通过loadAccountRewardsData获得 [{validator: 'xxx', eras: [1, 2, 34]}]
+ */
+window.payoutStakers = (account, validators) => Sub.payoutStakers(account, validators);
+
+/**
  * 验证节点信息
  * 返回值：
  * [
