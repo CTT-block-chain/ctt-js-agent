@@ -249,3 +249,9 @@ window.fetchProposals = () => Sub.fetchProposals();
  * @param {*} amount 投票金额 例如："1.1"
  */
 window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amount);
+
+/**
+ * 转换BN 到 浮点string
+ * @param {*} bnNum 
+ */
+window.convertBN = (bnNum) => Sub.convertBN(bnNum);

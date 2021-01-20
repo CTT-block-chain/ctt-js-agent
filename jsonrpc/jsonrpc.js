@@ -1729,13 +1729,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('check result:', result);
   });*/
 
-  /*sub.queryKpDocuments().then((result) => {
+  sub.queryKpDocuments().then((result) => {
     console.log('queryKpDocuments:');
   });
 
-  sub.queryKpComments().then(result => {
+  /*sub.queryKpComments().then(result => {
     console.log("comments:", result);
-  });
+  });*//*
 
   sub.queryKpDocumentPower().then(result => console.log("queryKpDocumentPower:", result));
 
