@@ -305,3 +305,12 @@ window.queryBlockHeight = () => Sub.queryBlockHeight();
  * } 
  */
 window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);
+
+/**
+ * 增加模型押金
+ * @param {*} app_id 
+ * @param {*} model_id 
+ * @param {*} amount  // 例如 “100.23” 
+ * @param {*} account // 模型创建者账户地址
+ */
+window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDeposit(app_id, model_id, amount, account);

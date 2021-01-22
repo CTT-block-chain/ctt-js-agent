@@ -28477,6 +28477,18 @@ const createModel = async (client_params, auth_params, owner_pub_key, owner_sign
   return result;
 };
 
+const addModelDeposit = async (app_id, model_id, amount, sender_pub_key) => {
+  let txInfo = {
+    module: 'kp',
+    call: 'addModelDeposit',
+    pubKey: sender_pub_key,
+  };
+
+  const result = await sendTx(txInfo, [Number(app_id), model_id, convertBalance(amount)]);
+  console.log('addModelDeposit result:', result);
+  return result;
+}
+
 const disableModel = async (model, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
   let { app_id, model_id } = model;
   app_id = Number(app_id);
@@ -30695,6 +30707,7 @@ module.exports = {
   createDocument: createDocument,
   createComment: createComment,
   createModel: createModel,
+  addModelDeposit: addModelDeposit,
   disableModel: disableModel,
   addCommodityType: addCommodityType,
   createPowerLeaderBoard: createPowerLeaderBoard,
@@ -86174,4 +86187,14 @@ window.queryBlockHeight = () => Sub.queryBlockHeight();
  * } 
  */
 window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);
+
+/**
+ * 增加模型押金
+ * @param {*} app_id 
+ * @param {*} model_id 
+ * @param {*} amount  // 例如 “100.23” 
+ * @param {*} account // 模型创建者账户地址
+ */
+window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDeposit(app_id, model_id, amount, account);
+
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":210}]},{},[1148]);
