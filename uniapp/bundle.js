@@ -30300,10 +30300,7 @@ const fetchReferendums = async (address) => {
       title: callData ? `${callData.section}.${callData.method}` : null,
       content: callData ? (callData.meta ? callData.meta.documentation.join(" ") : null) : null,
       imageHash: imageHash.toHuman(),
-      changes: {
-        changeAye: changes.changeAye.toString(),
-        changeNay: changes.changeNay.toString(),
-      },
+      changes,
       userVoted,
     };
   });
