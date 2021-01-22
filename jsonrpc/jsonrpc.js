@@ -1586,7 +1586,7 @@ console.log('init keyring...');
 let sudojson = fs.readFileSync("./jsonrpc/keys/sudo.json");
 if (sudojson) {
   sudojson = JSON.parse(sudojson);
-  console.log(sudojson);
+  //console.log(sudojson);
 }
 
 sub.initKeyring(sudojson, sudojson.pwd).then(() => {
@@ -1626,7 +1626,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
  
   // test
   // sub.rpcGetAccountPower("5GrwX4JEmrmk2RM6aTorJxzbpDWzgoifKVtHCPdjQohjRPo6").then((res) => console.log("p:", res));
-  sub.rpcGetCommodityPower(100000001, ["185"]).then((res) => console.log("rpcGetCommodityPower:", res));
+  // sub.rpcGetCommodityPower(100000001, ["185"]).then((res) => console.log("rpcGetCommodityPower:", res));
 
   // check dev balances
   /*sub.balancesAll(sub.getDevAdmin().address).then((info) => {
@@ -1874,7 +1874,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelIncomeCurrentStage().then(result => console.log("result:", result));
 
-  sub.queryKpModels();
+  //sub.queryKpModels();
 
   /*sub.rpcAppFinanceExchangeData(100, 'x', "5FHittguiXZgbt5qu1frKASSedmxy6QLYDHSRVsf6B7Dj9qk").then(result => {
     console.log('rpcAppFinanceExchangeData result:', result);
@@ -1944,4 +1944,15 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 32).then(result => console.log("loadAccountRewardsData:", result));
 
   //sub.bondExtra(sub.getDevAdmin().address, '100').then(result => console.log("bondExtra:", result));
+
+
+  /*let testJSON = JSON.parse(`{"encoded":"0xd8b620534104c8a1b47ccc669e950c2fc8bd61c65d078cc48aeeb170707235d23273330a1031e7a7eb0e269e709b60703cf5500da6204c32f364b14eb403ea78c8beb73852843760fa0a34e3d0bc14006b41a9e4681bc28abb32ec20ff0107e4aedd15d196c7dcc51a8c7becb7b4377adde6bdfc444029dc9cbb89ae85187a0b9f7d8ba3a0713611a77ded59beedfbb24892460c03e6368c3d1fb29b40","meta":{"name":"唐僧","userId":100051},"encoding":{"content":["pkcs8","sr25519"],"version":"2","type":"xsalsa20-poly1305"},"address":"5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu"}`);
+  let account = sub.setupAccountByJson(testJSON);
+  sub.unlock(testJSON.address, '123456');
+
+  sub.requestModelCycleReward('100000001', '28', testJSON.address).then(result => {
+    console.log("requestModelCycleReward:", result);
+  })*/
+
+  sub.queryAccountStatistic('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ').then(result => console.log('queryAccountStatistic:', result));
 });

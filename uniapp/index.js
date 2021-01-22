@@ -295,3 +295,13 @@ window.convertBN = (bnNum) => Sub.convertBN(bnNum);
  * 获取当前区块高度
  */
 window.queryBlockHeight = () => Sub.queryBlockHeight();
+
+/**
+ * 获取账户统计信息
+ * @param {*} account
+ * 返回值：
+ * {
+ *   commodity_num: Number 体验商品数  
+ * } 
+ */
+window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);

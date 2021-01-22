@@ -27858,6 +27858,17 @@ const chainDataTypes = {
     account: 'AuthAccountId',
     msg: 'Bytes',
     sign: 'Bytes',
+  },
+
+  AccountStatistics: {
+    createCommodityNum: 'u32',
+    slashCommodityNum: 'u32',
+    slashKpTotal: 'u64',
+    commentNum: 'u32',
+    commentCostTotal: 'u64',
+    commentCostMax: 'u64',
+    commentPositiveTrendNum: 'u32',
+    commentNegativeTrendNum: 'u32'
   }
 };
 
@@ -28103,8 +28114,6 @@ const initApi = async (wss, notify_cb) => {
   const chainInfo = `You are connected to chain ${chain} using ${nodeName} v${nodeVersion}`;
 
   console.log(chainInfo);
-
-  console.log('api derive:', this.api.derive);
 
   this.isApiReady = true;
   // return chain info
@@ -30659,6 +30668,15 @@ const setRewardDest = async (controller, dest) => {
   return result;
 }
 
+const queryAccountStatistic = async (accountId) => {
+  isApiReady();
+
+  let result = await this.api.query.kp.accountStatisticsMap(accountId);
+  return {
+    commodity_num: Number(result.createCommodityNum.toString())
+  };
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -30764,6 +30782,7 @@ module.exports = {
   queryAccountCommentStat: queryAccountCommentStat,
   accountInfo: accountInfo,
   queryBlockHeight: queryBlockHeight,
+  queryAccountStatistic: queryAccountStatistic,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
@@ -86148,4 +86167,14 @@ window.convertBN = (bnNum) => Sub.convertBN(bnNum);
  * 获取当前区块高度
  */
 window.queryBlockHeight = () => Sub.queryBlockHeight();
+
+/**
+ * 获取账户统计信息
+ * @param {*} account
+ * 返回值：
+ * {
+ *   commodity_num: Number 体验商品数  
+ * } 
+ */
+window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":210}]},{},[1148]);
