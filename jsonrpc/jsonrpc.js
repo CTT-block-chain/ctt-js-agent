@@ -1954,5 +1954,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("requestModelCycleReward:", result);
   })*/
 
-  sub.queryAccountStatistic('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ').then(result => console.log('queryAccountStatistic:', result));
+  //sub.queryAccountStatistic('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ').then(result => console.log('queryAccountStatistic:', result));
+
+  sub.fetchReferendums().then(result => console.log("fetchReferendums:", sub.convertBN(result.referendums[0].votedAye), result.details[0]));
 });
