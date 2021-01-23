@@ -282,8 +282,9 @@ window.fetchProposals = () => Sub.fetchProposals();
  * @param {*} id   公投ID Number
  * @param {*} isYes  是否赞成 bool
  * @param {*} amount 投票金额 例如："1.1"
+ * @param {*} conviction Number, 延长锁定期限类型 0:不锁定 1:锁定1个执行期 2:锁定2个执行期 ... 6: 最大6
  */
-window.vote = (account, id, isYes, amount) => Sub.vote(account, id, isYes, amount);
+window.vote = (account, id, isYes, amount, conviction) => Sub.vote(account, id, isYes, amount, conviction);
 
 /**
  * 转换BN 到 浮点string
