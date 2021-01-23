@@ -1957,4 +1957,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.queryAccountStatistic('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ').then(result => console.log('queryAccountStatistic:', result));
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", sub.convertBN(result.referendums[0].votedAye), result.details[0]));
+
+  sub.rpcMiscDocumentPower(100, 'abc').then(result => console.log('rpcMiscDocumentPower:', result));
 });

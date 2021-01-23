@@ -314,3 +314,10 @@ window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);
  * @param {*} account // 模型创建者账户地址
  */
 window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDeposit(app_id, model_id, amount, account);
+
+/**
+ * 查询选品和模型文章算力
+ * @param {*} app_id 
+ * @param {*} document_id 
+ */
+window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPower(app_id, document_id);

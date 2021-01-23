@@ -27869,6 +27869,11 @@ const chainDataTypes = {
     commentCostMax: 'u64',
     commentPositiveTrendNum: 'u32',
     commentNegativeTrendNum: 'u32'
+  },
+
+  MiscDocumentPowerParams: {
+    appId: 'u32',
+    documentId: 'Bytes'
   }
 };
 
@@ -27902,6 +27907,22 @@ const rpc = {
         {
           name: 'query',
           type: 'QueryCommodityPowerParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'PowerSize',
+    },
+
+    miscDocumentPower: {
+      description: 'Get choose and model create knowledge power.',
+      params: [
+        {
+          name: 'query',
+          type: 'MiscDocumentPowerParams',
         },
         {
           name: 'at',
@@ -29115,6 +29136,14 @@ const constBalanceExistentialDeposit = () => {
   console.log('ExistentialDeposit:', v.toString());
 
   return convertBN(v);
+};
+
+const rpcMiscDocumentPower = async (appId, documentId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let result = await this.api.rpc.kp.miscDocumentPower({appId: Number(appId), documentId});
+  return result.toString();
 };
 
 // democracy
@@ -30760,6 +30789,7 @@ module.exports = {
   getAppFinanceExchangeRecords: getAppFinanceExchangeRecords,
   rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
   rpcIsTechMemberSign: rpcIsTechMemberSign,
+  rpcMiscDocumentPower: rpcMiscDocumentPower,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -86196,5 +86226,12 @@ window.queryAccountStatistic = (account) => Sub.queryAccountStatistic(account);
  * @param {*} account // 模型创建者账户地址
  */
 window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDeposit(app_id, model_id, amount, account);
+
+/**
+ * 查询选品和模型文章算力
+ * @param {*} app_id 
+ * @param {*} document_id 
+ */
+window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPower(app_id, document_id);
 
 },{"../interface/modelDispute":201,"../interface/powerComplain":205,"../lib/sub":210}]},{},[1148]);
