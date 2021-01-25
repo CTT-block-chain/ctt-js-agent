@@ -1254,6 +1254,7 @@ server.expose('membersStableExchange', (args, opt, callback) => {
 });
 
 /**
+ * 增加应用admin
  * {
  *    app_key: 应用身份密钥地址 String
  *    sender_data: { 发送端数据
@@ -1287,6 +1288,18 @@ server.expose('membersAddAppAdmin', (args, opt, callback) => {
   }
 });
 
+/**
+ * 删除应用admin
+ * {
+ *    app_key: 应用身份密钥地址 String
+ *    sender_data: { 发送端数据
+ *      admin: 应用管理密钥地址, String
+        app_id: 应用ID, Number or String
+        member: 待移除地址, String
+ *    }
+ *    admin_sign: 应用管理密钥签名 String
+ * }
+ */
 server.expose('membersRemoveAppAdmin', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
@@ -1310,6 +1323,18 @@ server.expose('membersRemoveAppAdmin', (args, opt, callback) => {
   }
 });
 
+/**
+ * 增加应用身份
+ * {
+ *    app_key: 应用身份密钥地址 String
+ *    sender_data: { 发送端数据
+ *      admin: 应用管理密钥地址, String
+        app_id: 应用ID, Number or String
+        member: 新增身份地址, String
+ *    }
+ *    admin_sign: 应用管理密钥签名 String
+ * }
+ */
 server.expose('membersAddAppKey', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
@@ -1333,6 +1358,18 @@ server.expose('membersAddAppKey', (args, opt, callback) => {
   }
 });
 
+/**
+ * 移除应用身份
+ * {
+ *    app_key: 应用身份密钥地址 String
+ *    sender_data: { 发送端数据
+ *      admin: 应用管理密钥地址, String
+        app_id: 应用ID, Number or String
+        member: 待移除地址, String
+ *    }
+ *    admin_sign: 应用管理密钥签名 String
+ * }
+ */
 server.expose('membersRemoveAppKey', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
