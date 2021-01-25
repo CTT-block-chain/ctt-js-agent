@@ -26,7 +26,7 @@ const powerComplain = require('../interface/powerComplain');
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
-  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam } = require('../lib/signParamsDefine');
+  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, AppKeyManageParams } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -1213,44 +1213,6 @@ server.expose('membersAddInvestor', (args, opt, callback) => {
 });
 
 /**
- * SUDO 增加开发角色账户
- * {
- *    sender_pub_key: 发送者公钥 String
- *    sender_data: { 发送端数据
- *      developer: 开发账户地址 String
- *    }
- *    sender_sign: 发送者签名 String
- * }
- */
-server.expose('membersAddDeveloper', (args, opt, callback) => {
-  try {
-    const param = JSON.parse(args[0]);
-    console.log(`membersAddDeveloper:${args[0]}`);
-    const { sender_pub_key, sender_data, sender_sign } = param;
-    const { developer } = param.sender_data;
-
-    const verify = sub.verify(sender_pub_key, util.getObjectFieldValueStr(sender_data), sender_sign);
-    if (!verify.isValid) {
-      sendResult(callback, { error: 'sign veify fail' });
-      return;
-    }
-
-    sub
-      .membersAddDeveloper(developer)
-      .then((result) => {
-        console.log('membersAddDeveloper result:', result);
-        sendResult(callback, { result });
-      })
-      .catch((err) => {
-        sendResult(callback, { error: err });
-      });
-  } catch (e) {
-    console.error(`membersAddDeveloper error: ${e}`);
-    sendResult(callback, { error: e.message });
-  }
-});
-
-/**
  等额兑换
  * {
  *    sender_pub_key: 发送者公钥 String, app admin 公钥
@@ -1287,6 +1249,109 @@ server.expose('membersStableExchange', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`membersStableExchange error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * {
+ *    app_key: 应用身份密钥地址 String
+ *    sender_data: { 发送端数据
+ *      admin: 应用管理密钥地址, String
+        app_id: 应用ID, Number or String
+        member: 新增管理地址, String
+ *    }
+ *    admin_sign: 应用管理密钥签名 String
+ * }
+ */
+server.expose('membersAddAppAdmin', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAddAppAdmin:${args[0]}`);
+    const { app_key, sender_data, admin_sign } = param;
+    
+    let signObj = sub.createSignObject(AppKeyManageParams, sender_data);
+
+    sub
+      .membersAddAppAdmin(app_key, signObj, admin_sign)
+      .then((result) => {
+        console.log('membersAddAppAdmin result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAddAppAdmin error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+server.expose('membersRemoveAppAdmin', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersRemoveAppAdmin:${args[0]}`);
+    const { app_key, sender_data, admin_sign } = param;
+    
+    let signObj = sub.createSignObject(AppKeyManageParams, sender_data);
+
+    sub
+      .membersRemoveAppAdmin(app_key, signObj, admin_sign)
+      .then((result) => {
+        console.log('membersRemoveAppAdmin result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersRemoveAppAdmin error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+server.expose('membersAddAppKey', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAddAppKey:${args[0]}`);
+    const { app_key, sender_data, admin_sign } = param;
+    
+    let signObj = sub.createSignObject(AppKeyManageParams, sender_data);
+
+    sub
+      .membersAddAppKey(app_key, signObj, admin_sign)
+      .then((result) => {
+        console.log('membersAddAppKey result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAddAppKey error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+server.expose('membersRemoveAppKey', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersRemoveAppKey:${args[0]}`);
+    const { app_key, sender_data, admin_sign } = param;
+    
+    let signObj = sub.createSignObject(AppKeyManageParams, sender_data);
+
+    sub
+      .membersRemoveAppKey(app_key, signObj, admin_sign)
+      .then((result) => {
+        console.log('membersRemoveAppKey result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersRemoveAppKey error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -1958,5 +2023,5 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", sub.convertBN(result.referendums[0].votedAye), result.details[0]));
 
-  sub.rpcMiscDocumentPower(100, 'abc').then(result => console.log('rpcMiscDocumentPower:', result));
+  //sub.rpcMiscDocumentPower(100, 'abc').then(result => console.log('rpcMiscDocumentPower:', result));
 });
