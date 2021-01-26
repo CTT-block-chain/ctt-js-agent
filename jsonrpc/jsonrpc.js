@@ -1720,9 +1720,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
   });*/
 
-  /*sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
-    console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL getOwnStashInfo:', info);
-  });*/
+  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
+    console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL getOwnStashInfo:', JSON.stringify(info));
+  });
 
   //sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
  
@@ -2043,7 +2043,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.getAccountRewardsEraOptions().then(result => console.log("getAccountRewardsEraOptions:", result));
 
-  //sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 32).then(result => console.log("loadAccountRewardsData:", result));
+  // sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 32).then(result => console.log("loadAccountRewardsData:", JSON.stringify(result)));
 
   //sub.bondExtra(sub.getDevAdmin().address, '100').then(result => console.log("bondExtra:", result));
 
