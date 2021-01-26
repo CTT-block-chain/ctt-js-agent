@@ -250,6 +250,11 @@ window.payoutStakers = (account, validators) => Sub.payoutStakers(account, valid
 window.fetchValidatorInfos = () => Sub.fetchValidatorInfos();
 
 /**
+ * 返回Staking概览信息，包括当前验证节点和等待中
+ */
+window.fetchStakingOverview = () => Sub.fetchStakingOverview();
+
+/**
  * 获取账户抵押信息
  * @param {*} account 可以是controller账户或者stash账户
  * 返回值：

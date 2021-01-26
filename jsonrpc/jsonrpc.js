@@ -1720,9 +1720,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL balance:', info);
   });*/
 
-  sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
+  /*sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then((info) => {
     console.log('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL getOwnStashInfo:', JSON.stringify(info));
-  });
+  });*/
 
   //sub.accountInfo('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 16035).then(result => console.log("accountInfo:", result.toHuman()));
  
@@ -2018,7 +2018,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let hash = sub.hash(testStr);
   console.log("hash:", hash);*/
 
-  //sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
+  sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
 
   //sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
 
