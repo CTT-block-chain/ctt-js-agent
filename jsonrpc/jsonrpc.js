@@ -1859,13 +1859,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   /*sub.rpcLeaderBoardLoad('12345678', '0', '880').then(result => {
     console.log('rpcLeaderBoardLoad:', result);
-  });
+  });*/
 
-  sub.queryLeaderBoardRecords().then((result) => {
+  /*sub.queryLeaderBoardRecords().then((result) => {
     console.log('queryLeaderBoardRecords');
-  });
+  });*/
 
-  sub.queryRealtimeLeaderBoard().then((result) => {
+  /*sub.queryRealtimeLeaderBoard().then((result) => {
     console.log('queryRealtimeLeaderBoard');
   });*/
 
@@ -2018,12 +2018,12 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   let hash = sub.hash(testStr);
   console.log("hash:", hash);*/
 
-  sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
+  //sub.fetchStakingOverview().then(result => console.log("fetchStakingOverview:", result));
 
   //sub.fetchValidatorInfos().then(result => console.log("fetchValidatorInfos:", result));
 
-  /*sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => console.log("getOwnStashInfo:", result));
-
+  //sub.getOwnStashInfo('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => console.log("getOwnStashInfo:", JSON.stringify(result)));
+/*
   sub.balancesAll('5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL').then(result => {
     console.log("before b:", result);
   });*/
@@ -2043,7 +2043,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.getAccountRewardsEraOptions().then(result => console.log("getAccountRewardsEraOptions:", result));
 
-  // sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 32).then(result => console.log("loadAccountRewardsData:", JSON.stringify(result)));
+  sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 10).then(result => console.log("loadAccountRewardsData:", JSON.stringify(result)));
 
   //sub.bondExtra(sub.getDevAdmin().address, '100').then(result => console.log("bondExtra:", result));
 
@@ -2061,4 +2061,21 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", sub.convertBN(result.referendums[0].votedAye), result.details[0]));
 
   //sub.rpcMiscDocumentPower(100, 'abc').then(result => console.log('rpcMiscDocumentPower:', result));
+
+  // test 
+  // before pay
+  /*const account = '5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ';
+  sub.balancesAll(account).then(result => {
+    console.log("before pay:", result);
+
+    // payout 
+    sub.payoutStakers(sub.getDevAdmin().address, [{validator: '5E9T6mVvgrBhfbDJN1Hau1xoGZxquFroEvukDKpAoJAQgdwz', eras: [479, 480]}]).then(result => {
+      console.log("payout status:", result);
+
+      // load balance again
+      sub.balancesAll(account).then(result => {
+        console.log("after pay:", result);
+      });
+    })
+  })*/
 });

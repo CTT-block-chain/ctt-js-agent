@@ -30721,13 +30721,14 @@ const payoutStakers = async (account, validators) => {
     return result;
   };
 
-  validators.forEach(async (item) => {
-    let {validator, eras} = item;
-    eras.forEach(async (era) => {
-      let payoutResult = await payout(validator, era);
+  for (let i = 0; i < validators.length; i++) {
+    let {validator, eras} = validators[i];
+
+    for (let j = 0; j < eras.length; j++) {
+      let payoutResult = await payout(validator, eras[j]);
       results.push(payoutResult);
-    });
-  })
+    }
+  }
   
   return results;
 };
