@@ -29215,6 +29215,7 @@ const submitProposal = async (imageHash, deposit, pubKey) => {
   deposit = getDeposit(deposit);
   result = await sendTx(txInfo, [imageHash, deposit], false);
   result.proposal_idx = extractProposalIdx(result.events);
+  result.proposal_hash = imageHash;
   console.log('submitProposal result:', result);
 
   return result;
