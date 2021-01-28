@@ -29214,6 +29214,7 @@ const submitProposal = async (imageHash, deposit, pubKey) => {
 
   deposit = getDeposit(deposit);
   result = await sendTx(txInfo, [imageHash, deposit], false);
+  result.proposal_idx = extractProposalIdx(result.events);
   console.log('submitProposal result:', result);
 
   return result;
@@ -29269,7 +29270,7 @@ const democracyModelDispute = async (modelDispute, sender_pub_key, deposit) => {
   // submit pre-image first
   await submitPreimage(image, sender_pub_key);
   const result = await submitProposal(imageHash, deposit, sender_pub_key);
-
+  
   return result;
 };
 
@@ -29286,6 +29287,16 @@ const democracyAddApp = async (appAdd, user_key, user_sign, deposit) => {
   const result = await submitProposal(imageHash, deposit, user_key);
 
   return result;
+};
+
+const extractProposalIdx = (events) => {
+  for (let event of events) {
+    if (event.section == 'democracy' && event.method == 'Proposed') {
+      return event.data[0]
+    }
+  }
+
+  return -1;
 };
 
 // SUDO code for democracyAddApp

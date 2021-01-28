@@ -1845,7 +1845,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   sub.queryAccountCommentStat().then(result => console.log("queryAccountCommentStat:", result));
 */
-  // sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));
+  //sub.queryCommodityPower().then(result => console.log("queryCommodityPower:", result));
 /*
   /*let msg = "hello";
   let sign = sub.sign(sub.getDevAdmin().address, msg);
@@ -1853,7 +1853,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("rpcIsTechMemberSign result:", result);
   })*/
 
-  /*sub.rpcGetCommodityPower('12345678', ['174']).then(result => {
+  /*sub.rpcGetCommodityPower('100000001', ['174']).then(result => {
     console.log('rpcGetCommodityPower:', result);
   });*/
 
@@ -2043,7 +2043,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.getAccountRewardsEraOptions().then(result => console.log("getAccountRewardsEraOptions:", result));
 
-  sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 10).then(result => console.log("loadAccountRewardsData:", JSON.stringify(result)));
+  //sub.loadAccountRewardsData('5CtySW8czRJAFznj5iGqA4PNWv74zzMFZwRsDgMxfonUo5RZ', 84).then(result => console.log("loadAccountRewardsData:", JSON.stringify(result)));
 
   //sub.bondExtra(sub.getDevAdmin().address, '100').then(result => console.log("bondExtra:", result));
 
@@ -2077,5 +2077,19 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
         console.log("after pay:", result);
       });
     })
+  })*/
+
+  /*let params = sub.createSignObject('AddAppParams', {
+    app_type: 'commodity_general',
+    app_name: 'test',
+    app_key: sub.getDevAdmin().address,
+    app_admin_key: sub.getDevAdmin().address,
+    return_rate: 1,
+  });
+
+  let sign = sub.paramsSign('AddAppParams', params, sub.getDevAdmin().address);
+
+  sub.democracyAddApp(params, sub.getDevAdmin().address, sign).then(result => {
+    console.log("result:", result);
   })*/
 });
