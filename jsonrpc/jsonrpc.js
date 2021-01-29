@@ -1574,6 +1574,62 @@ server.expose('isTechMemberSign', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询模型复议结果
+ * sender_data: { 发送端数据
+ *      app_id, Number or String
+ *      comment_id, 评论ID String
+ *    }
+ */
+server.expose('queryModelDisputeRecord', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryModelDisputeRecord:${args[0]}`);
+  const { app_id, comment_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcModelDisputeRecord(Number(app_id), comment_id)
+      .then((result) => {
+        console.log('queryModelDisputeRecord result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryModelDisputeRecord error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 查询算力投诉结果
+ * sender_data: { 发送端数据
+ *      app_id, Number or String
+ *      comment_id, 评论ID String
+ *    }
+ */
+server.expose('queryCommodityPowerSlashRecord', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryCommodityPowerSlashRecord:${args[0]}`);
+  const { app_id, comment_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcCommodityPowerSlashRecord(Number(app_id), comment_id)
+      .then((result) => {
+        console.log('queryCommodityPowerSlashRecord result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryCommodityPowerSlashRecord error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -2092,4 +2148,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   sub.democracyAddApp(params, sub.getDevAdmin().address, sign).then(result => {
     console.log("result:", result);
   })*/
+
+  sub.rpcModelDisputeRecord(1, 'abc').then(result => console.log("rpcModelDisputeRecord:", result));
+  sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
 });
