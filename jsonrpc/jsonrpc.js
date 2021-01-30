@@ -1481,6 +1481,7 @@ server.expose('queryCommodityPower', (args, opt, callback) => {
  *      app_id:  String or Number
  *      cart_id: String
  *    }
+ *  return: bool (true or false)
  * }
  */
 server.expose('isCommodityInBlackList', (args, opt, callback) => {
