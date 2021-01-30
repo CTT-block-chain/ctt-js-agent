@@ -29336,11 +29336,12 @@ const submitProposal = async (imageHash, deposit, pubKey) => {
 
   deposit = getDeposit(deposit);
   result = await sendTx(txInfo, [imageHash, deposit], false);
-  result.proposal_idx = extractProposalIdx(result.events);
-  result.proposal_hash = imageHash;
-  console.log('submitProposal result:', result);
-
-  return result;
+  
+  return {
+    hash: result.hash,
+    proposal_idx: extractProposalIdx(result.events),
+    proposal_hash: imageHash
+  }
 };
 
 const getDeposit = (deposit) => {

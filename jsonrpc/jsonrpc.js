@@ -1661,6 +1661,33 @@ server.expose('queryCommodityPowerSlashRecord', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询所有等待提案
+ * 返回值：[{index, hash}]
+ */
+server.expose('fetchProposals', (args, opt, callback) => {
+  try {
+    sub
+      .fetchProposals()
+      .then((result) => {        
+        result = result.map(item => {
+          return {
+            index: item.index.toString(),
+            hash: item.proposer
+          };
+        })
+        console.log('fetchProposals result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`fetchProposals error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -1906,12 +1933,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg balance:', info.transferable.toString());
   });*/
   /*sub.democracyPowerComplain(
-    {},
-    '5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG',
-    '',
-    '5GNeKizyUBhKUiaTEZ5CDmHvzQwjvNZq4QD46QFKqSbNE1tG',
-    ''
-  );*/
+    {app_id: 1, cart_id: "001", comment_id: "001"},
+    sub.getDevAdmin().address
+  ).then(result => console.log("democracyPowerComplain:", result));*/
 
   // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu   
   /*sub.rpcCheckAccountIsPlatformExpert('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', '12345678').then((result) => {
@@ -2122,9 +2146,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.bond(sub.getDevAdmin().address, '100', 0).then(result => console.log("bond result:", result));
 
-  //sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
+  sub.fetchProposals().then(result => console.log("fetchProposals:", JSON.stringify(result)));
 
-  //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
+  sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
   //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 
