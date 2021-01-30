@@ -30566,7 +30566,9 @@ const fetchProposals = async () => {
   isKeyringReady();
   isApiReady();
 
-  let results = await this.api.derive.democracy.proposals();  
+  let results = await this.api.derive.democracy.proposals(); 
+  
+  //console.log("proposals:", JSON.stringify(results));
 
   let converted = [];
   results.forEach(item => {
@@ -30574,6 +30576,7 @@ const fetchProposals = async () => {
       balance: convertBN(item.balance),
       index: item.index.toString(),
       proposer: item.proposer.toString(),
+      hash: item.imageHash.toString(),
       call: item.image ? _transfromProposalMeta(item.image.proposal) : {}  
     })
   });
@@ -30585,12 +30588,12 @@ const fetchAllProposals = async () => {
   isKeyringReady();
   isApiReady();
 
-  let pendings = await fetchProposals();
+  let pending = await fetchProposals();
 
-  pendings = pendings.map(item => {
+  pending = pending.map(item => {
     return {
       index: item.index.toString(),
-      hash: item.proposer
+      hash: item.hash
     };
   });
 
@@ -30599,13 +30602,13 @@ const fetchAllProposals = async () => {
   let referendum = {};
   if (!!referendums && referendums.length > 0) {
     referendum = {
-      index: referendums[0].index,
-      hash: referendums[0].imageHash
+      index: referendums[0].index.toString(),
+      hash: referendums[0].imageHash.toString()
     };
   }
 
   return {
-    pendings,
+    pending,
     referendum
   };
   

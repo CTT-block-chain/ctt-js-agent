@@ -1664,6 +1664,18 @@ server.expose('queryCommodityPowerSlashRecord', (args, opt, callback) => {
 /**
  * 查询所有提案
  * 返回值:
+ * {
+ *  pending: [
+ *    {
+ *      index: '32',
+ *      hash: '0x8c7d56116584f65b3164a167136ab63546f94ea688ffe278c0d4f7f283c63cf6'
+ *    }
+ *  ],
+ *  referendum: {
+ *    index: '32',
+ *    hash: '0x8c7d56116584f65b3164a167136ab63546f94ea688ffe278c0d4f7f283c63cf6'
+ *  }
+ * }
  */
 server.expose('fetchAllProposals', (args, opt, callback) => {
   try {
@@ -1926,10 +1938,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   /*sub.balancesAll('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg').then((info) => {
     console.log('5HL6pXaaHffV2Wkjq2VZ3ifUz2qYuQjfTvxcizMrSpe8popg balance:', info.transferable.toString());
   });*/
-  sub.democracyPowerComplain(
+  /*sub.democracyPowerComplain(
     {app_id: 1, cart_id: "001", comment_id: "001"},
     sub.getDevAdmin().address
-  ).then(result => console.log("democracyPowerComplain:", result));
+  ).then(result => console.log("democracyPowerComplain:", result));*/
 
   // 5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu   
   /*sub.rpcCheckAccountIsPlatformExpert('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', '12345678').then((result) => {
@@ -2144,7 +2156,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
-  //sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
+  sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
 
   //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 
