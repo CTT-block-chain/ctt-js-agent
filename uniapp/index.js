@@ -333,5 +333,5 @@ window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPowe
  * @param {*} app_id 
  * @param {*} model_id 
  */
-window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mode_id);
+window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, model_id);
 
