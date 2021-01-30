@@ -2182,5 +2182,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelDisputeRecord(1, 'abc').then(result => console.log("rpcModelDisputeRecord:", result));
   //sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
-  sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
+  //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
+  //sub.rpcModelDeposit('123', 'abc').then(result => console.log("rpcModelDeposit:", result));
 });

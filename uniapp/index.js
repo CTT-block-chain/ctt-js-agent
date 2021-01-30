@@ -327,3 +327,11 @@ window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDepo
  * @param {*} document_id 
  */
 window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPower(app_id, document_id);
+
+/**
+ * 查询模型押金余额
+ * @param {*} app_id 
+ * @param {*} model_id 
+ */
+window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mode_id);
+

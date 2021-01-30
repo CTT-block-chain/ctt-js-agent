@@ -27883,7 +27883,33 @@ const chainDataTypes = {
     admin: 'AuthAccountId',
     appId: 'u32',
     member: 'AccountId'
+  },
+
+  AppCommentKeyParams: {
+    appId: 'u32',
+    commentId: 'Bytes',
+  },
+
+  ModelDisputeRecord: {
+    appId: 'u32',
+    modelId: 'Vec<u8>',
+    commentId: 'Vec<u8>',
+    disputeType: 'ModelDisputeType',
+    block: 'BlockNumber'
+  },
+
+  CommoditySlashRecord: {
+    appId: 'u32',
+    commentId: 'Vec<u8>',
+    cartId: 'Vec<u8>',
+    block: 'BlockNumber'
+  },
+
+  QueryModelParams: {
+    appId: 'u32',
+    modelId: 'Bytes'
   }
+
 };
 
 const rpc = {
@@ -27944,6 +27970,22 @@ const rpc = {
 
     isCommodityPowerExist: {
       description: 'Check if commodify knowledge power exist.',
+      params: [
+        {
+          name: 'query',
+          type: 'QueryCommodityPowerParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'bool',
+    },
+
+    isCommodityInBlackList: {
+      description: 'Check if commodify knowledge power in black list.',
       params: [
         {
           name: 'query',
@@ -28065,6 +28107,54 @@ const rpc = {
       ],
       type: 'bool',
     },
+
+    modelDepositRecord: {
+      description: 'load model dispute record',
+      params: [
+        {
+          name: 'params',
+          type: 'AppCommentKeyParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'ModelDisputeRecord',
+    },
+
+    commodityPowerSlashRecord: {
+      description: 'load commodity power slash record',
+      params: [
+        {
+          name: 'params',
+          type: 'AppCommentKeyParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'CommoditySlashRecord',
+    },
+
+    modelDeposit: {
+      description: 'get model deposit.',
+      params: [
+        {
+          name: 'params',
+          type: 'QueryModelParams'
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true
+        }
+      ],
+      type: 'u64'
+    }
   },
   members: {
     isPlatformExpert: {
@@ -29026,6 +29116,14 @@ const rpcGetCommodityPower = async (appId, cartIds) => {
   return Promise.all(queue);
 };
 
+const rpcIsCommodityInBlackList = async (appId, cartId) => {
+  isApiReady();
+
+  appId = Number(appId);
+  let result = await this.api.rpc.kp.isCommodityInBlackList({appId, cartId});
+  return result.toString() === 'true';
+}
+
 const rpcCheckAccountIsPlatformExpert = async (accountId, appId) => {
   appId = Number(appId);
   let result = await this.api.rpc.members.isPlatformExpert(accountId, { appId });
@@ -29171,6 +29269,22 @@ const rpcIsTechMemberSign = async (account, msg, sign) => {
   return this.api.rpc.kp.isTechMemberSign({account, msg, sign});
 };
 
+const rpcModelDisputeRecord = async (appId, commentId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let record = await this.api.rpc.kp.modelDepositRecord({appId, commentId});
+  return record.toJSON();
+};
+
+const rpcCommodityPowerSlashRecord = async (appId, commentId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let record = await this.api.rpc.kp.commodityPowerSlashRecord({appId, commentId});
+  return record.toJSON();
+};
+
 // chain constant api
 const constBalanceExistentialDeposit = () => {
   let v = this.api.consts.balances.existentialDeposit;
@@ -29192,6 +29306,14 @@ const createPreImage = (txModule, method, paramList) => {
   let tx = this.api.tx[txModule][method](...paramList);
   return tx.method.toHex();
 };
+
+const rpcModelDeposit = async (appId, modelId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let result = await this.api.rpc.kp.modelDeposit({appId: Number(appId), modelId});
+  return result.div(new BN(10000)).toString();
+}
 
 const submitPreimage = async (image, pubKey) => {
   const txInfo = {
@@ -30861,6 +30983,7 @@ module.exports = {
   rpcGetTotalPower: rpcGetTotalPower,
   rpcGetAccountPower: rpcGetAccountPower,
   rpcGetCommodityPower: rpcGetCommodityPower,
+  rpcIsCommodityInBlackList: rpcIsCommodityInBlackList,
   rpcCheckAccountIsPlatformExpert: rpcCheckAccountIsPlatformExpert,
   rpcCheckAccountIsModelExpert: rpcCheckAccountIsModelExpert,
   rpcCheckAccountIsModelCreator: rpcCheckAccountIsModelCreator,
@@ -30872,6 +30995,9 @@ module.exports = {
   rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
   rpcIsTechMemberSign: rpcIsTechMemberSign,
   rpcMiscDocumentPower: rpcMiscDocumentPower,
+  rpcModelDisputeRecord: rpcModelDisputeRecord,
+  rpcCommodityPowerSlashRecord: rpcCommodityPowerSlashRecord,
+  rpcModelDeposit: rpcModelDeposit,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -86265,5 +86391,13 @@ window.addModelDeposit = (app_id, model_id, amount, account) => Sub.addModelDepo
  * @param {*} document_id 
  */
 window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPower(app_id, document_id);
+
+/**
+ * 查询模型押金余额
+ * @param {*} app_id 
+ * @param {*} model_id 
+ */
+window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mode_id);
+
 
 },{"../interface/modelDispute":202,"../interface/powerComplain":206,"../lib/sub":211}]},{},[1149]);
