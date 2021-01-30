@@ -29414,7 +29414,8 @@ const democracyAddApp = async (appAdd, user_key, user_sign, deposit) => {
 };
 
 const extractProposalIdx = (events) => {
-  for (let event of events) {
+  for (let i = 0; i < events.length; i++ ) {
+    let event = events[i];
     if (event.section == 'democracy' && event.method == 'Proposed') {
       return event.data[0]
     }
@@ -30580,6 +30581,36 @@ const fetchProposals = async () => {
   return converted;
 };
 
+const fetchAllProposals = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  let pendings = await fetchProposals();
+
+  pendings = pendings.map(item => {
+    return {
+      index: item.index.toString(),
+      hash: item.proposer
+    };
+  });
+
+  let referendums = await fetchReferendums();
+  referendums = referendums.referendums;
+  let referendum = {};
+  if (!!referendums && referendums.length > 0) {
+    referendum = {
+      index: referendums[0].index,
+      hash: referendums[0].imageHash
+    };
+  }
+
+  return {
+    pendings,
+    referendum
+  };
+  
+};
+
 const vote = async (account, id, isYes, amount, conviction) => {
   isKeyringReady();
   isApiReady();
@@ -30979,6 +31010,7 @@ module.exports = {
   // democracy:
   fetchReferendums: fetchReferendums, // get referendum detail
   fetchProposals: fetchProposals,
+  fetchAllProposals: fetchAllProposals,
 
   // RPC
   rpcGetTotalPower: rpcGetTotalPower,
