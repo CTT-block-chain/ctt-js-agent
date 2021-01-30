@@ -1475,6 +1475,36 @@ server.expose('queryCommodityPower', (args, opt, callback) => {
 });
 
 /**
+ * 查询体验商品是否在黑名单
+ * {
+ *    sender_data: { 发送端数据
+ *      app_id:  String or Number
+ *      cart_id: String
+ *    }
+ * }
+ */
+server.expose('isCommodityInBlackList', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`isCommodityInBlackList:${args[0]}`);
+  const { app_id, cart_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcIsCommodityInBlackList(app_id, cart_id)
+      .then((result) => {
+        console.log('isCommodityInBlackList result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`isCommodityInBlackList error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 查询应用类型
  * 无参数
  */
@@ -2149,6 +2179,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("result:", result);
   })*/
 
-  sub.rpcModelDisputeRecord(1, 'abc').then(result => console.log("rpcModelDisputeRecord:", result));
-  sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
+  //sub.rpcModelDisputeRecord(1, 'abc').then(result => console.log("rpcModelDisputeRecord:", result));
+  //sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
+  sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
 });
