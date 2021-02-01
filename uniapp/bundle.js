@@ -27936,6 +27936,22 @@ const rpc = {
       type: 'PowerSize',
     },
 
+    powerRatio: {
+      description: 'Get account knowledge power ratio.',
+      params: [
+        {
+          name: 'account',
+          type: 'AccountId',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'u64',
+    },
+
     commodityPower: {
       description: 'Get commodify knowledge power.',
       params: [
@@ -29313,6 +29329,14 @@ const rpcModelDeposit = async (appId, modelId) => {
 
   let result = await this.api.rpc.kp.modelDeposit({appId: Number(appId), modelId});
   return result.div(new BN(10000)).toString();
+}
+
+const rpcPowerRatio = async (accountId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let result = await this.api.rpc.kp.powerRatio(accountId);
+  return Number(result.toString()) / 10000;
 }
 
 const submitPreimage = async (image, pubKey) => {
@@ -31034,6 +31058,7 @@ module.exports = {
   rpcModelDisputeRecord: rpcModelDisputeRecord,
   rpcCommodityPowerSlashRecord: rpcCommodityPowerSlashRecord,
   rpcModelDeposit: rpcModelDeposit,
+  rpcPowerRatio: rpcPowerRatio,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -86434,6 +86459,13 @@ window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPowe
  * @param {*} model_id 
  */
 window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, model_id);
+
+/**
+ * 查询算力加权值
+ * @param {*} account 账户地址
+ * 返回浮点数： 例如 0.15
+ */
+window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
 
 
 },{"../interface/modelDispute":202,"../interface/powerComplain":206,"../lib/sub":211}]},{},[1149]);

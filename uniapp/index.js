@@ -335,3 +335,10 @@ window.queryMiscDocumentPower = (app_id, document_id) => Sub.rpcMiscDocumentPowe
  */
 window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, model_id);
 
+/**
+ * 查询算力加权值
+ * @param {*} account 账户地址
+ * 返回浮点数： 例如 0.15
+ */
+window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
+

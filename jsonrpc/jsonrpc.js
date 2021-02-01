@@ -1954,10 +1954,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   /*sub.queryKpComments().then(result => {
     console.log("comments:", result);
-  });*//*
+  });*/
 
-  sub.queryKpDocumentPower().then(result => console.log("queryKpDocumentPower:", result));
-
+  //sub.queryKpDocumentPower().then(result => console.log("queryKpDocumentPower:", result));
+/*
   sub.queryAccountAttendPower().then(result => console.log("queryAccountAttendPower:", result));
 
   sub.queryAccountCommentStat().then(result => console.log("queryAccountCommentStat:", result));
@@ -2156,7 +2156,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
-  sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
+  //sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
 
   //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 
@@ -2216,4 +2216,33 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
   //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
   //sub.rpcModelDeposit('123', 'abc').then(result => console.log("rpcModelDeposit:", result));
+
+  /*const addAdmin = async () => {
+    let params = sub.createSignObject('AppKeyManageParams', {
+      app_id: "100000001", 
+      admin: sub.getDevAdmin().address, 
+      member: '5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc'
+    });
+
+    let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    let result = await sub.membersAddAppAdmin(sub.getDevAdmin().address, params, sign);
+    console.log("membersAddAppAdmin result:", result);
+  }
+
+  const addKey = async () => {
+    let params = sub.createSignObject('AppKeyManageParams', {
+      app_id: "100000001", 
+      admin: sub.getDevAdmin().address, 
+      member: '5H3zFbfFwhXhKcHxudzGtgzhUhycmNm99FjXdubAkGCEL2cZ'
+    });
+
+    let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    let result = await sub.membersAddAppKey(sub.getDevAdmin().address, params, sign);
+    console.log("membersAddAppAdmin result:", result);
+  }
+
+  addAdmin().then(addKey);*/
+
+  sub.rpcPowerRatio('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu').then(result => console.log("rpcPowerRatio:", result));
+  
 });
