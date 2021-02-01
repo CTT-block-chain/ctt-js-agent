@@ -29361,11 +29361,17 @@ const submitProposal = async (imageHash, deposit, pubKey) => {
   deposit = getDeposit(deposit);
   result = await sendTx(txInfo, [imageHash, deposit], false);
   console.log(`submitProposal result:${JSON.stringify(result)}`);
-  
-  return {
-    hash: result.hash,
-    proposal_idx: extractProposalIdx(result.events),
-    proposal_hash: imageHash
+
+  if (result.error) {
+    return { 
+      error: result.error
+    }
+  } else {
+    return {
+      hash: result.hash,
+      proposal_idx: extractProposalIdx(result.events),
+      proposal_hash: imageHash
+    }
   }
 };
 
