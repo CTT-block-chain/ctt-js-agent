@@ -29360,6 +29360,7 @@ const submitProposal = async (imageHash, deposit, pubKey) => {
 
   deposit = getDeposit(deposit);
   result = await sendTx(txInfo, [imageHash, deposit], false);
+  console.log(`submitProposal result:${JSON.stringify(result)}`);
   
   return {
     hash: result.hash,
@@ -86463,7 +86464,7 @@ window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mod
 /**
  * 查询算力加权值
  * @param {*} account 账户地址
- * 返回浮点数： 例如 0.15
+ * 返回浮点数： 例如 1.25
  */
 window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
 

@@ -22,6 +22,7 @@ const InterfaceClientParamsCreateChooseDoc = require('../interface/clientParamsC
 const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCreateModelDoc');
 const InterfaceModelExpertDelMemberParams = require('../interface/modelExpertDelMemberParams');
 const powerComplain = require('../interface/powerComplain');
+const ModelDispute = require('../interface/modelDispute');
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
@@ -2243,6 +2244,11 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   addAdmin().then(addKey);*/
 
-  sub.rpcPowerRatio('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu').then(result => console.log("rpcPowerRatio:", result));
+  //sub.rpcPowerRatio('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu').then(result => console.log("rpcPowerRatio:", result));
+
+  /*let modelDispute = ModelDispute.create(100, 'abc', 'abc', 'abc', '0');
+  sub.democracyModelDispute(modelDispute, sub.getDevAdmin().address).then(result => {
+    console.log("democracyModelDispute:", result);
+  });*/
   
 });
