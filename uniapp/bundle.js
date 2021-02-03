@@ -27892,8 +27892,8 @@ const chainDataTypes = {
 
   ModelDisputeRecord: {
     appId: 'u32',
-    modelId: 'Vec<u8>',
-    commentId: 'Vec<u8>',
+    modelId: 'Bytes',
+    commentId: 'Bytes',
     disputeType: 'ModelDisputeType',
     block: 'BlockNumber'
   },
@@ -29290,6 +29290,7 @@ const rpcModelDisputeRecord = async (appId, commentId) => {
   isApiReady();
 
   let record = await this.api.rpc.kp.modelDepositRecord({appId, commentId});
+  console.log("record:", JSON.stringify(record));
   return record.toJSON();
 };
 
@@ -29336,7 +29337,11 @@ const rpcPowerRatio = async (accountId) => {
   isApiReady();
 
   let result = await this.api.rpc.kp.powerRatio(accountId);
-  return Number(result.toString()) / 10000;
+  console.log(`rpcPowerRatio: ${result}`)
+  // what we got is a converstion from mini balance
+  let mini = this.api.consts.balances.existentialDeposit;
+  let ratio = Number(result.toString()) / Number(mini.toString());
+  return ratio;
 }
 
 const submitPreimage = async (image, pubKey) => {
@@ -29772,6 +29777,54 @@ const queryAccountCommodities = async () => {
 
   return results;
 };
+
+const queryCommoditySlashRecords = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.commoditySlashRecords;
+  const store = await entry.entries();
+  console.log('queryCommoditySlashRecords len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+}
+
+const queryModelDisputeRecords = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.modelDisputeRecords;
+  const store = await entry.entries();
+  console.log('queryModelDisputeRecords len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+}
 
 const queryApps = async () => {
   isKeyringReady();
@@ -31101,6 +31154,8 @@ module.exports = {
   queryAccountStatistic: queryAccountStatistic,
   queryAppAdmins: queryAppAdmins,
   queryAppKeys: queryAppKeys,
+  queryCommoditySlashRecords: queryCommoditySlashRecords,
+  queryModelDisputeRecords: queryModelDisputeRecords,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,

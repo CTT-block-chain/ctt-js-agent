@@ -2213,10 +2213,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("result:", result);
   })*/
 
-  //sub.rpcModelDisputeRecord(1, 'abc').then(result => console.log("rpcModelDisputeRecord:", result));
-  //sub.rpcCommodityPowerSlashRecord(1, 'abc').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
+  //sub.rpcModelDisputeRecord('100000001', '147').then(result => console.log("rpcModelDisputeRecord:", result));
+  //sub.rpcCommodityPowerSlashRecord(100000001, '146').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
   //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
-  //sub.rpcModelDeposit('123', 'abc').then(result => console.log("rpcModelDeposit:", result));
+  //sub.rpcModelDeposit('100000001', '147').then(result => console.log("rpcModelDeposit:", result));
 
   /*const addAdmin = async () => {
     let params = sub.createSignObject('AppKeyManageParams', {
@@ -2244,11 +2244,16 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   addAdmin().then(addKey);*/
 
-  //sub.rpcPowerRatio('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu').then(result => console.log("rpcPowerRatio:", result));
+  sub.rpcPowerRatio('5GCTf23EmVJQnsJAmnLHJeck3fmfLY6Xg5ttirzD1ziKSSLE').then(result => console.log("rpcPowerRatio:", result));
+
+  sub.queryMinerPower();
 
   /*let modelDispute = ModelDispute.create(100, 'abc', 'abc', 'abc', '0');
   sub.democracyModelDispute(modelDispute, sub.getDevAdmin().address).then(result => {
     console.log("democracyModelDispute:", result);
   });*/
+
+  //sub.queryCommoditySlashRecords();
+  //sub.queryModelDisputeRecords();
   
 });
