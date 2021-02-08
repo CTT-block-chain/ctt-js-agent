@@ -1695,6 +1695,26 @@ server.expose('fetchAllProposals', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询区块高度
+ */
+server.expose('queryBlockHeight', (args, opt, callback) => {
+  try {
+    sub
+      .queryBlockHeight()
+      .then((result) => {        
+        console.log('queryBlockHeight result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryBlockHeight error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
