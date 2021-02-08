@@ -31039,6 +31039,17 @@ const queryAccountStatistic = async (accountId) => {
   };
 }
 
+const queryBlockTime = async (block) => {
+  isApiReady();
+
+  let hash = await this.api.rpc.chain.getBlockHash(block);
+  let time = await this.api.query.timestamp.now.at(hash);
+
+  console.log("time:", new Date(Number(time.toString())));
+
+  return time.toString();
+}
+
 module.exports = {
   initKeyring: initKeyring,
   initApi: initApi,
@@ -31182,6 +31193,8 @@ module.exports = {
 
   paramsSign: paramsSign,
   createSignObject: createSignObject,
+
+  queryBlockTime: queryBlockTime,
 
   test: test,
 };
@@ -86531,5 +86544,11 @@ window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mod
  */
 window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
 
-
+/**
+ * 查询区块时间 
+ * @param {*} block 区块号，Number
+ * 返回值：
+ * 格林威治时间秒数 （相对于1970.1.1.00:00）String 
+ */
+window.queryBlockTime = (block) => Sub.queryBlockTime(block);
 },{"../interface/modelDispute":202,"../interface/powerComplain":206,"../lib/sub":211}]},{},[1149]);

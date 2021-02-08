@@ -342,3 +342,10 @@ window.queryModelDeposit = (app_id, model_id) => Sub.rpcModelDeposit(app_id, mod
  */
 window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
 
+/**
+ * 查询区块时间 
+ * @param {*} block 区块号，Number
+ * 返回值：
+ * 格林威治时间秒数 （相对于1970.1.1.00:00）String 
+ */
+window.queryBlockTime = (block) => Sub.queryBlockTime(block);

@@ -1715,6 +1715,33 @@ server.expose('queryBlockHeight', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询区块时间
+ * sender_data: { 发送端数据
+ *   block, 区块号 Number
+ * }
+ */
+server.expose('queryBlockTime', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryBlockTime:${args[0]}`);
+  const { block } = param.sender_data;
+
+  try {
+    sub
+      .queryBlockTime(Number(block))
+      .then((result) => {        
+        console.log('queryBlockTime result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryBlockTime error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -2177,7 +2204,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
-  sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
+  //sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
 
   //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 
@@ -2275,5 +2302,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryCommoditySlashRecords();
   //sub.queryModelDisputeRecords();
+
+  sub.queryBlockTime(1);
   
 });
