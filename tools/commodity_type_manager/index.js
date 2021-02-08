@@ -6,6 +6,7 @@ const sub = require('../../lib/sub');
 const config = require('../../config/config');
 
 const setupCommodityTypes = async () => {
+  start = false;
   const workbook = xlsx.parse('tools/commodity_type_manager/id_defines.xlsx');
   //console.log(workbook);
   const sheet = workbook[0].data;
@@ -13,6 +14,13 @@ const setupCommodityTypes = async () => {
     let row = sheet[i];
     //console.log(row);
     let id = Number(row[4]);
+    /*if (start || id === 300040001) {
+      start = true;
+    } else {
+      console.log(`ignore ${id}`);
+      continue;
+    }*/
+
     let desc = row[3];
     console.log(`processing ${id} - ${desc}`);
     if (isNaN(id) || !desc) {

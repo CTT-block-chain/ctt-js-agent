@@ -30687,7 +30687,9 @@ const fetchAllProposals = async () => {
   if (!!referendums && referendums.length > 0) {
     referendum = {
       index: referendums[0].index.toString(),
-      hash: referendums[0].imageHash.toString()
+      hash: referendums[0].imageHash.toString(),
+      vote_end: Number(referendums[0].status.end.toString()),
+      execution: Number(referendums[0].status.end.toString()) + Number(referendums[0].status.delay.toString())
     };
   }
 

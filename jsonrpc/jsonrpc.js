@@ -2157,7 +2157,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.fetchReferendums().then(result => console.log("fetchReferendums:", JSON.stringify(result)));
 
-  //sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
+  sub.fetchAllProposals().then(result => console.log("fetchAllProposals:", result));
 
   //sub.queryBlockHeight().then(result => console.log("bestNumber:", result));
 
@@ -2244,9 +2244,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   addAdmin().then(addKey);*/
 
-  sub.rpcPowerRatio('5GCTf23EmVJQnsJAmnLHJeck3fmfLY6Xg5ttirzD1ziKSSLE').then(result => console.log("rpcPowerRatio:", result));
+  //sub.rpcPowerRatio('5GCTf23EmVJQnsJAmnLHJeck3fmfLY6Xg5ttirzD1ziKSSLE').then(result => console.log("rpcPowerRatio:", result));
 
-  sub.queryMinerPower();
+  //sub.queryMinerPower();
 
   /*let modelDispute = ModelDispute.create(100, 'abc', 'abc', 'abc', '0');
   sub.democracyModelDispute(modelDispute, sub.getDevAdmin().address).then(result => {
