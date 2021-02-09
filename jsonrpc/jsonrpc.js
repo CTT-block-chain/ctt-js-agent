@@ -1742,6 +1742,27 @@ server.expose('queryBlockTime', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询公投时间参数
+ * 返回值：（区块数)
+ * { 
+ *   launchPeriod: '300',  // 启动周期 
+ *   enactmentPeriod: '100', // 执行延后时间
+ *   votingPeriod: '100' // 投票时间
+ * }
+ */
+server.expose('queryDemocracyParams', (args, opt, callback) => {
+  try {
+    result = sub.queryDemocracyParams();
+    console.log('queryDemocracyParams result:', result);
+    sendResult(callback, { result });
+  } catch (e) {
+    console.error(`queryDemocracyParams error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+
 // signer interfaces
 /**
  * signParams 参数签名
@@ -2303,6 +2324,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.queryCommoditySlashRecords();
   //sub.queryModelDisputeRecords();
 
-  sub.queryBlockTime(1);
+  //sub.queryBlockTime(1);
+
+  console.log("test:", sub.queryDemocracyParams());
   
 });
