@@ -31002,6 +31002,28 @@ const bondExtra = async (stash, amount) => {
   return result;
 };
 
+const getSlashingSpans = async (stashId) => {
+  isApiReady();
+  const res = await this.api.query.staking.slashingSpans(stashId);
+  return res.isNone ? 0 : res.unwrap().prior.length + 1;
+};
+
+const withdrawUnbonded = async (stash) => {
+  isApiReady();
+
+  const txInfo = {
+    module: 'staking',
+    call: 'withdrawUnbonded',
+    pubKey: stash,
+  };
+
+  let span = await getSlashingSpans(stash);
+
+  const result = await sendTx(txInfo, [span]);
+  console.log("withdrawUnbonded:", result);
+  return result;
+};
+
 const unbond = async (stash, amount) => {
   isApiReady();
 
@@ -31048,6 +31070,16 @@ const queryBlockTime = async (block) => {
   console.log("time:", new Date(Number(time.toString())));
 
   return time.toString();
+}
+
+const queryDemocracyParams = () => {
+  isApiReady();
+
+  return {
+    launchPeriod: this.api.consts.democracy.launchPeriod.toString(),
+    enactmentPeriod: this.api.consts.democracy.enactmentPeriod.toString(),
+    votingPeriod: this.api.consts.democracy.votingPeriod.toString()
+  }
 }
 
 module.exports = {
@@ -31187,6 +31219,7 @@ module.exports = {
   getAccountRewardsEraOptions: getAccountRewardsEraOptions,
   loadAccountRewardsData: loadAccountRewardsData,
   payoutStakers: payoutStakers,
+  withdrawUnbonded: withdrawUnbonded,
 
   convertBN: convertBN,
   convertBalance: convertBalance,
@@ -31195,6 +31228,7 @@ module.exports = {
   createSignObject: createSignObject,
 
   queryBlockTime: queryBlockTime,
+  queryDemocracyParams: queryDemocracyParams,
 
   test: test,
 };
@@ -86551,4 +86585,10 @@ window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
  * 格林威治时间秒数 （相对于1970.1.1.00:00）String 
  */
 window.queryBlockTime = (block) => Sub.queryBlockTime(block);
+
+/**
+ * 取回解锁余额
+ * @param {*} stash stash 账户地址 
+ */
+window.withdrawUnbonded = (stash) => Sub.withdrawUnbonded(stash);
 },{"../interface/modelDispute":202,"../interface/powerComplain":206,"../lib/sub":211}]},{},[1149]);

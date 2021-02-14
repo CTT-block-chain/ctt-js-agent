@@ -349,3 +349,9 @@ window.queryPowerRatio = (account) => Sub.rpcPowerRatio(account);
  * 格林威治时间秒数 （相对于1970.1.1.00:00）String 
  */
 window.queryBlockTime = (block) => Sub.queryBlockTime(block);
+
+/**
+ * 取回解锁余额
+ * @param {*} stash stash 账户地址 
+ */
+window.withdrawUnbonded = (stash) => Sub.withdrawUnbonded(stash);
