@@ -21,13 +21,16 @@ const InterfaceClientParamsCreateTryDoc = require('../interface/clientParamsCrea
 const InterfaceClientParamsCreateChooseDoc = require('../interface/clientParamsCreateChooseDoc');
 const InterfaceClientParamsCreateModelDoc = require('../interface/clientParamsCreateModelDoc');
 const InterfaceModelExpertDelMemberParams = require('../interface/modelExpertDelMemberParams');
+const InterfaceAppIncomeRedeemParams = require('../interface/appIncomeRedeemParams');
+const InterfaceAppIncomeRedeemConfirmParams = require('../interface/appIncomeRedeemConfirmParams');
 const powerComplain = require('../interface/powerComplain');
 const ModelDispute = require('../interface/modelDispute');
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
-  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, AppKeyManageParams } = require('../lib/signParamsDefine');
+  ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, 
+  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -967,6 +970,97 @@ server.expose('queryCurrentModelRewardStage', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`queryCurrentModelRewardStage error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 应用分成用户兑换申请
+ * {
+ *    data: { 
+ *      account: user_pub_key
+ *      app_id: 应用ID Number String
+ *      cycle: 模型增发周期 String
+ *      exchange_amount: 兑换KPT（经过了用户端提交及服务端校验的可兑换额度）
+ *    }
+ *    user_key: 用户账户公钥 String (投资者账户)
+ *    user_sign: 用户数据签名 String
+ *    auth_key: 授信服务器以及发送者公钥 String
+ *    auth_sign: 授信签名
+ * }
+ */
+server.expose('appIncomeUserExchangeRequest', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`appIncomeUserExchangeRequest:${args[0]}`);
+    const { data, user_key, user_sign, auth_key, auth_sign } = param;
+    
+    let signObj = sub.createSignObject(AppIncomeRedeemParams, data);
+
+    // verify sign
+    let buf = InterfaceAppIncomeRedeemParams.encode(signObj);
+    let verify = sub.verify(auth_key, buf, auth_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for auth';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
+    verify = sub.verify(user_key, buf, user_sign);
+    if (!verify.isValid) {
+      const msg = 'sign verify fail for user';
+      console.error(msg);
+      sendResult(callback, { error: msg });
+      return
+    }
+
+    sub
+      .appIncomeUserExchangeRequest(signObj, user_key, user_sign, auth_key, auth_sign)
+      .then((result) => {
+        console.log('appIncomeUserExchangeRequest result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`appIncomeUserExchangeRequest error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 应用分成用户兑换确认
+ * {
+ *    data: {
+ *      account: 用户账户公钥
+ *      app_id: 应用ID Number String
+ *      cycle: 模型增发周期 String
+ *      pay_id: 支付号 String
+ *    }
+ *    auth_key: 授信服务器以及发送者公钥 String
+ * }
+ */
+server.expose('appIncomeUserExchangeConfirm', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`appIncomeUserExchangeConfirm:${args[0]}`);
+    const { data, auth_key } = param;
+    
+    let signObj = sub.createSignObject(AppIncomeRedeemConfirmParams, data);
+
+    sub
+      .appIncomeUserExchangeConfirm(signObj, auth_key)
+      .then((result) => {
+        console.log('appIncomeUserExchangeConfirm result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`appIncomeUserExchangeConfirm error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -2326,6 +2420,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryBlockTime(1);
 
-  console.log("test:", sub.queryDemocracyParams());
+  //console.log("test:", sub.queryDemocracyParams());
+
+  sub.queryHistoryLiquid(10000);
   
 });
