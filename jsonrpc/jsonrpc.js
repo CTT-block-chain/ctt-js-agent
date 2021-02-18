@@ -1856,6 +1856,33 @@ server.expose('queryDemocracyParams', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询技术委员会成员
+ * 返回值：
+ * [
+      '5EqWxvQqD2PriHPSPUWyVpqYR34RhopaPYZ1xFaF1GV2gUwL',
+      '5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP',
+      '5FenQHhRgGfqYgJtTYLWz8u31tmznv2XV8qiXNpNBKScZT1t',
+      '5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu'
+    ]
+ */
+server.expose('queryTechMembers', (args, opt, callback) => {
+  try {
+    sub
+      .queryTechMembers()
+      .then((result) => {        
+        console.log('queryTechMembers result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryTechMembers error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 
 // signer interfaces
 /**
@@ -2422,6 +2449,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //console.log("test:", sub.queryDemocracyParams());
 
-  sub.queryHistoryLiquid(10000);
+  //sub.queryHistoryLiquid(10000);
+
+  //sub.queryTechMembers();
   
 });
