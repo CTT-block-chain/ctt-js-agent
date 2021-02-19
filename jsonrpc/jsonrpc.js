@@ -688,6 +688,42 @@ server.expose('queryAppFinancedPortion', (args, opt, callback) => {
 });
 
 /**
+ * 查询账户可兑换应用提成额度
+ * {
+ *    sender_data: { 发送端数据
+ *      address: 账户地址 String
+ *      appId: 应用ID Number String
+ *      cycle: 期数索引 Number 可选，如不传，则查询最近一期
+ *    }
+ *    返回值： 
+ *    {
+ *       portion: String 可兑换额度（元）
+ *       cycle: Number 查询期数索引 
+ *    }
+ * }
+ */
+server.expose('queryAppCycleIncomeUserPortion', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`queryAppCycleIncomeUserPortion:${args[0]}`);
+    const { address, appId, cycle } = param.sender_data;
+
+    sub
+      .queryAppCycleIncomeUserPortion(address, appId, cycle)
+      .then((result) => {
+        console.log('queryAppCycleIncomeUserPortion result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryAppCycleIncomeUserPortion error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 查询指定融资提案下的兑换账户列表数据
  * {
  *    sender_data: { 发送端数据
@@ -2452,5 +2488,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.queryHistoryLiquid(10000);
 
   //sub.queryTechMembers();
+
+  sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
   
 });

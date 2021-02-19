@@ -30058,14 +30058,13 @@ const queryAppCycleIncomeUserPortion = async (accountId, appId, cycle) => {
   isApiReady();
 
   // make sure in model reward stage
-  let result = await this.api.rpc.kp.modelIncomeCurrentStage();
+  /*let result = await this.api.rpc.kp.modelIncomeCurrentStage();
   if (result.stage.toString() != '2') {
     console.warn('not in rewarding stage');
     return { 
-      portion: '0',
       error: 'not in rewarding stage'
     };
-  }
+  }*/
 
   // in rewarding stage, compute stage block height
   let periodBlock = Number(this.api.consts.kp.modelIncomeCyclePeriod.toString());
@@ -30077,7 +30076,14 @@ const queryAppCycleIncomeUserPortion = async (accountId, appId, cycle) => {
   }
   // reverse compute tracking point (every cycle end)
   // since we are in rewarding stage, this will not be overflowed
-  let trackPoint = (cycle + 1) * periodBlock;
+  let trackPoint = cycle * periodBlock;
+  console.log("trackPoint:", trackPoint);
+  if (trackPoint > currentBlock) {
+    return {
+      error: "you are querying future"
+    };
+  }
+
   let trackPointBalance = await queryHistoryLiquid(trackPoint);
   trackPointBalance = convertBN(trackPointBalance);
   let accountInfo = await queryAccountInfoWithBlockNum(accountId, trackPoint);
@@ -30089,7 +30095,6 @@ const queryAppCycleIncomeUserPortion = async (accountId, appId, cycle) => {
   if (!appCycleRecord) {
     console.warn("not found target cycle");
     return { 
-      portion: '0',
       error: 'not found target cycle'
     };
   }
@@ -30097,25 +30102,26 @@ const queryAppCycleIncomeUserPortion = async (accountId, appId, cycle) => {
   let income = appCycleRecord.income.toNumber();
   if (income <= 0) {
     return { 
-      portion: '0',
       error: 'income zero'
     };
   }
 
-  let rate = (appConfig.return_rate.toNumber() / 10000);
+  let rate = (appConfig.returnRate.toNumber() / 10000);
   if (rate <= 0) {
     return { 
-      portion: '0',
       error: 'app return rate zero'
     };
   }
 
   let amount = Math.floor(income * rate / 100);
-  let ratio = (amount * historyBalance / trackPointBalance).toFixed(2);
+  let portion = (amount * historyBalance / trackPointBalance).toFixed(2);
 
-  console.log(`queryAppCycleIncomeUserPortion: ${currentBlock} ${periodBlock} ${cycle} ${trackPoint} ${trackPointBalance.toString()} ${historyBalance.toString()} ${amount} ${ratio}`);
+  console.log(`queryAppCycleIncomeUserPortion: ${currentBlock} ${periodBlock} ${cycle} ${trackPoint} ${trackPointBalance.toString()} ${historyBalance.toString()} ${amount} ${portion}`);
 
-  return ratio;
+  return {
+    portion,
+    cycle
+  }
 };
 
 const queryAppFinancedRecords = async () => {
@@ -30250,7 +30256,8 @@ const queryAppCycleIncome = async (app_id, cycle) => {
   
   for (const entry of store) {
     const exposure = entry[1];
-    if (exposure.app_id.toString() === app_id.toString() && exposure.cycle.toNumber() === cycle) {
+    console.log("queryAppCycleIncome:", exposure.toHuman());
+    if (exposure.appId.toString() === app_id.toString() && exposure.cycle.toNumber() === cycle) {
       // found
       return exposure;
     }
@@ -30276,8 +30283,15 @@ const isPermitSubmitAppFinance = async () => {
   console.log("lastHeader:", lastHeader.number.unwrap());
 
   //if (lastHeader.number.unwrap())
-  return (lastHeader.number.unwrap().gt(lastRecord.exchangeEndBlock));
-  
+  return (lastHeader.number.unwrap().gt(lastRecord.exchangeEndBlock)); 
+}
+
+const queryTechMembers = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  let list = await this.api.query.technicalMembership.members();
+  return list.toHuman();
 }
 
 const paramsSign = (paramsType, interfaceObj, signer_address) => {
@@ -31439,6 +31453,7 @@ module.exports = {
   queryModelDisputeRecords: queryModelDisputeRecords,
   queryAppData: queryAppData,
   queryAppCycleIncome: queryAppCycleIncome,
+  queryTechMembers: queryTechMembers,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
@@ -86639,6 +86654,14 @@ window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(
  * @param {*} proposal_id 
  */
 window.queryAppFinancedUserPortion = (account, app_id, proposal_id) => Sub.queryAppFinancedUserPortion(account, app_id, proposal_id);
+
+/**
+ * 查询用户账户应用提成的最大赎回份额
+ * @param {*} account 
+ * @param {*} app_id 
+ * @param {*} cycle 期数索引，可选
+ */
+window.queryAppCycleIncomeUserPortion = (account, app_id, cycle) => Sub.queryAppCycleIncomeUserPortion(account, app_id, cycle);
 
 
 /**

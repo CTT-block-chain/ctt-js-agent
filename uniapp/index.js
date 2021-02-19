@@ -163,6 +163,14 @@ window.queryAppFinanceRecord = (app_id, proposal_id) => Sub.rpcAppFinanceRecord(
  */
 window.queryAppFinancedUserPortion = (account, app_id, proposal_id) => Sub.queryAppFinancedUserPortion(account, app_id, proposal_id);
 
+/**
+ * 查询用户账户应用提成的最大赎回份额
+ * @param {*} account 
+ * @param {*} app_id 
+ * @param {*} cycle 期数索引，可选
+ */
+window.queryAppCycleIncomeUserPortion = (account, app_id, cycle) => Sub.queryAppCycleIncomeUserPortion(account, app_id, cycle);
+
 
 /**
  * 模型增发奖励当前阶段
