@@ -26722,6 +26722,7 @@ module.exports = {
 
 },{"../lib/codec":209}],194:[function(require,module,exports){
 const { encode } = require('../lib/codec');
+const { convertBalance } = require('../lib/util');
 
 module.exports = {
   create: (app_id, account, cycle, exchange_amount ) => {
@@ -26736,7 +26737,7 @@ module.exports = {
   encode: (inst) => encode('AppIncomeRedeemParams', inst)
 };
 
-},{"../lib/codec":209}],195:[function(require,module,exports){
+},{"../lib/codec":209,"../lib/util":214}],195:[function(require,module,exports){
 const { encode } = require('../lib/codec');
 
 /**
@@ -26792,7 +26793,7 @@ module.exports = {
 const { encode } = require('../lib/codec');
 
 module.exports = {
-  create: (app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id ) => {
+  create: (app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, seller_consistence, cart_id ) => {
     return {
 			appId: Number(app_id),
 			documentId: document_id,
@@ -26801,6 +26802,7 @@ module.exports = {
 			goodsPrice: Math.round(Number(goods_price) * 100),
     	identRate: Math.round(Number(ident_rate) * 100),
     	identConsistence: Math.round(Number(ident_consistence) * 100),
+			sellerConsistence: Math.round(Number(seller_consistence) * 100),
     	cartId: cart_id,
     };
   },
@@ -26848,7 +26850,7 @@ module.exports = {
 const { encode } = require('../lib/codec');
 
 module.exports = {
-  create: (app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate) => {
+  create: (app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate) => {
     return {
 			appId: Number(app_id),
 			documentId: document_id,
@@ -26856,7 +26858,8 @@ module.exports = {
 			productId: product_id,
 			contentHash: content_hash,
 			paraIssueRate: Math.round(Number(para_issue_rate) * 100),
-			selfIssueRate: Math.round(Number(self_issue_rate) * 100)
+			selfIssueRate: Math.round(Number(self_issue_rate) * 100),
+			attendRate: Math.round(Number(attend_rate) * 100),
     };
   },
 
@@ -26867,7 +26870,7 @@ module.exports = {
 const { encode } = require('../lib/codec');
 
 module.exports = {
-  create: (app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id ) => {
+  create: (app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, seller_consistence, cart_id ) => {
     return {
 			appId: Number(app_id),
 			documentId: document_id,
@@ -26876,6 +26879,7 @@ module.exports = {
 			goodsPrice: Math.round(Number(goods_price) * 100),
 			offsetRate: Math.round(Number(offset_rate) * 100),
 			trueRate: Math.round(Number(true_rate) * 100),
+			sellerConsistence: Math.round(Number(seller_consistence) * 100),
 			cartId: cart_id,
     };
   },
@@ -27106,6 +27110,7 @@ function processClientParamsCreatePublishDoc(params) {
         contentHash: types_1.U8aFixed,
         paraIssueRate: primitive_1.u64,
         selfIssueRate: primitive_1.u64,
+        attendRate: primitive_1.u64,
     }, params);
     return s.toU8a();
 }
@@ -27118,6 +27123,7 @@ function processClientParamsCreateIdentifyDoc(params) {
         goodsPrice: primitive_1.u64,
         identRate: primitive_1.u64,
         identConsistence: primitive_1.u64,
+        sellerConsistence: primitive_1.u64,
         cartId: types_1.Bytes
     }, params);
     return s.toU8a();
@@ -27131,6 +27137,7 @@ function processClientParamsCreateTryDoc(params) {
         goodsPrice: primitive_1.u64,
         offsetRate: primitive_1.u64,
         trueRate: primitive_1.u64,
+        sellerConsistence: primitive_1.u64,
         cartId: types_1.Bytes
     }, params);
     return s.toU8a();
@@ -27824,7 +27831,8 @@ const chainDataTypes = {
     productId: 'Vec<u8>',
     contentHash: 'Hash',
     paraIssueRate: 'PowerSize',
-    selfIssueRate: 'PowerSize'
+    selfIssueRate: 'PowerSize',
+    attendRate: 'PowerSize'
   },
 
   ClientParamsCreateIdentifyDoc: {
@@ -27835,6 +27843,7 @@ const chainDataTypes = {
     goodsPrice: 'PowerSize',
     identRate: 'PowerSize',
     identConsistence: 'PowerSize',
+    sellerConsistence: 'PowerSize',
     cartId: 'Vec<u8>'
   },
 
@@ -27846,6 +27855,7 @@ const chainDataTypes = {
     goodsPrice: 'PowerSize',
     offsetRate: 'PowerSize',
     trueRate: 'PowerSize',
+    sellerConsistence: 'PowerSize',
     cartId: 'Vec<u8>'
   },
 
@@ -30413,16 +30423,16 @@ const createSignObject = (params_type, params_data) => {
       return InterfaceClientParamsCreateModel.create(app_id, expert_id, commodity_name, commodity_type, content_hash);
     }
     case ClientParamsCreatePublishDoc: {
-      const {app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate} = params_data;
-      return InterfaceClientParamsCreatePublishDoc.create(app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate);
+      const {app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate} = params_data;
+      return InterfaceClientParamsCreatePublishDoc.create(app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate);
     }
     case ClientParamsCreateIdentifyDoc: {
-      const {app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id} = params_data;
-      return InterfaceClientParamsCreateIdentifyDoc.create(app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id);
+      const {app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, seller_consistence, cart_id} = params_data;
+      return InterfaceClientParamsCreateIdentifyDoc.create(app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, seller_consistence, cart_id);
     }
     case ClientParamsCreateTryDoc: {
-      const {app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id} = params_data;
-      return InterfaceClientParamsCreateTryDoc.create(app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id);
+      const {app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, seller_consistence, cart_id} = params_data;
+      return InterfaceClientParamsCreateTryDoc.create(app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, seller_consistence, cart_id);
     }
     case ClientParamsCreateChooseDoc: {
       const {app_id, document_id, model_id, product_id, content_hash, sell_count, try_count} = params_data;
