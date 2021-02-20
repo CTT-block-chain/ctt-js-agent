@@ -2439,7 +2439,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.rpcModelDisputeRecord('100000001', '147').then(result => console.log("rpcModelDisputeRecord:", result));
-  //sub.rpcCommodityPowerSlashRecord(100000001, '146').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
+  sub.rpcCommodityPowerSlashRecord(100000001, '167').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
   //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
   //sub.rpcModelDeposit('100000001', '147').then(result => console.log("rpcModelDeposit:", result));
 
@@ -2478,7 +2478,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("democracyModelDispute:", result);
   });*/
 
-  //sub.queryCommoditySlashRecords();
+  sub.queryCommoditySlashRecords();
   //sub.queryModelDisputeRecords();
 
   //sub.queryBlockTime(1);
@@ -2489,6 +2489,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryTechMembers();
 
-  sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
+  //sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
   
 });
