@@ -29340,6 +29340,53 @@ const rpcModelIncomeCurrentStage = async () => {
   };
 };
 
+const getAppIncomeExchangeRecords = async (appId, cycle) => {
+  isKeyringReady();
+  isApiReady();
+
+  // get accounts set first
+  appId = Number(appId);
+  let combines = [];
+
+  let accounts = await this.api.rpc.kp.appIncomeExchangeAccounts({appId, cycle});
+  // console.log('accounts:', accounts);
+  if (!!accounts && accounts.length > 0) {
+    
+    let queue = [];
+    accounts.forEach((account) => {
+      queue.push(this.api.rpc.kp.appIncomeExchangeData({appId, cycle, account}));
+    });
+
+    let results = await Promise.all(queue);
+    for (let i = 0; i < results.length; i++) {
+      let data = results[i];
+      combines.push({
+        account: accounts[i].toString(),
+        exchange_amount: convertBN(data.exchangeAmount.mul(new BN(1e10))),
+        status: data.status.toString(),
+        pay_id: data.payId.toString()
+      });
+    }    
+  }
+  return combines;
+}
+
+const rpcAppIncomeExchangeData = async (appId, cycle, account) => {
+  isKeyringReady();
+  isApiReady();
+
+  // get accounts set first
+  appId = Number(appId);
+
+  let data = await this.api.rpc.kp.appIncomeExchangeData({appId, cycle, account});
+
+  return { 
+    exchange_amount: convertBN(data.exchangeAmount.mul(new BN(1e10))),
+    status: data.status.toString(),
+    pay_id: data.payId.toString()
+  };
+};
+
 const getAppFinanceExchangeRecords = async (appId, proposalId) => {
   isKeyringReady();
   isApiReady();
@@ -31417,6 +31464,7 @@ module.exports = {
   rpcAppFinanceRecord: rpcAppFinanceRecord,
   rpcModelIncomeCurrentStage: rpcModelIncomeCurrentStage,
   getAppFinanceExchangeRecords: getAppFinanceExchangeRecords,
+  getAppIncomeExchangeRecords: getAppIncomeExchangeRecords,
   rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
   rpcIsTechMemberSign: rpcIsTechMemberSign,
   rpcMiscDocumentPower: rpcMiscDocumentPower,

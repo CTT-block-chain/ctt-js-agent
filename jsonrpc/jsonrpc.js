@@ -761,6 +761,42 @@ server.expose('queryAppFinanceExchangeRecords', (args, opt, callback) => {
 });
 
 /**
+ * 查询指定周期下的兑换账户列表数据
+ * {
+ *    sender_data: { 发送端数据
+ *      appId: 应用ID Number String
+ *      cycle: 兑换期数 Number String
+ *    }
+ *    返回值： [{
+ *       account: 兑换账户地址 String
+ *       exchange_amount: 兑换数量 String
+ *       status: 兑换状态 "1": 用户已提交申请，并锁定相应KTP, "2": 已确认兑换，并燃烧锁定KPT 
+ *       pay_id: 支付单号 String
+ *    }]
+ * }
+ */
+server.expose('queryAppIncomeExchangeRecords', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`queryAppIncomeExchangeRecords:${args[0]}`);
+    const { appId, cycle } = param.sender_data;
+
+    sub
+      .getAppIncomeExchangeRecords(Number(appId), Number(cycle))
+      .then((result) => {
+        console.log('queryAppIncomeExchangeRecords result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryAppIncomeExchangeRecords error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 应用融资提案
  * {
  *    data: { 
@@ -1020,7 +1056,7 @@ server.expose('queryCurrentModelRewardStage', (args, opt, callback) => {
  *      cycle: 模型增发周期 String
  *      exchange_amount: 兑换KPT（经过了用户端提交及服务端校验的可兑换额度）
  *    }
- *    user_key: 用户账户公钥 String (投资者账户)
+ *    user_key: 用户账户公钥 String
  *    user_sign: 用户数据签名 String
  *    auth_key: 授信服务器以及发送者公钥 String
  *    auth_sign: 授信签名
@@ -2492,4 +2528,13 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
   
+  /*let obj = JSON.parse(
+    '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","cycle":"678","exchange_amount":"0.01"}'
+  );
+  let signObj = sub.createSignObject(AppIncomeRedeemParams, obj);
+
+  // verify sign
+  let buf = InterfaceAppIncomeRedeemParams.encode(signObj);
+  let verify = sub.verify('5G3hB9FexasEspFREaBu6jTWaX9pC8nmsmxeg6p2X89N6PYu', buf, '0xca4e73e240fd40dcc56a050ddb12114f32eb2a4429d99a8eeaf8777565a43a45f76189ad556345340ecbb67847b7c2e9ca7d0eaf724f2695ae36ffdc365ce78f');
+  console.log("verify:", verify);*/
 });

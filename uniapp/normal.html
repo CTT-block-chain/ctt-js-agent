@@ -19,12 +19,12 @@
 
         console.log('start sign');
         let obj = JSON.parse(
-          '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","proposal_id":"1608958475000","exchange":"10","amount":"1000000"}'
+          '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","cycle":"678","exchange_amount":"0.01"}'
         );
-        let sign = signParams('AppFinancedProposalParams', obj, testAccount.json.address);
+        let sign = signParams('AppIncomeRedeemParams', obj, testAccount.json.address);
         console.log('sign:', sign);
 
-        subInitApi('ws://39.106.116.92:9944').then(() => {
+        /*subInitApi('ws://39.106.116.92:9944').then(() => {
           queryAppFinancedUserPortion(
             '5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW',
             '100000001',
@@ -32,7 +32,7 @@
           ).then((result) => {
             console.log('result:', result);
           });
-        });
+        });*/
       });
     </script>
   </body>
