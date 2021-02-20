@@ -1,4 +1,5 @@
 const { encode } = require('../lib/codec');
+const { convertBalance } = require('../lib/util');
 
 module.exports = {
   create: (app_id, account, cycle, exchange_amount ) => {

@@ -214,6 +214,7 @@ server.expose('subHash', (args, opt, callback) => {
  *      content_hash: 文章hash String
  *      para_issue_rate: 参数发布率 String
  *      self_issue_rate: 自证参数发布率 String
+ *      attend_rate: 体验参与度 String
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
@@ -226,9 +227,9 @@ server.expose('subProductPublish', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`subProductPublish:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    let { app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate } = param.data;
+    let { app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate } = param.data;
 
-    let params = InterfaceClientParamsCreatePublishDoc.create(app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate);
+    let params = InterfaceClientParamsCreatePublishDoc.create(app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate);
 
     sub
       .createDocument(0, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
@@ -2439,7 +2440,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.rpcModelDisputeRecord('100000001', '147').then(result => console.log("rpcModelDisputeRecord:", result));
-  sub.rpcCommodityPowerSlashRecord(100000001, '167').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
+  //sub.rpcCommodityPowerSlashRecord(100000001, '167').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
   //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
   //sub.rpcModelDeposit('100000001', '147').then(result => console.log("rpcModelDeposit:", result));
 
@@ -2478,7 +2479,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     console.log("democracyModelDispute:", result);
   });*/
 
-  sub.queryCommoditySlashRecords();
+  //sub.queryCommoditySlashRecords();
   //sub.queryModelDisputeRecords();
 
   //sub.queryBlockTime(1);
