@@ -48,6 +48,7 @@ window.subComment = (
  * @param {*} signer_key 签名公钥，需确保已加载
  */
 window.signParams = (params_type, params_obj, signer_key) => {
+  console.log(`signParams: ${params_type}, ${JSON.stringify(params_obj)}, ${signer_key}`);
   let sign_obj = Sub.createSignObject(params_type, params_obj);
   if (!sign_obj) {
     console.error("create sign object fail", params_type, params_obj);
