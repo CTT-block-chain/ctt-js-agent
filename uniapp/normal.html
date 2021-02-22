@@ -19,7 +19,7 @@
 
         console.log('start sign');
         let obj = JSON.parse(
-          '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","cycle":"678","exchange_amount":"0.01"}'
+          '{"app_id":"100000001","account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","cycle":"700","exchange_amount":"0.01"}'
         );
         let sign = signParams('AppIncomeRedeemParams', obj, testAccount.json.address);
         console.log('sign:', sign);

@@ -25,12 +25,13 @@ const InterfaceAppIncomeRedeemParams = require('../interface/appIncomeRedeemPara
 const InterfaceAppIncomeRedeemConfirmParams = require('../interface/appIncomeRedeemConfirmParams');
 const powerComplain = require('../interface/powerComplain');
 const ModelDispute = require('../interface/modelDispute');
+const InterfaceDisableModelParams = require('../interface/disableModelParams');
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
   ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, 
-  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams } = require('../lib/signParamsDefine');
+  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams, DisableModelParams } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -461,6 +462,43 @@ server.expose('subModelCreate', (args, opt, callback) => {
       });
   } catch (e) {
     console.error(`subModelCreate error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 取消模型 
+ * {
+ *    data: {
+ *      app_id: 应用ID String
+ *      model_id: 商品模型ID String
+ *    }
+ *    app_pub_key: 应用公钥 String
+ *    app_sign: 用户数据签名 String
+ *    sender_pub_key: 发送者公钥 String
+ *    sender_sign: 发送者签名 String
+ * }
+ */
+server.expose('subModelDisable', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`subModelDisable:${args[0]}`);
+
+    const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
+    const { app_id, model_id } = param.data;
+    
+    let params = InterfaceDisableModelParams.create(app_id, model_id);
+
+    sub.disableModel(params, app_pub_key, app_sign, sender_pub_key, sender_sign)
+      .then((result) => {
+        console.log('subModelDisable result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`subModelDisable error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
