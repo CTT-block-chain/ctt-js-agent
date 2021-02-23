@@ -2567,6 +2567,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.queryTechMembers();
 
   //sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
+
+  //sub.queryAppCycleIncome();
+
+  //sub.getAppIncomeExchangeRecords(Number("100000001"), Number("703")).then(result => console.log(result));
   
   /*let obj = JSON.parse(
     '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","cycle":"678","exchange_amount":"0.01"}'

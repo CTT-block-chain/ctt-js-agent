@@ -1,4 +1,4 @@
 {
   "port": 5080,
-  "sub_endpoint": "ws://localhost:9944"
+  "sub_endpoint": "ws://39.106.116.92:9944"
 }
