@@ -8,5 +8,5 @@ module.exports = {
     };
   },
 
-  encode: (inst) => encode('DisableModelParams', inst)
+  encode: (inst) => encode('ModelKeyParams', inst)
 };

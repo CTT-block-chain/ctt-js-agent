@@ -25,7 +25,7 @@ const InterfaceAppIncomeRedeemParams = require('../interface/appIncomeRedeemPara
 const InterfaceAppIncomeRedeemConfirmParams = require('../interface/appIncomeRedeemConfirmParams');
 const powerComplain = require('../interface/powerComplain');
 const ModelDispute = require('../interface/modelDispute');
-const InterfaceDisableModelParams = require('../interface/disableModelParams');
+const InterfaceModelKeyParams = require('../interface/modelKeyParams');
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
@@ -469,38 +469,38 @@ server.expose('subModelCreate', (args, opt, callback) => {
 });
 
 /**
- * 取消模型 
+ * 转移模型所有者 
  * {
  *    data: {
  *      app_id: 应用ID String
  *      model_id: 商品模型ID String
  *    }
- *    app_pub_key: 应用公钥 String
+ *    app_pub_key: 公钥 String
  *    app_sign: 用户数据签名 String
  *    sender_pub_key: 发送者公钥 String
  *    sender_sign: 发送者签名 String
  * }
  */
-server.expose('subModelDisable', (args, opt, callback) => {
+server.expose('subModelOwnerRelease', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
-    console.log(`subModelDisable:${args[0]}`);
+    console.log(`subModelOwnerRelease:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
     const { app_id, model_id } = param.data;
     
-    let params = InterfaceDisableModelParams.create(app_id, model_id);
+    let params = InterfaceModelKeyParams.create(app_id, model_id);
 
-    sub.disableModel(params, app_pub_key, app_sign, sender_pub_key, sender_sign)
+    sub.modelOwnerRelease(params, app_pub_key, app_sign, sender_pub_key, sender_sign)
       .then((result) => {
-        console.log('subModelDisable result:', result);
+        console.log('subModelOwnerRelease result:', result);
         sendResult(callback, { result });
       })
       .catch((err) => {
         sendResult(callback, { error: err });
       });
   } catch (e) {
-    console.error(`subModelDisable error: ${e}`);
+    console.error(`subModelOwnerRelease error: ${e}`);
     sendResult(callback, { error: e.message });
   }
 });
@@ -2562,7 +2562,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //console.log("test:", sub.queryDemocracyParams());
 
-  sub.queryHistoryLiquid(10000);
+  //sub.queryHistoryLiquid(10000);
 
   //sub.queryTechMembers();
 
