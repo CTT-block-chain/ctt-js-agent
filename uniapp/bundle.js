@@ -26905,20 +26905,6 @@ module.exports = {
 };
 
 },{"../lib/codec":210}],204:[function(require,module,exports){
-const { encode } = require('../lib/codec');
-
-module.exports = {
-  create: (appId, modelId ) => {
-    return {
-			appId: Number(appId),
-    	modelId
-    };
-  },
-
-  encode: (inst) => encode('DisableModelParams', inst)
-};
-
-},{"../lib/codec":210}],205:[function(require,module,exports){
 const { stringToU8a, u8aConcat } = require('@polkadot/util');
 const { uint32ToU8a } = require('../lib/util');
 
@@ -26945,7 +26931,7 @@ module.exports = {
   },
 };
 
-},{"../lib/util":215,"@polkadot/util":712}],206:[function(require,module,exports){
+},{"../lib/util":215,"@polkadot/util":712}],205:[function(require,module,exports){
 const { encode } = require('../lib/codec');
 const { ModelExpertAddMemberParams } = require('../lib/signParamsDefine');
 
@@ -26961,7 +26947,7 @@ module.exports = {
   encode: (inst) => encode(ModelExpertAddMemberParams, inst)
 };
 
-},{"../lib/codec":210,"../lib/signParamsDefine":213}],207:[function(require,module,exports){
+},{"../lib/codec":210,"../lib/signParamsDefine":213}],206:[function(require,module,exports){
 const { encode } = require('../lib/codec');
 const { ModelExpertDelMemberParams } = require('../lib/signParamsDefine');
 
@@ -26977,7 +26963,7 @@ module.exports = {
   encode: (inst) => encode(ModelExpertDelMemberParams, inst)
 };
 
-},{"../lib/codec":210,"../lib/signParamsDefine":213}],208:[function(require,module,exports){
+},{"../lib/codec":210,"../lib/signParamsDefine":213}],207:[function(require,module,exports){
 const { encode } = require('../lib/codec');
 const { ModelIncomeCollectingParam } = require('../lib/signParamsDefine');
 
@@ -27000,7 +26986,21 @@ module.exports = {
   encode: (inst) => encode(ModelIncomeCollectingParam, inst)
 };
 
-},{"../lib/codec":210,"../lib/signParamsDefine":213}],209:[function(require,module,exports){
+},{"../lib/codec":210,"../lib/signParamsDefine":213}],208:[function(require,module,exports){
+const { encode } = require('../lib/codec');
+
+module.exports = {
+  create: (appId, modelId ) => {
+    return {
+			appId: Number(appId),
+    	modelId
+    };
+  },
+
+  encode: (inst) => encode('ModelKeyParams', inst)
+};
+
+},{"../lib/codec":210}],209:[function(require,module,exports){
 const { stringToU8a, u8aConcat } = require('@polkadot/util');
 const { uint32ToU8a } = require('../lib/util');
 
@@ -27228,7 +27228,7 @@ function processAppIncomeRedeemConfirmParams(params) {
     }, params);
     return s.toU8a();
 }
-function processDisableModelParams(params) {
+function processModelKeyParams(params) {
     const s = new types_1.Struct(registry, {
         appId: primitive_1.u32,
         modelId: types_1.Bytes,
@@ -27273,8 +27273,8 @@ const encode = (structType, structObj) => {
             return processAppIncomeRedeemParams(structObj);
         case 'AppIncomeRedeemConfirmParams':
             return processAppIncomeRedeemConfirmParams(structObj);
-        case 'DisableModelParams':
-            return processDisableModelParams(structObj);
+        case 'ModelKeyParams':
+            return processModelKeyParams(structObj);
         default:
             return null;
     }
@@ -27485,7 +27485,7 @@ module.exports = {
 	AppKeyManageParams: 'AppKeyManageParams',
 	AppIncomeRedeemParams: 'AppIncomeRedeemParams',
 	AppIncomeRedeemConfirmParams: 'AppIncomeRedeemConfirmParams',
-	DisableModelParams: 'DisableModelParams',
+	ModelKeyParams: 'ModelKeyParams',
 }
 },{}],214:[function(require,module,exports){
 // Required imports
@@ -27524,7 +27524,7 @@ const InterfaceModelIncomeCollectingParam = require('../interface/modelIncomeCol
 const InterfaceAppKeyManageParams = require('../interface/appKeyManage');
 const InterfaceAppIncomeRedeemParams = require('../interface/appIncomeRedeemParams');
 const InterfaceAppIncomeRedeemConfirmParams = require('../interface/appIncomeRedeemConfirmParams');
-const InterfaceDisableModelParams = require('../interface/disableModelParams');
+const InterfaceModelKeyParams = require('../interface/modelKeyParams');
 
 const DEC_NUM = 14;
 
@@ -28023,7 +28023,18 @@ const chainDataTypes = {
     income: 'u64'
   },
 
-  DisableModelParams: {
+  AppIncomeRecordParams: {
+    appId: 'u32',
+    cycle: 'BlockNumber'
+  },
+
+  AppIncomeExchangeDataParams: {
+    appId: 'u32',
+    cycle: 'BlockNumber',
+    account: 'AccountId'
+  },
+
+  ModelKeyParams: {
     app_id: 'u32',
     model_id: 'Vec<u8>'
   }
@@ -28204,6 +28215,38 @@ const rpc = {
         {
           name: 'params',
           type: 'AppFinanceExchangeDataParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'AppFinanceExchangeDataRPC',
+    },
+
+    appIncomeExchangeAccounts: {
+      description: 'get app income exchange record accounts.',
+      params: [
+        {
+          name: 'params',
+          type: 'AppIncomeRecordParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'Vec<AccountId>',
+    },
+
+    appIncomeExchangeData: {
+      description: 'get app income exchange data.',
+      params: [
+        {
+          name: 'params',
+          type: 'AppIncomeExchangeDataParams',
         },
         {
           name: 'at',
@@ -28743,16 +28786,16 @@ const addModelDeposit = async (app_id, model_id, amount, sender_pub_key) => {
   return result;
 }
 
-const disableModel = async (params, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
+const modelOwnerRelease = async (params, owner_pub_key, owner_sign, sender_pub_key, sender_sign) => {
   let txInfo = {
     module: 'kp',
-    call: 'disableModel',
+    call: 'modelOwnerRelease',
     pubKey: sender_pub_key,
   };
 
   params = [params, owner_pub_key, owner_sign, sender_pub_key, sender_sign];
   const result = await sendTx(txInfo, params);
-  console.log('disableModel result:', result);
+  console.log('modelOwnerRelease result:', result);
   return result;
 };
 
@@ -30100,12 +30143,12 @@ const queryHistoryLiquid = async (blockNum) => {
   let blockHash = await this.api.rpc.chain.getBlockHash(blockNum);
 
   let totalIssuance = await this.api.query.balances.totalIssuance.at(blockHash);
-  let fund1 = await this.api.derive.balances.account(TREASURY_ACCOUNT);
-  let fund2 = await this.api.derive.balances.account(TRMODEL_ACCOUNT);
-  let fund3 = await this.api.derive.balances.account(ACMODEL_ACCOUNT);
-  let fund4 = await this.api.derive.balances.account(TECHNOLOGY_ACCOUNT);
+  let fund1 = await this.api.query.system.account.at(blockHash, TREASURY_ACCOUNT);
+  let fund2 = await this.api.query.system.account.at(blockHash, TRMODEL_ACCOUNT);
+  let fund3 = await this.api.query.system.account.at(blockHash, ACMODEL_ACCOUNT);
+  let fund4 = await this.api.query.system.account.at(blockHash, TECHNOLOGY_ACCOUNT);
 
-  let balance = totalIssuance.sub(fund1.freeBalance).sub(fund2.freeBalance).sub(fund3.freeBalance).sub(fund4.freeBalance);
+  let balance = totalIssuance.sub(fund1.data.free).sub(fund2.data.free).sub(fund3.data.free).sub(fund4.data.free);
 
   console.log("balance:", balance.toString());
   return balance;
@@ -30338,7 +30381,7 @@ const queryAppCycleIncome = async (app_id, cycle) => {
   for (const entry of store) {
     const exposure = entry[1];
     console.log("queryAppCycleIncome:", exposure.toHuman());
-    if (exposure.appId.toString() === app_id.toString() && exposure.cycle.toNumber() === cycle) {
+    if (app_id && exposure.appId.toString() === app_id.toString() && exposure.cycle.toNumber() === cycle) {
       // found
       return exposure;
     }
@@ -30450,8 +30493,8 @@ const paramsSign = (paramsType, interfaceObj, signer_address) => {
       buf = InterfaceAppIncomeRedeemConfirmParams.encode(interfaceObj);
       break;
     }
-    case DisableModelParams: {
-      buf = InterfaceDisableModelParams.encode(interfaceObj);
+    case ModelKeyParams: {
+      buf = InterfaceModelKeyParams.encode(interfaceObj);
       break;
     }
     default:
@@ -30541,9 +30584,9 @@ const createSignObject = (params_type, params_data) => {
       const {app_id, account, cycle, pay_id} = params_data;
       return InterfaceAppIncomeRedeemConfirmParams.create(app_id, account, cycle, pay_id);
     }
-    case DisableModelParams: {
+    case ModelKeyParams: {
       const {app_id, model_id} = params_data;
-      return InterfaceDisableModelParams.create(app_id, model_id);
+      return InterfaceModelKeyParams.create(app_id, model_id);
     }
     default:
       console.error("unknown type:", params_type);
@@ -31441,7 +31484,7 @@ module.exports = {
   createComment: createComment,
   createModel: createModel,
   addModelDeposit: addModelDeposit,
-  disableModel: disableModel,
+  modelOwnerRelease: modelOwnerRelease,
   addCommodityType: addCommodityType,
   createPowerLeaderBoard: createPowerLeaderBoard,
   appFinancedUserExchangeRequest: appFinancedUserExchangeRequest,
@@ -31579,7 +31622,7 @@ module.exports = {
   test: test,
 };
 
-},{"../interface/addAppParams":189,"../interface/appFinancedProposalParams":190,"../interface/appFinancedUserExchangeConfirmParams":191,"../interface/appFinancedUserExchangeParams":192,"../interface/appIncomeRedeemConfirmParams":193,"../interface/appIncomeRedeemParams":194,"../interface/appKeyManage":195,"../interface/authParamsCreateModel":196,"../interface/clientParamsCreateChooseDoc":197,"../interface/clientParamsCreateIdentifyDoc":198,"../interface/clientParamsCreateModel":199,"../interface/clientParamsCreateModelDoc":200,"../interface/clientParamsCreatePublishDoc":201,"../interface/clientParamsCreateTryDoc":202,"../interface/comment":203,"../interface/disableModelParams":204,"../interface/modelExpertAddMemberParams":206,"../interface/modelExpertDelMemberParams":207,"../interface/modelIncomeCollectingParam":208,"./codec":210,"./referendumApproxChanges":212,"./signParamsDefine":213,"./util":215,"@polkadot/api":327,"@polkadot/keyring":346,"@polkadot/types":476,"@polkadot/util":712,"@polkadot/util-crypto":599,"bn.js":781,"fs":1}],215:[function(require,module,exports){
+},{"../interface/addAppParams":189,"../interface/appFinancedProposalParams":190,"../interface/appFinancedUserExchangeConfirmParams":191,"../interface/appFinancedUserExchangeParams":192,"../interface/appIncomeRedeemConfirmParams":193,"../interface/appIncomeRedeemParams":194,"../interface/appKeyManage":195,"../interface/authParamsCreateModel":196,"../interface/clientParamsCreateChooseDoc":197,"../interface/clientParamsCreateIdentifyDoc":198,"../interface/clientParamsCreateModel":199,"../interface/clientParamsCreateModelDoc":200,"../interface/clientParamsCreatePublishDoc":201,"../interface/clientParamsCreateTryDoc":202,"../interface/comment":203,"../interface/modelExpertAddMemberParams":205,"../interface/modelExpertDelMemberParams":206,"../interface/modelIncomeCollectingParam":207,"../interface/modelKeyParams":208,"./codec":210,"./referendumApproxChanges":212,"./signParamsDefine":213,"./util":215,"@polkadot/api":327,"@polkadot/keyring":346,"@polkadot/types":476,"@polkadot/util":712,"@polkadot/util-crypto":599,"bn.js":781,"fs":1}],215:[function(require,module,exports){
 const { BN } = require('bn.js');
 
 // data field value will be truncated together to do sign check
@@ -86946,4 +86989,4 @@ window.queryBlockTime = (block) => Sub.queryBlockTime(block);
  * @param {*} stash stash 账户地址 
  */
 window.withdrawUnbonded = (stash) => Sub.withdrawUnbonded(stash);
-},{"../interface/modelDispute":205,"../interface/powerComplain":209,"../lib/sub":214}]},{},[1152]);
+},{"../interface/modelDispute":204,"../interface/powerComplain":209,"../lib/sub":214}]},{},[1152]);
