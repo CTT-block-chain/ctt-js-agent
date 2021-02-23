@@ -2562,7 +2562,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //console.log("test:", sub.queryDemocracyParams());
 
-  //sub.queryHistoryLiquid(10000);
+  sub.queryHistoryLiquid(10000);
 
   //sub.queryTechMembers();
 
@@ -2580,5 +2580,5 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   // verify sign
   let buf = InterfaceAppIncomeRedeemParams.encode(signObj);
   let verify = sub.verify('5G3hB9FexasEspFREaBu6jTWaX9pC8nmsmxeg6p2X89N6PYu', buf, '0xca4e73e240fd40dcc56a050ddb12114f32eb2a4429d99a8eeaf8777565a43a45f76189ad556345340ecbb67847b7c2e9ca7d0eaf724f2695ae36ffdc365ce78f');
-  console.log("verify:", verify);*/
+  console.log("verify:", verify);*/  
 });
