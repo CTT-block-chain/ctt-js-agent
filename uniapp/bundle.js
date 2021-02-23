@@ -26850,7 +26850,7 @@ module.exports = {
 const { encode } = require('../lib/codec');
 
 module.exports = {
-  create: (app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate, attend_rate) => {
+  create: (app_id, document_id, model_id, product_id, content_hash, para_issue_rate, self_issue_rate) => {
     return {
 			appId: Number(app_id),
 			documentId: document_id,
@@ -26858,8 +26858,7 @@ module.exports = {
 			productId: product_id,
 			contentHash: content_hash,
 			paraIssueRate: Math.round(Number(para_issue_rate) * 100),
-			selfIssueRate: Math.round(Number(self_issue_rate) * 100),
-			attendRate: Math.round(Number(attend_rate) * 100),
+			selfIssueRate: Math.round(Number(self_issue_rate) * 100)
     };
   },
 
@@ -27124,7 +27123,6 @@ function processClientParamsCreatePublishDoc(params) {
         contentHash: types_1.U8aFixed,
         paraIssueRate: primitive_1.u64,
         selfIssueRate: primitive_1.u64,
-        attendRate: primitive_1.u64,
     }, params);
     return s.toU8a();
 }
@@ -27856,8 +27854,7 @@ const chainDataTypes = {
     productId: 'Vec<u8>',
     contentHash: 'Hash',
     paraIssueRate: 'PowerSize',
-    selfIssueRate: 'PowerSize',
-    attendRate: 'PowerSize'
+    selfIssueRate: 'PowerSize'
   },
 
   ClientParamsCreateIdentifyDoc: {
