@@ -259,6 +259,7 @@ server.expose('subProductPublish', (args, opt, callback) => {
  *      goods_price: 商品价格 String
  *      ident_rate: 参数鉴别率 String
  *      ident_consistence: 鉴别核实一致性  String
+ *      seller_consistence: 商家核实一致性 String
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
@@ -271,9 +272,9 @@ server.expose('subProductIdentify', (args, opt, callback) => {
     const param = JSON.parse(args[0]);
     console.log(`subProductIdentify:${args[0]}`);
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id } = param.data;
+    const { app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, seller_consistence, cart_id } = param.data;
     
-    let params = InterfaceClientParamsCreateIdentifyDoc.create(app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, cart_id);
+    let params = InterfaceClientParamsCreateIdentifyDoc.create(app_id, document_id, product_id, content_hash, goods_price, ident_rate, ident_consistence, seller_consistence, cart_id);
 
     sub
       .createDocument(1, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
@@ -302,6 +303,7 @@ server.expose('subProductIdentify', (args, opt, callback) => {
  *      goods_price: 商品价格 String
  *      offset_rate: 品鉴偏差率 String
  *      true_rate: 品鉴真实度 String
+ *      seller_consistence: 商家核实一致性 String
  *    }
  *    app_pub_key: 应用公钥 String
  *    app_sign: 用户数据签名 String
@@ -315,9 +317,9 @@ server.expose('subProductTry', (args, opt, callback) => {
     console.log(`subProductIdentify:${args[0]}`);
 
     const { sender_pub_key, app_pub_key, app_sign, sender_sign } = param;
-    const { app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id } = param.data;
+    const { app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, seller_consistence, cart_id } = param.data;
     
-    let params = InterfaceClientParamsCreateTryDoc.create(app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, cart_id);
+    let params = InterfaceClientParamsCreateTryDoc.create(app_id, document_id, product_id, content_hash, goods_price, offset_rate, true_rate, seller_consistence, cart_id);
 
     sub
       .createDocument(2, params, app_pub_key, app_sign, sender_pub_key, sender_sign)
