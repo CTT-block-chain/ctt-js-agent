@@ -30502,7 +30502,7 @@ const paramsSign = (paramsType, interfaceObj, signer_address) => {
   }
 
   if (!!buf) {
-    console.log("buf:", buf);
+    console.log(`paramsSign buf:${buf}`);
     return signU8a(signer_address, buf);
   } else {
     console.error("paramsSigner fail:", paramsType, interfaceObj, signer_address);
