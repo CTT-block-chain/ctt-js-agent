@@ -28035,8 +28035,8 @@ const chainDataTypes = {
   },
 
   ModelKeyParams: {
-    app_id: 'u32',
-    model_id: 'Vec<u8>'
+    appId: 'u32',
+    modelId: 'Vec<u8>'
   }
 
 };
@@ -28793,8 +28793,7 @@ const modelOwnerRelease = async (params, owner_pub_key, owner_sign, sender_pub_k
     pubKey: sender_pub_key,
   };
 
-  params = [params, owner_pub_key, owner_sign, sender_pub_key, sender_sign];
-  const result = await sendTx(txInfo, params);
+  const result = await sendTx(txInfo, [params, owner_pub_key, owner_sign, sender_pub_key, sender_sign]);
   console.log('modelOwnerRelease result:', result);
   return result;
 };
