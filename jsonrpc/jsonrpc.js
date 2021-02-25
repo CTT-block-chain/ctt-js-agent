@@ -31,7 +31,7 @@ const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUse
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
   ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, 
-  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams, DisableModelParams } = require('../lib/signParamsDefine');
+  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams, ModelKeyParams } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -1348,6 +1348,68 @@ server.expose('membersRemoveExpertByCreator', (args, opt, callback) => {
 });
 
 /**
+ * 增加财务组成员
+ * {
+ *    sender_pub_key: 发送者公钥 String 要求为组长
+ *    sender_data: {
+ *      new_member: 新增成员公钥 String
+ *    }
+ * }
+ */
+server.expose('membersAddFinanceMember', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersAddFinanceMember:${args[0]}`);
+    const { sender_pub_key, sender_data } = param;
+    const { new_member } = sender_data;
+
+    sub
+      .membersAddFinanceMember(sender_pub_key, new_member)
+      .then((result) => {
+        console.log('membersAddFinanceMember result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersAddFinanceMember error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 移除财务组成员
+ * {
+ *    sender_pub_key: 发送者公钥 String 要求为组长
+ *    sender_data: {
+ *      old_member: 成员公钥 String
+ *    }
+ * }
+ */
+server.expose('membersRemoveFinanceMember', (args, opt, callback) => {
+  try {
+    const param = JSON.parse(args[0]);
+    console.log(`membersRemoveFinanceMember:${args[0]}`);
+    const { sender_pub_key, sender_data } = param;
+    const { old_member } = sender_data;
+
+    sub
+      .membersRemoveFinanceMember(sender_pub_key, old_member)
+      .then((result) => {
+        console.log('membersRemoveFinanceMember result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersRemoveFinanceMember error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 空投新用户KPT
  * {
  *    sender_pub_key: 发送者公钥 String (同时也是资金持有账户)
@@ -2573,12 +2635,20 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.getAppIncomeExchangeRecords(Number("100000001"), Number("703")).then(result => console.log(result));
   
   /*let obj = JSON.parse(
-    '{"account":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW","app_id":"100000001","cycle":"678","exchange_amount":"0.01"}'
+    '{"model_id":"28","app_id":"100000001"}'
   );
-  let signObj = sub.createSignObject(AppIncomeRedeemParams, obj);
+  let signObj = sub.createSignObject(ModelKeyParams, obj);
 
   // verify sign
-  let buf = InterfaceAppIncomeRedeemParams.encode(signObj);
-  let verify = sub.verify('5G3hB9FexasEspFREaBu6jTWaX9pC8nmsmxeg6p2X89N6PYu', buf, '0xca4e73e240fd40dcc56a050ddb12114f32eb2a4429d99a8eeaf8777565a43a45f76189ad556345340ecbb67847b7c2e9ca7d0eaf724f2695ae36ffdc365ce78f');
-  console.log("verify:", verify);*/  
+  let buf = InterfaceModelKeyParams.encode(signObj);
+  let verify = sub.verify('5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', buf, '0xbc23122f6ea79e9c7ee27c190f0294d7776759751714e26411514c7cc102e707b7343015b265bef45025db02175d2fc12711079e669b2560b82ac9e0b663c88d');
+  console.log("verify:", verify);
+
+  sub.modelOwnerRelease(signObj, 
+    '5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu', 
+    '0xbc23122f6ea79e9c7ee27c190f0294d7776759751714e26411514c7cc102e707b7343015b265bef45025db02175d2fc12711079e669b2560b82ac9e0b663c88d', 
+    sub.getDevAdmin().address, 
+    '0xbc23122f6ea79e9c7ee27c190f0294d7776759751714e26411514c7cc102e707b7343015b265bef45025db02175d2fc12711079e669b2560b82ac9e0b663c88d').then(result => {
+      console.log('result:', result);
+    })*/
 });
