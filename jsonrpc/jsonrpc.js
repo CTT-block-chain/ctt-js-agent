@@ -2728,7 +2728,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //console.log("v:", hexToBn("0x000000000000000374c5770000000001", { isLe: true }).toString());
   //console.log("v:", hexToBn("0x0000a0dec5adc9353600000000000000", { isLe: true }).toString());
 
-  /*sub.rpcDocumentPower(100000001, '1400').then(result => {
+  sub.rpcDocumentPower(100000001, '146').then(result => {
     console.log(result);
-  })*/
+  })
 });
