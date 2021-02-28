@@ -3,8 +3,10 @@ const fs = require('fs');
 const sub = require('../lib/sub');
 const util = require('../lib/util');
 const config = require('../config/config');
+const { BN } = require('bn.js');
 
-const { hexToU8a, hexToString, u8aToString, u8aToBuffer } = require('@polkadot/util');
+const { hexToU8a, hexToString, u8aToHex, u8aToBuffer, u8aConcat, u8aToU8a, hexToBn } = require('@polkadot/util');
+const { blake2AsU8a,decodeAddress, xxhashAsU8a } = require('@polkadot/util-crypto');
 
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAppFinancedUserExchangeParams = require('../interface/appFinancedUserExchangeParams');
@@ -2012,6 +2014,66 @@ server.expose('queryBlockTime', (args, opt, callback) => {
 });
 
 /**
+ * 查询3篇文章算力
+ * sender_data: { 发送端数据
+ *   app_id,
+ *   document_id,
+ * }
+ * 返回值：
+ * { docType: '4', power: '1,125', isExist: true, isSlashed: false }
+ */
+server.expose('queryDocumentPower', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryDocumentPower:${args[0]}`);
+  const { app_id, document_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcDocumentPower(app_id, document_id)
+      .then((result) => {        
+        console.log('queryDocumentPower result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryDocumentPower error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
+ * 查询2篇文章算力
+ * sender_data: { 发送端数据
+ *   app_id,
+ *   document_id,
+ * }
+ * 返回值：
+ * { docType: '4', power: '1,125', isExist: true, isSlashed: false }
+ */
+server.expose('queryMiscDocumentPower', (args, opt, callback) => {
+  const param = JSON.parse(args[0]);
+  console.log(`queryMiscDocumentPower:${args[0]}`);
+  const { app_id, document_id } = param.sender_data;
+
+  try {
+    sub
+      .rpcMiscDocumentPower(app_id, document_id)
+      .then((result) => {        
+        console.log('queryMiscDocumentPower result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryMiscDocumentPower error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
+/**
  * 查询公投时间参数
  * 返回值：（区块数)
  * { 
@@ -2651,4 +2713,22 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
     '0xbc23122f6ea79e9c7ee27c190f0294d7776759751714e26411514c7cc102e707b7343015b265bef45025db02175d2fc12711079e669b2560b82ac9e0b663c88d').then(result => {
       console.log('result:', result);
     })*/
+
+  //sub.testSwap();
+
+ /* const module = xxhashAsU8a('System', 128);
+  const variable = xxhashAsU8a('Account', 128);
+
+  let data = decodeAddress("166p4pv4istU5SVoroAW3ZTyQCYp2bc2ng3F13htqoBEpZ98");
+  let address = u8aConcat(blake2AsU8a(data, 128), u8aToU8a(data));
+
+  const combined = Buffer.concat([module, variable, param]);
+  console.log("combined:" , Buffer.from(combined).toString('hex'));*/
+
+  //console.log("v:", hexToBn("0x000000000000000374c5770000000001", { isLe: true }).toString());
+  //console.log("v:", hexToBn("0x0000a0dec5adc9353600000000000000", { isLe: true }).toString());
+
+  /*sub.rpcDocumentPower(100000001, '1400').then(result => {
+    console.log(result);
+  })*/
 });
