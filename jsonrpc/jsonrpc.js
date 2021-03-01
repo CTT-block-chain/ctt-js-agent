@@ -1411,6 +1411,29 @@ server.expose('membersRemoveFinanceMember', (args, opt, callback) => {
   }
 });
 
+
+/**
+ * 读取财务组成员列表
+ * 返回值：
+ * 账户地址数组
+ */
+server.expose('membersGetFinanceMembers', (args, opt, callback) => {
+  try {
+    sub
+      .membersGetFinanceMembers()
+      .then((result) => {
+        console.log('membersGetFinanceMembers result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`membersGetFinanceMembers error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 /**
  * 空投新用户KPT
  * {
@@ -2738,4 +2761,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   /*sub.rpcDocumentPower(100000001, '146').then(result => {
     console.log(result);
   })*/
+
+  //sub.membersGetFinanceMembers().then(result => console.log(result));
 });
