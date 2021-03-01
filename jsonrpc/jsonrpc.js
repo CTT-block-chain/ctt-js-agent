@@ -1552,6 +1552,7 @@ server.expose('membersAddAppAdmin', (args, opt, callback) => {
         sendResult(callback, { result });
       })
       .catch((err) => {
+        console.log("membersAddAppAdmin sub error:", err);
         sendResult(callback, { error: err });
       });
   } catch (e) {
@@ -1587,6 +1588,7 @@ server.expose('membersRemoveAppAdmin', (args, opt, callback) => {
         sendResult(callback, { result });
       })
       .catch((err) => {
+        console.log("membersRemoveAppAdmin sub error:", err);
         sendResult(callback, { error: err });
       });
   } catch (e) {
@@ -1622,6 +1624,7 @@ server.expose('membersAddAppKey', (args, opt, callback) => {
         sendResult(callback, { result });
       })
       .catch((err) => {
+        console.log("membersAddAppKey sub error:", err);
         sendResult(callback, { error: err });
       });
   } catch (e) {
@@ -1657,6 +1660,7 @@ server.expose('membersRemoveAppKey', (args, opt, callback) => {
         sendResult(callback, { result });
       })
       .catch((err) => {
+        console.log("membersRemoveAppKey sub error:", err);
         sendResult(callback, { error: err });
       });
   } catch (e) {
@@ -2651,7 +2655,8 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
       member: '5GsdH24tsB3NxtiewWVEeqBWFV6kT2JKCEPig7LxjxUJw4Fc'
     });
 
-    let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    //let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    let sign = '0xc2e9ce0c724c56271a144eae7d457e676ee5c8185ac87a632062adcd7175b43d0bb5880fdda27d84474b0886e0b81b777d97b8ff5a3b2c7229daaed4195a1f83';
     let result = await sub.membersAddAppAdmin(sub.getDevAdmin().address, params, sign);
     console.log("membersAddAppAdmin result:", result);
   }
@@ -2663,12 +2668,14 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
       member: '5H3zFbfFwhXhKcHxudzGtgzhUhycmNm99FjXdubAkGCEL2cZ'
     });
 
-    let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    //let sign = sub.paramsSign('AppKeyManageParams', params, sub.getDevAdmin().address);
+    let sign = '0xc2e9ce0c724c56271a144eae7d457e676ee5c8185ac87a632062adcd7175b43d0bb5880fdda27d84474b0886e0b81b777d97b8ff5a3b2c7229daaed4195a1f83';
     let result = await sub.membersAddAppKey(sub.getDevAdmin().address, params, sign);
     console.log("membersAddAppAdmin result:", result);
   }
 
-  addAdmin().then(addKey);*/
+  //addAdmin().then(addKey);
+  addKey();*/
 
   //sub.rpcPowerRatio('5GCTf23EmVJQnsJAmnLHJeck3fmfLY6Xg5ttirzD1ziKSSLE').then(result => console.log("rpcPowerRatio:", result));
 
@@ -2728,7 +2735,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //console.log("v:", hexToBn("0x000000000000000374c5770000000001", { isLe: true }).toString());
   //console.log("v:", hexToBn("0x0000a0dec5adc9353600000000000000", { isLe: true }).toString());
 
-  sub.rpcDocumentPower(100000001, '146').then(result => {
+  /*sub.rpcDocumentPower(100000001, '146').then(result => {
     console.log(result);
-  })
+  })*/
 });
