@@ -247,12 +247,14 @@ window.payoutStakers = (account, validators) => Sub.payoutStakers(account, valid
     {
       accountId: '5DZLq7gpzHfSpNruFamZKpUVnreNjB7z4E8uSLApJ36xjCWD',
       bondInfo: { total: '502.0889 KPT', own: '502.0889 KPT' },
-      commission: '0'
+      commission: '0', 
+      stakedReturn: 6916.077348066298
     },
     {
       accountId: '5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw',
       bondInfo: { total: '502.0854 KPT', own: '502.0854 KPT' },
-      commission: '0'
+      commission: '0',
+      stakedReturn: 6916.077348066298
     }
   ]
  */

@@ -27566,6 +27566,16 @@ const chainDataTypes = {
   PowerSize: 'u64',
   AccountID32: 'AccountId',
   AuthAccountId: 'AccountId',
+  HashedProof: 'Hash',
+
+  PendingSwap: {
+    /// Source of the swap.
+    source: 'AccountId',
+    /// Action of this swap.
+    action: 'SwapAction',
+    /// End block of the lock.
+    endBlock: 'BlockNumber'
+  },
   
   KPProductPublishData: {
     paraIssueRate: 'PowerSize',
@@ -28037,6 +28047,22 @@ const chainDataTypes = {
   ModelKeyParams: {
     appId: 'u32',
     modelId: 'Vec<u8>'
+  },
+
+  SwapAction: {
+    value: 'BalanceOf'
+  },
+
+  QueryDocumentPowerParams: {
+    appId: 'u32',
+    docId: 'Bytes'
+  },
+
+  DocumentPowerRPC: {
+    docType: 'u8',
+    power: 'PowerSize',
+    isExist: 'bool',
+    isSlashed: 'bool'
   }
 
 };
@@ -28097,12 +28123,12 @@ const rpc = {
       type: 'PowerSize',
     },
 
-    miscDocumentPower: {
-      description: 'Get choose and model create knowledge power.',
+    documentPower: {
+      description: 'Get doc create knowledge power.',
       params: [
         {
           name: 'query',
-          type: 'MiscDocumentPowerParams',
+          type: 'QueryDocumentPowerParams',
         },
         {
           name: 'at',
@@ -28110,7 +28136,23 @@ const rpc = {
           isOptional: true,
         },
       ],
-      type: 'PowerSize',
+      type: 'DocumentPowerRPC',
+    },
+
+    miscDocumentPower: {
+      description: 'Get choose and model create knowledge power.',
+      params: [
+        {
+          name: 'query',
+          type: 'QueryDocumentPowerParams',
+        },
+        {
+          name: 'at',
+          type: 'Hash',
+          isOptional: true,
+        },
+      ],
+      type: 'DocumentPowerRPC',
     },
 
     isCommodityPowerExist: {
@@ -28597,7 +28639,12 @@ const sendTx = (txInfo, paramList, isSudo, eventCB) => {
     };
 
     let keyPair;
-    keyPair = this.keyring.getPair(txInfo.pubKey);
+    try {
+      keyPair = this.keyring.getPair(txInfo.pubKey);
+    } catch (err) {
+      console.log("sendTx key load error");
+      resolve({ error: 'pub key not setup' });
+    }
 
     if (!!txInfo.password) {
       try {
@@ -29091,6 +29138,48 @@ const membersRemoveInvestor = async (investor) => {
   return result;
 };
 
+const membersAddFinanceMember = async (sender_pub_key, new_member) => {
+  isKeyringReady();
+  isApiReady();
+  
+  const txInfo = {
+    module: 'members',
+    call: 'addFinanceMember',
+    pubKey: sender_pub_key,
+  };
+
+  const result = await sendTx(txInfo, [new_member]);
+  console.log('membersAddFinanceMember result:', result);
+
+  return result;
+};
+
+const membersRemoveFinanceMember = async (sender_pub_key, old_member) => {
+  isKeyringReady();
+  isApiReady();
+  
+  const txInfo = {
+    module: 'members',
+    call: 'removeFinanceMember',
+    pubKey: sender_pub_key,
+  };
+
+  const result = await sendTx(txInfo, [old_member]);
+  console.log('membersRemoveFinanceMember result:', result);
+
+  return result;
+};
+
+const membersGetFinanceMembers = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  let members = await this.api.query.members.financeMembers();
+
+  return members.toJSON();
+}
+
+
 const membersAddAppAdmin = async (appKeyAccount, appKeyManageParams, sign) => {
   isKeyringReady();
   isApiReady();
@@ -29119,6 +29208,24 @@ const membersRemoveAppAdmin = async (appKeyAccount, appKeyManageParams, sign) =>
 
   const result = await sendTx(txInfo, [appKeyManageParams, sign]);
   console.log('membersRemoveAppAdmin result:', result);
+
+  return result;
+};
+
+const testSwap = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const txInfo = {
+    module: 'atomicSwap',
+    call: 'createSwap',
+    pubKey: getDevAdmin().address,
+  };
+
+  let testHash = hash('an1');
+
+  const result = await sendTx(txInfo, [getDevAdmin().address, testHash, { value: convertBalance("1")}, 100]);
+  console.log('testSwap result:', result);
 
   return result;
 };
@@ -29536,11 +29643,19 @@ const constBalanceExistentialDeposit = () => {
   return convertBN(v);
 };
 
-const rpcMiscDocumentPower = async (appId, documentId) => {
+const rpcMiscDocumentPower = async (appId, docId) => {
   isKeyringReady();
   isApiReady();
 
-  let result = await this.api.rpc.kp.miscDocumentPower({appId: Number(appId), documentId});
+  let result = await this.api.rpc.kp.miscDocumentPower({appId: Number(appId), docId});
+  return result.toString();
+};
+
+const rpcDocumentPower = async (appId, docId) => {
+  isKeyringReady();
+  isApiReady();
+
+  let result = await this.api.rpc.kp.miscDocumentPower({appId: Number(appId), docId});
   return result.toString();
 };
 
@@ -30153,6 +30268,22 @@ const queryHistoryLiquid = async (blockNum) => {
   return balance;
 }
 
+const queryCurrentIssuance = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  let totalIssuance = await this.api.query.balances.totalIssuance();
+  let fund1 = await this.api.query.system.account(TREASURY_ACCOUNT);
+  let fund2 = await this.api.query.system.account(TRMODEL_ACCOUNT);
+  let fund3 = await this.api.query.system.account(ACMODEL_ACCOUNT);
+  let fund4 = await this.api.query.system.account(TECHNOLOGY_ACCOUNT);
+
+  let balance = totalIssuance.sub(fund1.data.free).sub(fund2.data.free).sub(fund3.data.free).sub(fund4.data.free);
+
+  console.log("balance:", balance.toString());
+  return balance;
+}
+
 const queryAppFinancedUserPortion = async (accountId, appId, proposalId) => {
   isKeyringReady();
   isApiReady();
@@ -30657,7 +30788,7 @@ const fetchStakingOverview = async () => {
   };
 };
 
-const fetchValidatorInfos = async () => {
+const loadValidators = async () => {
   isKeyringReady();
   isApiReady();
   let { info } = await this.api.derive.staking.electedInfo();
@@ -30669,10 +30800,71 @@ const fetchValidatorInfos = async () => {
         total: exposure.total.toHuman(),
         own: exposure.own.toHuman()
       },
-      commission: validatorPrefs.commission.toString()
+      commission: validatorPrefs.commission.toString(),
+      exposure
     }
   });
 }
+
+const fetchValidatorInfos = async () => {
+  let validators = await loadValidators();
+
+  let totalStake = new BN(0);
+  validators.forEach(item => {
+    console.log("exposure:", item.exposure.total.toString());
+    totalStake = totalStake.iadd(new BN(item.exposure.total.toString()));
+  });
+
+  let inflation = await stakeAvgReturn(totalStake);
+  const avgStaked = totalStake.divn(validators.length);
+  console.log("avgStaked:", avgStaked.toString());
+
+  if (avgStaked.gt(new BN(0))) {
+    validators.forEach((e) => {
+      e.stakedReturn = inflation.stakedReturn * avgStaked.muln(1_000_000).div(new BN(e.exposure.total.toString())).toNumber() / 1_000_000;
+      
+      console.log(`validator stake return: ${e.stakedReturn.toFixed(2)}%`);
+    });
+  }
+
+  return validators;
+}
+
+function calcInflation (totalStaked, totalIssuance) {
+  //const { falloff, idealStake, maxInflation, minInflation } = getInflationParams(api);
+  const { falloff, idealStake, maxInflation, minInflation } = {
+    falloff: 0.05,
+    idealStake: 0.75,
+    maxInflation: 0.1,
+    minInflation: 0.025
+  };
+
+  const stakedFraction = totalStaked.muln(1_000_000).div(totalIssuance).toNumber() / 1_000_000;
+  const idealInterest = maxInflation / idealStake;
+  const inflation = 100 * (minInflation + (
+    stakedFraction <= idealStake
+      ? (stakedFraction * (idealInterest - (minInflation / idealStake)))
+      : (((idealInterest * idealStake) - minInflation) * Math.pow(2, (idealStake - stakedFraction) / falloff))
+  ));
+
+  console.log(`calcInflation: totalStaked:${totalStaked.toString()}, totalIssuance:${totalIssuance.toString()}, stakedFraction: ${stakedFraction.toString()}, idealInterest:${idealInterest.toString()}`);
+
+  return {
+    inflation,
+    stakedReturn: inflation / stakedFraction
+  };
+}
+
+
+const stakeAvgReturn = async (totalStake) => {
+  isKeyringReady();
+  isApiReady();
+
+  let totalIssuance = await queryCurrentIssuance();
+  console.log(`totalStake: ${totalStake.toString()}`);
+
+  return calcInflation(totalStake, totalIssuance);
+};
 
 function _accountsToString(accounts) {
   return accounts.map((accountId) => accountId.toString());
@@ -31509,6 +31701,9 @@ module.exports = {
   membersRemoveAppAdmin: membersRemoveAppAdmin,
   membersAddAppKey: membersAddAppKey,
   membersRemoveAppKey: membersRemoveAppKey,
+  membersAddFinanceMember: membersAddFinanceMember,
+  membersRemoveFinanceMember: membersRemoveFinanceMember,
+  membersGetFinanceMembers: membersGetFinanceMembers,
 
   // wallet interfaces:
   // accounts:
@@ -31541,6 +31736,7 @@ module.exports = {
   getAppIncomeExchangeRecords: getAppIncomeExchangeRecords,
   rpcAppFinanceExchangeData: rpcAppFinanceExchangeData,
   rpcIsTechMemberSign: rpcIsTechMemberSign,
+  rpcDocumentPower: rpcDocumentPower,
   rpcMiscDocumentPower: rpcMiscDocumentPower,
   rpcModelDisputeRecord: rpcModelDisputeRecord,
   rpcCommodityPowerSlashRecord: rpcCommodityPowerSlashRecord,
@@ -31618,7 +31814,10 @@ module.exports = {
   queryHistoryLiquid: queryHistoryLiquid,
   queryAppCycleIncomeUserPortion: queryAppCycleIncomeUserPortion,
 
+  stakeAvgReturn: stakeAvgReturn,
+
   test: test,
+  testSwap: testSwap,
 };
 
 },{"../interface/addAppParams":189,"../interface/appFinancedProposalParams":190,"../interface/appFinancedUserExchangeConfirmParams":191,"../interface/appFinancedUserExchangeParams":192,"../interface/appIncomeRedeemConfirmParams":193,"../interface/appIncomeRedeemParams":194,"../interface/appKeyManage":195,"../interface/authParamsCreateModel":196,"../interface/clientParamsCreateChooseDoc":197,"../interface/clientParamsCreateIdentifyDoc":198,"../interface/clientParamsCreateModel":199,"../interface/clientParamsCreateModelDoc":200,"../interface/clientParamsCreatePublishDoc":201,"../interface/clientParamsCreateTryDoc":202,"../interface/comment":203,"../interface/modelExpertAddMemberParams":205,"../interface/modelExpertDelMemberParams":206,"../interface/modelIncomeCollectingParam":207,"../interface/modelKeyParams":208,"./codec":210,"./referendumApproxChanges":212,"./signParamsDefine":213,"./util":215,"@polkadot/api":327,"@polkadot/keyring":346,"@polkadot/types":476,"@polkadot/util":712,"@polkadot/util-crypto":599,"bn.js":781,"fs":1}],215:[function(require,module,exports){
@@ -86871,12 +87070,14 @@ window.payoutStakers = (account, validators) => Sub.payoutStakers(account, valid
     {
       accountId: '5DZLq7gpzHfSpNruFamZKpUVnreNjB7z4E8uSLApJ36xjCWD',
       bondInfo: { total: '502.0889 KPT', own: '502.0889 KPT' },
-      commission: '0'
+      commission: '0', 
+      stakedReturn: 6916.077348066298
     },
     {
       accountId: '5HdvEEyHXxKHWt15LizRBEWkL8N3BozGwziXa23k5xEGS7xw',
       bondInfo: { total: '502.0854 KPT', own: '502.0854 KPT' },
-      commission: '0'
+      commission: '0',
+      stakedReturn: 6916.077348066298
     }
   ]
  */
