@@ -30821,7 +30821,7 @@ const fetchValidatorInfos = async () => {
 
   if (avgStaked.gt(new BN(0))) {
     validators.forEach((e) => {
-      e.stakedReturn = inflation.stakedReturn * avgStaked.muln(1_000_000).div(new BN(e.exposure.total.toString())).toNumber() / 1_000_000;
+      e.stakedReturn = inflation.stakedReturn * avgStaked.muln(1000000).div(new BN(e.exposure.total.toString())).toNumber() / 1000000;
       
       console.log(`validator stake return: ${e.stakedReturn.toFixed(2)}%`);
     });
