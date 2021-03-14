@@ -366,3 +366,29 @@ window.queryBlockTime = (block) => Sub.queryBlockTime(block);
  * @param {*} stash stash 账户地址 
  */
 window.withdrawUnbonded = (stash) => Sub.withdrawUnbonded(stash);
+
+/**
+ * 财务组成员增加押金
+ * @param {*} account 
+ * @param {*} deposit 押金，String, 例如 "1024"
+ * @returns 
+ */
+window.financeMemberAddDeposit = (account, deposit) => Sub.membersFinanceMemberAddDeposit(account, deposit);
+
+/**
+ * 对融资赎回过期未到账进行补偿
+ * @param {*} account 申请赎回账户
+ * @param {*} app_id 
+ * @param {*} proposal_id 
+ * @returns 
+ */
+window.appFinancedUserExchangeCompensate = (account, app_id, proposal_id) => Sub.appFinancedUserExchangeCompensate(account, app_id, proposal_id);
+
+/**
+ * 对应用分成赎回过期未到账进行补偿
+ * @param {*} account 
+ * @param {*} app_id 
+ * @param {*} cycle 模型周期数
+ * @returns 
+ */
+window.appIncomeUserExchangeCompensate = (account, app_id, cycle) => Sub.appIncomeUserExchangeCompensate(account, app_id, cycle);

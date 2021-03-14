@@ -6,7 +6,7 @@ const config = require('../config/config');
 const { BN } = require('bn.js');
 
 const { hexToU8a, hexToString, u8aToHex, u8aToBuffer, u8aConcat, u8aToU8a, hexToBn } = require('@polkadot/util');
-const { blake2AsU8a,decodeAddress, xxhashAsU8a } = require('@polkadot/util-crypto');
+const { createKeyMulti, encodeAddress, sortAddresses, blake2AsU8a,decodeAddress, xxhashAsU8a } = require('@polkadot/util-crypto');
 
 const InterfaceAppFinancedProposalParams = require('../interface/appFinancedProposalParams');
 const InterfaceAppFinancedUserExchangeParams = require('../interface/appFinancedUserExchangeParams');
@@ -28,12 +28,13 @@ const InterfaceAppIncomeRedeemConfirmParams = require('../interface/appIncomeRed
 const powerComplain = require('../interface/powerComplain');
 const ModelDispute = require('../interface/modelDispute');
 const InterfaceModelKeyParams = require('../interface/modelKeyParams');
+const InterfaceFinanceMemberParams = require('../interface/financeMemberParams');
 
 const { AppFinancedProposalParams, AppFinancedUserExchangeParams, AppFinancedUserExchangeConfirmParams, CommentData,
   AddAppParams, AuthParamsCreateModel, ClientParamsCreateModel, ClientParamsCreatePublishDoc,
   ClientParamsCreateIdentifyDoc, ClientParamsCreateTryDoc, ClientParamsCreateChooseDoc, 
   ClientParamsCreateModelDoc, ModelExpertAddMemberParams, ModelExpertDelMemberParams, ModelIncomeCollectingParam, 
-  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams, ModelKeyParams } = require('../lib/signParamsDefine');
+  AppKeyManageParams, AppIncomeRedeemParams, AppIncomeRedeemConfirmParams, ModelKeyParams, FinanceMemberParams } = require('../lib/signParamsDefine');
 
 
 const server_white_list = require('./keys/wl.json');
@@ -1352,21 +1353,25 @@ server.expose('membersRemoveExpertByCreator', (args, opt, callback) => {
 /**
  * 增加财务组成员
  * {
- *    sender_pub_key: 发送者公钥 String 要求为组长
- *    sender_data: {
- *      new_member: 新增成员公钥 String
+ *    sender_pub_key: 发送者公钥 String 要求为finance root
+ *    data: {
+ *      deposit: 押金 String, 例如 "1024"
+ *      member: 新增成员公钥 String
  *    }
+ *    app_pub_key: 用户公钥 String (等同于data.member)
+ *    app_sign: 用户数据签名 String
  * }
  */
 server.expose('membersAddFinanceMember', (args, opt, callback) => {
   try {
     const param = JSON.parse(args[0]);
     console.log(`membersAddFinanceMember:${args[0]}`);
-    const { sender_pub_key, sender_data } = param;
-    const { new_member } = sender_data;
+    const { sender_pub_key, data, app_pub_key, app_sign } = param;
+    
+    let signObj = sub.createSignObject(FinanceMemberParams, data);
 
     sub
-      .membersAddFinanceMember(sender_pub_key, new_member)
+      .membersAddFinanceMember(signObj, sender_pub_key, app_pub_key, app_sign)
       .then((result) => {
         console.log('membersAddFinanceMember result:', result);
         sendResult(callback, { result });
@@ -1383,7 +1388,7 @@ server.expose('membersAddFinanceMember', (args, opt, callback) => {
 /**
  * 移除财务组成员
  * {
- *    sender_pub_key: 发送者公钥 String 要求为组长
+ *    sender_pub_key: 发送者公钥 String 要求为finance root
  *    sender_data: {
  *      old_member: 成员公钥 String
  *    }
@@ -2668,7 +2673,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelDisputeRecord('100000001', '147').then(result => console.log("rpcModelDisputeRecord:", result));
   //sub.rpcCommodityPowerSlashRecord(100000001, '167').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
-  //sub.rpcIsCommodityInBlackList(1, "abc").then(result => console.log("rpcIsCommodityInBlackList:", result));
+  sub.rpcIsCommodityInBlackList('100000001', "174").then(result => console.log("rpcIsCommodityInBlackList:", result));
   //sub.rpcModelDeposit('100000001', '147').then(result => console.log("rpcModelDeposit:", result));
 
   /*const addAdmin = async () => {
@@ -2763,4 +2768,10 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   })*/
 
   //sub.membersGetFinanceMembers().then(result => console.log(result));
+  /*sub.fetchValidatorInfos().then(result => {
+    console.log(result);
+  })*/
+  //sub.rpcGetTotalPower().then(result => console.log("rpcGetTotalPower:", result));
+
+  //sub.multisig_test();
 });
