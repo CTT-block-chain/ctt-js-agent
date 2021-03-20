@@ -2152,6 +2152,26 @@ server.expose('queryTechMembers', (args, opt, callback) => {
   }
 });
 
+/**
+ * 查询财务组管理员账户
+ */
+server.expose('queryFinanceRoot', (args, opt, callback) => {
+  try {
+    sub
+      .queryFinanceRoot()
+      .then((result) => {        
+        console.log('queryFinanceRoot result:', result);
+        sendResult(callback, { result });
+      })
+      .catch((err) => {
+        sendResult(callback, { error: err });
+      });
+  } catch (e) {
+    console.error(`queryFinanceRoot error: ${e}`);
+    sendResult(callback, { error: e.message });
+  }
+});
+
 
 // signer interfaces
 /**
@@ -2673,7 +2693,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.rpcModelDisputeRecord('100000001', '147').then(result => console.log("rpcModelDisputeRecord:", result));
   //sub.rpcCommodityPowerSlashRecord(100000001, '167').then(result => console.log("rpcCommodityPowerSlashRecord:", result));
-  sub.rpcIsCommodityInBlackList('100000001', "174").then(result => console.log("rpcIsCommodityInBlackList:", result));
+  //sub.rpcIsCommodityInBlackList('100000001', "174").then(result => console.log("rpcIsCommodityInBlackList:", result));
   //sub.rpcModelDeposit('100000001', '147').then(result => console.log("rpcModelDeposit:", result));
 
   /*const addAdmin = async () => {
@@ -2774,4 +2794,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.rpcGetTotalPower().then(result => console.log("rpcGetTotalPower:", result));
 
   //sub.multisig_test();
+
+  //sub.queryFinanceRoot().then(result => console.log("queryFinanceRoot:", result));
 });
