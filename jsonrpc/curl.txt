@@ -8,3 +8,8 @@ curl -X POST \
      -d '{"jsonrpc":"2.0","id":"id","method":"signParams","params":["{\"params_type\":\"CommentData\",\"params_data\":{\"appId\":\"1000\",\"documentId\":\"123\",\"commentId\":\"1234\",\"commentHash\":\"0x998e22798b83792ab29ae246dc7d9f694be6d47ada6fd5f0014b662e2e609e76\",\"commentFee\":\"0.01\",\"commentTrend\":\"0\"},\"signer_address\":\"5FcBV9rczxcFLYFhxkuYnWHVi8UTt9DMqxhwkps1xeRgX7dP\"}"]}' \
      http://39.106.116.92:5080
 
+curl -X POST \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":"id","method":"membersRemoveFinanceMember","params":["{\"sender_pub_key\": \"abc\", \"sender_data\":{\"old_member\":\"12345678\"}}"]}' \
+     http://39.106.116.92:5080
+

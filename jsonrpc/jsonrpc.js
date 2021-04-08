@@ -2518,6 +2518,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryAppFinancedUserPortion(sub.getDevAdmin().address, '100000001', '1608889493000').then(result => {});
   //sub.queryAppFinancedRecords();
+  //sub.queryAppFinanceMemberChoice();
 
   /*let json = JSON.parse('{"encoded":"Fx2EJWx3L6MB3ojlDa0zMNQKX0NZ6KNITTQg3pqQQlsAgAAAAQAAAAgAAAABapNIRzhJEtGn744N94RucYcbFTUbtAa0CG2DeoZCCVtkIKp6CHTP+85wvl75WyBDx83bW8k/vLj6qcDRq6O3hdUsb9ok7VQpu2U5Bka1u0sc2x5lS6SYTEbh9t+Ova38VhSvsXcPBS4F4og3sKMJ+KmVLOtYl7OtH8jtjRQTdVWnrrZ4UwIDAQgUCcxNUjFXh5kOM2noDey4ACXM","meta":{"name":"oNVB19","userId":100072},"encoding":{"content":["pkcs8","sr25519"],"version":"3","type":["scrypt","xsalsa20-poly1305"]},"address":"5Fe1ycrky9cggGuyTP9jqLmq1PsoWnnLn11gseyUMhdsAiHW"}');
   sub.setupAccountByJson(json);
@@ -2796,4 +2797,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
   //sub.multisig_test();
 
   //sub.queryFinanceRoot().then(result => console.log("queryFinanceRoot:", result));
+
+  //sub.queryFinanceMemberDeposit();
+
+  let result = sub.resetAccountWithMnemonic("abc", "parent symbol kick luggage connect arena lounge capital claim approve addict force", '123456');
+  console.log("result:", result);
 });
