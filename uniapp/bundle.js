@@ -27606,12 +27606,14 @@ const chainDataTypes = {
   KPProductPublishData: {
     paraIssueRate: 'PowerSize',
     selfIssueRate: 'PowerSize',
+    referCount: 'PowerSize'
   },
 
   KPProductIdentifyData: {
     goodsPrice: 'PowerSize',
     identRate: 'PowerSize',
     identConsistence: 'PowerSize',
+    sellerConsistence: 'PowerSize',
     cartId: 'Vec<u8>',
   },
 
@@ -27619,6 +27621,7 @@ const chainDataTypes = {
     goodsPrice: 'PowerSize',
     offsetRate: 'PowerSize',
     trueRate: 'PowerSize',
+    sellerConsistence: 'PowerSize',
     cartId: 'Vec<u8>',
   },
 
@@ -27668,12 +27671,14 @@ const chainDataTypes = {
   KPProductPublishData: {
     paraIssueRate: 'PowerSize',
     selfIssueRate: 'PowerSize',
+    referCount: 'PowerSize'
   },
 
   KPProductIdentifyData: {
     goodsPrice: 'PowerSize',
     identRate: 'PowerSize',
     identConsistence: 'PowerSize',
+    sellerConsistence: 'PowerSize',
     cartId: 'Vec<u8>',
   },
 
@@ -28094,8 +28099,13 @@ const chainDataTypes = {
   FinanceMemberParams: {
     deposit: 'BalanceOf',
     member: 'AccountId'
-  }
+  },
 
+  KPProductIdentifyRateMax: {
+    identRate: 'PowerSize',
+    identConsistence: 'PowerSize',
+    sellerConsistence: 'PowerSize'
+  }
 };
 
 const rpc = {
@@ -28512,7 +28522,7 @@ const newAccount = (name, password) => {
 
 const resetAccountWithMnemonic = (name, mnemonic, password) => {
   isKeyringReady();
-  let path = `${mnemonic}//hard/derivatio`;
+  /*let path = `${mnemonic}//hard/derivatio`;
   if (!!password) {
     path += `///${password}`;
   }
@@ -28521,6 +28531,9 @@ const resetAccountWithMnemonic = (name, mnemonic, password) => {
     name,
   });
 
+  return { mnemonic, json: pair.toJson(password) };*/
+
+  const pair = this.keyring.addFromUri(mnemonic, { name });
   return { mnemonic, json: pair.toJson(password) };
 };
 
@@ -28694,6 +28707,11 @@ const sendTx = (txInfo, paramList, isSudo, eventCB) => {
       .catch((err) => {
         resolve({ error: err.message });
       });
+
+     /*tx.signAsync(keyPair).then(newTx => {
+       console.log("newTx:", newTx);
+       newTx.send(onStatusChange).then(res => {unsub = res;});
+     });*/
   });
 };
 
@@ -30623,6 +30641,56 @@ const queryAppCycleIncome = async (app_id, cycle) => {
   return null;
 };
 
+const queryFinanceMemberDeposit = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.members.financeMemberDeposit;
+
+  const store = await entry.entries();
+  console.log('queryFinanceMemberDeposit len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+}
+
+const queryAppFinanceMemberChoice = async () => {
+  isKeyringReady();
+  isApiReady();
+
+  const entry = await this.api.query.kp.appFinanceFinanceMember;
+
+  const store = await entry.entries();
+  console.log('queryAppFinanceMemberChoice len:', store.length);
+
+  let results = [];
+
+  store.forEach(([key, exposure]) => {
+    let result = {
+      key: key.args.map((k) => k.toHuman()),
+      value: exposure.toHuman(),
+    };
+    console.log('key arguments:', result.key);
+    console.log('     exposure:', result.value);
+
+    results.push(result);
+  });
+
+  return results;
+}
+
 const isPermitSubmitAppFinance = async () => {
   isKeyringReady();
   isApiReady();
@@ -31763,6 +31831,14 @@ const queryDemocracyParams = () => {
   }
 }
 
+const queryFinanceRoot = async () => {
+  isApiReady();
+
+  let account = await this.api.query.members.financeRoot();
+
+  return account.toString();
+};
+
 const multisig_test = async () => { 
   const SS58Prefix = 0;
 
@@ -31933,6 +32009,9 @@ module.exports = {
   queryAppData: queryAppData,
   queryAppCycleIncome: queryAppCycleIncome,
   queryTechMembers: queryTechMembers,
+  queryFinanceRoot: queryFinanceRoot,
+  queryFinanceMemberDeposit: queryFinanceMemberDeposit,
+  queryAppFinanceMemberChoice: queryAppFinanceMemberChoice,
 
   sudoAppFinance: sudoAppFinance,
   sudoAddApp: sudoAddApp,
