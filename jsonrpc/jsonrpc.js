@@ -2800,6 +2800,9 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryFinanceMemberDeposit();
 
-  let result = sub.resetAccountWithMnemonic("abc", "parent symbol kick luggage connect arena lounge capital claim approve addict force", '123456');
-  console.log("result:", result);
+  /*const newAccount = sub.newAccount('abc', '123456');
+  console.log('newAccount:', newAccount);*/
+
+  /*let result = sub.resetAccountWithMnemonic("abc", "time alone monkey online crunch uphold skate animal grit peasant slow calm", '123456');
+  console.log("result:", result);*/
 });

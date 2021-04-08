@@ -28503,12 +28503,16 @@ const initApi = async (wss, notify_cb) => {
 const newAccount = (name, password) => {
   isKeyringReady();
   const mnemonic = mnemonicGenerate(12);
-  let path = `${mnemonic}//hard/derivatio`;
+  /*let path = `${mnemonic}//hard/derivatio`;
   if (!!password) {
     path += `///${password}`;
   }
 
   const pair = this.keyring.addFromUri(path, {
+    name,
+  });*/
+
+  const pair = this.keyring.addFromUri(mnemonic, {
     name,
   });
 
