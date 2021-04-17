@@ -2746,7 +2746,7 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   //sub.queryTechMembers();
 
-  //sub.queryAppCycleIncomeUserPortion(sub.getDevAdmin().address, 100010002, 2);
+  //sub.queryAppCycleIncomeUserPortion('5EHHpb49xvnXm9PNe3iSwXtBGCPtbAaCNPtGm4TdJsS3vTnV', 100000001, 395);
 
   //sub.queryAppCycleIncome();
 
@@ -2805,4 +2805,6 @@ sub.initApi(apiAddr, sub_notify_cb).then(() => {
 
   /*let result = sub.resetAccountWithMnemonic("abc", "time alone monkey online crunch uphold skate animal grit peasant slow calm", '123456');
   console.log("result:", result);*/
+
+  sub.rpcAppIncomeExchangeData(100000001, 409, '5HQtHMiGpnS8NBYFRTbDq9D7XnK9eLRg8Z79ZJj5PTmZNdKu').then(result => console.log("result:", result));
 });

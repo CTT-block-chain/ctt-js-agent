@@ -30495,6 +30495,8 @@ const queryAppCycleIncomeUserPortion = async (accountId, appId, cycle) => {
   let amount = Math.floor(income * rate / 100);
   let portion = (amount * historyBalance / trackPointBalance).toFixed(2);
 
+  console.log(`rate:${rate} income:${income}`);
+
   console.log(`queryAppCycleIncomeUserPortion: ${currentBlock} ${periodBlock} ${cycle} ${trackPoint} ${trackPointBalance.toString()} ${historyBalance.toString()} ${amount} ${portion}`);
 
   return {
@@ -31973,6 +31975,7 @@ module.exports = {
   rpcCommodityPowerSlashRecord: rpcCommodityPowerSlashRecord,
   rpcModelDeposit: rpcModelDeposit,
   rpcPowerRatio: rpcPowerRatio,
+  rpcAppIncomeExchangeData: rpcAppIncomeExchangeData,
 
   // const query
   constBalanceExistentialDeposit: constBalanceExistentialDeposit,
@@ -87174,6 +87177,15 @@ window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFin
  * @param {*} account 
  */
 window.queryAppFinancedExchangeStatus = (appId, proposalId, account) => Sub.rpcAppFinanceExchangeData(appId, proposalId, account);
+
+/**
+ * 查询账户在周期应用提成中的兑换状态
+ * @param {*} appId 
+ * @param {*} cycle 
+ * @param {*} account 
+ * @returns 
+ */
+window.queryAppIncomeExchangeStatus = (appId, cycle, account) => Sub.rpcAppIncomeExchangeData(Number(appId), Number(cycle), account);
 
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();

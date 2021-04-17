@@ -116,6 +116,15 @@ window.queryAppFinancedPortion = (address, appId, proposalId) => Sub.queryAppFin
  */
 window.queryAppFinancedExchangeStatus = (appId, proposalId, account) => Sub.rpcAppFinanceExchangeData(appId, proposalId, account);
 
+/**
+ * 查询账户在周期应用提成中的兑换状态
+ * @param {*} appId 
+ * @param {*} cycle 
+ * @param {*} account 
+ * @returns 
+ */
+window.queryAppIncomeExchangeStatus = (appId, cycle, account) => Sub.rpcAppIncomeExchangeData(Number(appId), Number(cycle), account);
+
 // const api
 window.constBalanceExistentialDeposit = () => Sub.constBalanceExistentialDeposit();
 
