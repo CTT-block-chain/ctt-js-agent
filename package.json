@@ -7,7 +7,7 @@
     "@polkadot/api": "^1.35.0-beta.1",
     "bn.js": "^5.1.1",
     "commander": "^5.1.0",
-    "convict": "^5.2.0",
+    "convict": "^6.2.4",
     "js-xlsx": "^0.8.22",
     "json-rpc2": "^2.0.0",
     "node-xlsx": "^0.15.0"
